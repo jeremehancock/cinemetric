@@ -25,6 +25,7 @@ and what needs tidying up.
 | `library-report` | Counts, storage, 4K/1080p and codec breakdown, 10-bit video, recently added, unavailable files, unmatched items, missing posters, very large files |
 | `server-health` | Version and updates, remote access, CPU and memory, who's streaming now (direct play vs transcode, bandwidth), running tasks, library scans, scheduled maintenance |
 | `watch-activity` | Plays and watch time, most watched movies, shows and music, most active users and devices, daily trends, recent plays. Uses Tautulli if you have it, otherwise Plex's own history |
+| `dashboard` | One page with library, server and watch stats and charts, saved on your computer. Can update itself automatically on Linux, macOS or Windows |
 
 More skills are planned; see [ROADMAP.md](ROADMAP.md).
 
@@ -55,7 +56,8 @@ It never appears in the chat. Cinemetric shows up in Plex under **Settings → A
 where you can revoke it at any time.
 
 Then try: *"Give me a Plex library report"*, *"What's been added to my Movies library recently?"*,
-*"How's my Plex server doing?"* or *"What's been watched on Plex this month?"*
+*"How's my Plex server doing?"*, *"What's been watched on Plex this month?"* or
+*"Build my Plex dashboard"*
 
 ### Optional: add Tautulli
 

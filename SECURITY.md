@@ -8,6 +8,10 @@ Cinemetric is designed so you can hand it your Plex token without worrying about
   (`ALLOWED_PATHS` in each script). Any other request is blocked in code before it is sent.
   `server-health` reads the server's settings list but keeps only a few maintenance settings (scan and
   maintenance-window options); everything else in it is discarded without being printed.
+- **The dashboard stays on your computer.** It's saved as a private file (readable only by you) and
+  contains your library and watch history. Automatic updates add one scheduled task (cron on Linux,
+  launchd on macOS, Task Scheduler on Windows), only when you agree, and keep their own copy of the
+  scripts so plugin updates can't break them. They don't use Claude.
 - **Only Plex.** Report skills contact only the Plex server address you configured. The `setup` skill
   also contacts Plex's own sign-in service (`plex.tv` and `clients.plex.tv`) to sign you in and list your
   servers. If you add Tautulli, `watch-activity` and setup also contact the Tautulli address you gave,

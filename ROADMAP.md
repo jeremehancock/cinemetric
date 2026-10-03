@@ -35,14 +35,20 @@ Listed in the order they're likely to be built.
 - [x] Add an optional Tautulli step to `setup` (address and API key saved in the same private config
       file, never shown in the chat)
 
-### 3. `dashboard` (scheduled)
+### 3. `dashboard` (done)
 
-- [ ] One comprehensive Plex dashboard combining the library report, server health and watch activity
-- [ ] Published as a claude.ai artifact (an HTML page) that you can open any time
-- [ ] Kept up to date automatically on a schedule (for example, daily) using Claude Code's scheduling
-- Depends on `server-health` and `watch-activity`
+- [x] One comprehensive Plex dashboard combining the library report, server health and watch activity
+- [x] A private HTML page on your computer
+- [x] Kept up to date automatically using your computer's own scheduler (cron on Linux, launchd on
+      macOS, Task Scheduler on Windows). Claude Code's scheduled tasks run in the cloud and can't reach
+      a Plex server on a home network
+- [ ] Test the macOS and Windows schedulers on real machines (so far tested with stand-ins on Linux)
 
 ## Ideas for later
+
+- [ ] **Dashboard as a claude.ai page**: publish the dashboard and keep it updated automatically. On hold:
+      Claude Code's background mode (`claude -p`) didn't have the page-publishing tool on the account
+      it was tested with, so scheduled runs couldn't update the page.
 
 - [ ] **`duplicates`**: titles with more than one copy or version, and how much space the extras use
 - [ ] **`quality-upgrades`**: titles only available in SD or 720p that may be worth replacing

@@ -1,6 +1,6 @@
 ---
 name: setup
-description: "Connect Cinemetric to a Plex Media Server by signing in with Plex in the browser, then choosing a server. Use when the user wants to set up Cinemetric, connect or switch Plex servers, sign in to Plex for Cinemetric, or when another Cinemetric skill reports NOT_CONFIGURED."
+description: "Connect Cinemetric to a Plex Media Server by signing in with Plex in the browser, then choosing a server; optionally add Tautulli for fuller watch stats. Use when the user wants to set up Cinemetric, connect or switch Plex servers, sign in to Plex for Cinemetric, add, change or remove Tautulli (set up Tautulli, connect Tautulli, Tautulli API key), or when another Cinemetric skill reports NOT_CONFIGURED or TAUTULLI_NOT_CONFIGURED."
 allowed-tools: Read, Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/setup.py *), Bash(python ${CLAUDE_SKILL_DIR}/scripts/setup.py *)
 ---
 

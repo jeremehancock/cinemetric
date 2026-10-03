@@ -1,0 +1,21 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "cinemetric",
+  "description": "Cinemetric: Claude skills for your Plex server. Read-only reports on your media and server.",
+  "owner": {
+    "name": "Jereme Hancock"
+  },
+  "plugins": [
+    {
+      "name": "cinemetric",
+      "description": "Read-only reports on your Plex Media Server: library stats, storage, quality breakdowns, recently added and housekeeping issues.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Jereme Hancock"
+      },
+      "source": "./plugins/cinemetric",
+      "category": "productivity",
+      "homepage": "https://github.com/jeremehancock/cinemetric"
+    }
+  ]
+}

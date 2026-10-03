@@ -1,0 +1,12 @@
+{
+  "name": "cinemetric",
+  "version": "0.1.0",
+  "description": "Claude skills for your Plex server. Read-only reports on your media and server.",
+  "author": {
+    "name": "Jereme Hancock"
+  },
+  "homepage": "https://github.com/jeremehancock/cinemetric",
+  "repository": "https://github.com/jeremehancock/cinemetric",
+  "license": "MIT",
+  "keywords": ["plex", "media", "reports", "homelab"]
+}

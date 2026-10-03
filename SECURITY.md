@@ -1,0 +1,38 @@
+# Security
+
+Cinemetric is designed so you can hand it your Plex token without worrying about what it will do with it.
+
+## What the skills do
+
+- **Read only.** Scripts only send HTTP `GET` requests, and only to a fixed list of Plex paths
+  (`ALLOWED_PATHS` in each script). Any other request is blocked in code before it is sent.
+- **Only Plex.** Report skills contact only the Plex server address you configured. The `setup` skill
+  also contacts Plex's own sign-in service (`plex.tv` and `clients.plex.tv`) to sign you in and list your
+  servers. Nothing else: no analytics, no update checks, no third-party services.
+- **Sign in with Plex, no copy-pasted tokens.** Setup receives the token straight from Plex and writes it
+  to the private config file. It never passes through the chat. Each install is listed in Plex under
+  **Authorized Devices** as "Cinemetric" and can be revoked there.
+- **No redirects.** If the server answers with a redirect, the script stops instead of following it,
+  so your token is never forwarded to a different address.
+- **Token stays hidden.** The token is sent in a request header, never in a URL, and is never printed,
+  logged, or included in error messages.
+- **Private files only.** Config and in-progress sign-in files are created readable only by you (`600`,
+  folder `700`); the sign-in file is deleted once setup finishes. The config file is refused if it's owned by another user or readable by
+  other users (it must be `chmod 600`).
+- **Encrypted by default.** HTTPS certificates are checked unless you explicitly set `"verify_tls": false`.
+  Plain `http` to a non-local address triggers a warning.
+- **No dependencies.** Python standard library only, so there are no third-party packages to trust.
+- **Limited permissions for Claude.** Each skill's `allowed-tools` only pre-approves running its own script.
+- **Media titles are treated as data.** Skill instructions tell Claude never to follow instructions that
+  appear inside titles or metadata.
+
+## What the skills do not protect against
+
+- Anyone who can read your config file or environment can use your token. Keep your user account secure.
+- A Plex token has the same access as the account it belongs to. Read-only behavior is enforced by
+  Cinemetric's code, not by Plex.
+
+## Reporting a problem
+
+Please open a GitHub issue for general bugs. For anything security-sensitive, use GitHub's
+"Report a vulnerability" (private security advisory) on this repository instead of a public issue.

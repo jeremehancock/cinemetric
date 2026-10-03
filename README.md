@@ -18,7 +18,7 @@ and what needs tidying up.
 | `setup` | Connects Cinemetric to your server using **Sign in with Plex**; no copying tokens around |
 | `library-report` | Counts, storage, 4K/1080p and codec breakdown, 10-bit video, recently added, unavailable files, unmatched items, missing posters, very large files |
 
-More are planned: server health, watch activity (via Tautulli), and a scheduled dashboard.
+More skills are planned; see [ROADMAP.md](ROADMAP.md).
 
 Every Cinemetric skill is **read-only**: it never changes anything on your server. See [SECURITY.md](SECURITY.md).
 

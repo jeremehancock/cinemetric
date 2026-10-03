@@ -17,6 +17,7 @@ and what needs tidying up.
 |---|---|
 | `setup` | Connects Cinemetric to your server using **Sign in with Plex**; no copying tokens around |
 | `library-report` | Counts, storage, 4K/1080p and codec breakdown, 10-bit video, recently added, unavailable files, unmatched items, missing posters, very large files |
+| `server-health` | Version and updates, remote access, CPU and memory, who's streaming now (direct play vs transcode, bandwidth), running tasks, library scans, scheduled maintenance |
 
 More skills are planned; see [ROADMAP.md](ROADMAP.md).
 
@@ -46,7 +47,8 @@ Your token goes straight from Plex into `~/.config/cinemetric/config.json`, a fi
 It never appears in the chat. Cinemetric shows up in Plex under **Settings → Authorized Devices**,
 where you can revoke it at any time.
 
-Then try: *"Give me a Plex library report"* or *"What's been added to my Movies library recently?"*
+Then try: *"Give me a Plex library report"*, *"What's been added to my Movies library recently?"* or
+*"How's my Plex server doing?"*
 
 ### Manual setup
 

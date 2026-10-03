@@ -6,6 +6,8 @@ Cinemetric is designed so you can hand it your Plex token without worrying about
 
 - **Read only.** Scripts only send HTTP `GET` requests, and only to a fixed list of Plex paths
   (`ALLOWED_PATHS` in each script). Any other request is blocked in code before it is sent.
+  `server-health` reads the server's settings list but keeps only a few maintenance settings (scan and
+  maintenance-window options); everything else in it is discarded without being printed.
 - **Only Plex.** Report skills contact only the Plex server address you configured. The `setup` skill
   also contacts Plex's own sign-in service (`plex.tv` and `clients.plex.tv`) to sign you in and list your
   servers. Nothing else: no analytics, no update checks, no third-party services.

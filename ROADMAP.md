@@ -17,14 +17,15 @@ change; feedback and ideas are welcome via GitHub issues.
 
 Listed in the order they're likely to be built.
 
-### 1. `server-health`
+### 1. `server-health` (done)
 
-- [ ] **Server basics**: Plex version, whether an update is available, platform, and whether remote
+- [x] **Server basics**: Plex version, whether an update is available, platform, and whether remote
       access is working
-- [ ] **Live activity**: who's streaming right now, what they're watching, direct play vs transcode,
+- [x] **Live activity**: who's streaming right now, what they're watching, direct play vs transcode,
       and bandwidth use
-- [ ] **Background tasks**: scheduled maintenance, recent library scans, and tasks that failed or
-      seem stuck
+- [x] **Background tasks**: scheduled maintenance, recent library scans, and tasks running now
+- [ ] **Failed or stuck tasks**: Plex doesn't report task failures through its API, so this needs
+      another source (for example its logs) before it can be added
 
 ### 2. `watch-activity`
 

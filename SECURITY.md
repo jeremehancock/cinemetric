@@ -25,6 +25,9 @@ Cinemetric is designed so you can hand it your Plex token without worrying about
 - **Tautulli setup stays on your computer.** The one-time key form listens only on `127.0.0.1` (not your
   network), at an address with a random code, and only answers requests addressed to `127.0.0.1` or
   `localhost`. It shuts down after one successful save, when cancelled, or after 10 minutes.
+- **Certificate checks are only skipped when you say so.** If Tautulli uses a self-signed `https`
+  certificate, setup stops and asks. Skipping the check is saved for the Tautulli address only
+  (`tautulli_verify_tls: false`) and never happens automatically.
 - **One exception to read-only.** To fetch the key automatically, setup uses Tautulli's `get_apikey`
   command. If Tautulli has never had an API key at all, Tautulli itself creates one in response and
   saves it in its own settings. If Tautulli already has a key (the usual case), nothing changes.

@@ -1,6 +1,6 @@
 {
   "name": "cinemetric",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Claude skills for your Plex server. Read-only reports on your media and server.",
   "author": {
     "name": "Jereme Hancock"

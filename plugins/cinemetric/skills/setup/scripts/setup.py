@@ -36,7 +36,7 @@ import urllib.parse
 import urllib.request
 import uuid
 
-VERSION = "0.2.3"
+VERSION = "0.2.4"
 PRODUCT = "Cinemetric"
 TIMEOUT_SECONDS = 15
 FINISH_WAIT_SECONDS = 60
@@ -59,6 +59,10 @@ class SetupError(Exception):
 
 class TautulliLoginRequired(SetupError):
     """Tautulli answered 401/403: it has a login, so the key can't be fetched without one."""
+
+
+class TautulliCertificateError(SetupError):
+    """Tautulli's https certificate couldn't be verified (usually a self-signed certificate)."""
 
 
 class DamagedFile(SetupError):
@@ -287,7 +291,8 @@ def cmd_status(args):
         "configured": True,
         "address": config.get("plex_url"),
         "has_token": bool(config.get("plex_token")),
-        "tautulli": {"address": config.get("tautulli_url"), "has_api_key": bool(config.get("tautulli_api_key"))}
+        "tautulli": {"address": config.get("tautulli_url"), "has_api_key": bool(config.get("tautulli_api_key")),
+                     "certificate_check": config.get("tautulli_verify_tls", True) is not False}
         if config.get("tautulli_url") else None,
     }
 
@@ -300,20 +305,29 @@ def clean_tautulli_url(url):
     return urllib.parse.urlunsplit((parts.scheme, parts.netloc, parts.path.rstrip("/"), "", ""))
 
 
-def tautulli_call(url, command, secret=None, **params):
+CERT_HELP = (
+    "Tautulli's https certificate couldn't be verified. This usually means it uses a self-signed "
+    "certificate. Either use Tautulli's plain http address on your home network, or choose to skip "
+    "the certificate check for this address (only do that on a network you trust)."
+)
+
+
+def tautulli_call(url, command, secret=None, verify_tls=True, **params):
     """Run one allowlisted Tautulli command. Returns the response dict; secrets are kept out of errors."""
     if command not in TAUTULLI_COMMANDS:
         raise SetupError(f"Blocked Tautulli command outside the allowlist: {command}")
     query = urllib.parse.urlencode({"cmd": command, **params})
     request = urllib.request.Request(f"{url}/api/v2?{query}", headers={"Accept": "application/json"})
     try:
-        with _opener().open(request, timeout=TIMEOUT_SECONDS) as resp:
+        with _opener(verify_tls).open(request, timeout=TIMEOUT_SECONDS) as resp:
             data = json.loads(resp.read())
     except urllib.error.HTTPError as exc:
         if exc.code in (401, 403):
             raise TautulliLoginRequired(f"Tautulli asked for a login (HTTP {exc.code}).") from None
         raise SetupError(f"Tautulli returned HTTP {exc.code}. Check the address.") from None
     except (urllib.error.URLError, OSError, ValueError) as exc:
+        if isinstance(getattr(exc, "reason", exc), ssl.SSLCertVerificationError):
+            raise TautulliCertificateError(CERT_HELP) from None
         reason = str(getattr(exc, "reason", exc))
         if secret:
             reason = reason.replace(secret, "[hidden]")
@@ -321,10 +335,11 @@ def tautulli_call(url, command, secret=None, **params):
     return data.get("response", {}) if isinstance(data, dict) else {}
 
 
-def test_tautulli(url, api_key):
+def test_tautulli(url, api_key, verify_tls=True):
     """Return Tautulli's version if the address and key work; raise SetupError otherwise."""
     try:
-        response = tautulli_call(url, "get_tautulli_info", secret=api_key, apikey=api_key)
+        response = tautulli_call(url, "get_tautulli_info", secret=api_key, verify_tls=verify_tls,
+                                 apikey=api_key)
     except TautulliLoginRequired:
         response = {}
     if response.get("result") != "success":
@@ -332,35 +347,44 @@ def test_tautulli(url, api_key):
     return (response.get("data") or {}).get("tautulli_version") or "?"
 
 
-def save_tautulli(url, api_key):
+def save_tautulli(url, api_key, verify_tls=True):
     try:
         config = read_private(config_path()) or {}
     except DamagedFile:
         config = {}
     config.update({"tautulli_url": url, "tautulli_api_key": api_key})
+    # Only ever turned off by the user's explicit choice; any earlier choice is replaced.
+    if verify_tls:
+        config.pop("tautulli_verify_tls", None)
+    else:
+        config["tautulli_verify_tls"] = False
     write_private(config_path(), config)
 
 
 def cmd_tautulli_auto(args):
     """Ask Tautulli for its key directly. Only works when Tautulli has no login set."""
     url = clean_tautulli_url(args.url)
+    verify = not args.skip_cert_check
     # Tautulli says "login needed" either as HTTP 401/403 or as an error message, depending on version.
     try:
-        response = tautulli_call(url, "get_apikey")
+        response = tautulli_call(url, "get_apikey", verify_tls=verify)
     except TautulliLoginRequired:
         response = {}
+    except TautulliCertificateError:
+        return {"step": "certificate_problem", "tautulli": url, "message": CERT_HELP}
     key = response.get("data") if response.get("result") == "success" else None
     if not isinstance(key, str) or not key.strip():
         return {
             "step": "needs_form",
             "tautulli": url,
             "reason": "Tautulli has a login, so the key can't be fetched automatically.",
+            "certificate_check": verify,
         }
     key = key.strip()
-    version = test_tautulli(url, key)
-    save_tautulli(url, key)
+    version = test_tautulli(url, key, verify)
+    save_tautulli(url, key, verify)
     return {"step": "done", "tautulli": url, "tautulli_version": version, "how": "fetched automatically",
-            "tautulli_has_no_login": True}
+            "tautulli_has_no_login": True, "certificate_check": verify}
 
 
 def cmd_tautulli(args):
@@ -374,9 +398,18 @@ def cmd_tautulli(args):
     api_key = getpass.getpass("Tautulli API key (Settings → Web Interface → API; hidden as you type): ").strip()
     if not api_key:
         raise SetupError("No API key entered.")
-    version = test_tautulli(url, api_key)
-    save_tautulli(url, api_key)
-    return {"step": "done", "tautulli": url, "tautulli_version": version}
+    verify = True
+    try:
+        version = test_tautulli(url, api_key)
+    except TautulliCertificateError:
+        print(CERT_HELP, file=sys.stderr)
+        answer = input("Skip the certificate check for this Tautulli address? [y/N]: ").strip().lower()
+        if answer not in ("y", "yes"):
+            raise SetupError("Not saved. Try again with Tautulli's http address, or answer y to skip the check.")
+        verify = False
+        version = test_tautulli(url, api_key, verify_tls=False)
+    save_tautulli(url, api_key, verify)
+    return {"step": "done", "tautulli": url, "tautulli_version": version, "certificate_check": verify}
 
 
 # ---------------------------------------------------------------- tautulli form
@@ -403,6 +436,8 @@ FORM_PAGE = """<!doctype html>
  button {{ margin-top:1.25rem; width:100%; padding:.7rem; font:inherit; font-weight:600; border:0;
            border-radius:8px; background:var(--accent); color:#fff; cursor:pointer; }}
  .err {{ color:var(--err); font-weight:600; }} .ok {{ color:var(--ok); font-weight:600; }}
+ .check {{ display:flex; gap:.6rem; align-items:flex-start; font-weight:400; margin-top:1rem; }}
+ .check input {{ width:auto; margin-top:.3rem; }}
 </style></head>
 <body><main><div class="card">{body}</div></main></body></html>"""
 
@@ -416,8 +451,13 @@ settings file and is never shown to Claude.</p>
  <label for="key">API key</label>
  <input id="key" name="api_key" type="password" required spellcheck="false">
  <small>In Tautulli: Settings → Web Interface → API (turn on "Enable API" if it's off).</small>
+ {cert_option}
  <button type="submit">Test and save</button>
 </form>"""
+
+CERT_OPTION = """<label class="check"><input type="checkbox" name="skip_cert_check" value="1">
+ <span>Skip the certificate check for this address. Only do this if your Tautulli uses a self-signed
+ certificate on a network you trust; otherwise use its plain <code>http://</code> address.</span></label>"""
 
 DONE_BODY = """<h1 class="ok">Tautulli connected ✓</h1>
 <p>Cinemetric can now use Tautulli (version {version}). You can close this tab and go back to Claude.</p>"""
@@ -472,10 +512,11 @@ def serve_tautulli_form(token, prefill_url):
             path_ok = hmac.compare_digest(self.path.split("?")[0].encode(), path.encode())
             return host_ok and path_ok
 
-        def _form(self, error="", url=""):
+        def _form(self, error="", url="", cert_option=False):
             msg = f'<p class="err">{html.escape(error)}</p>' if error else ""
             self._send(200, FORM_BODY.format(error=msg, action=html.escape(path),
-                                             url=html.escape(url or prefill_url or "")))
+                                             url=html.escape(url or prefill_url or ""),
+                                             cert_option=CERT_OPTION if cert_option else ""))
 
         def do_GET(self):
             if not self._allowed():
@@ -491,20 +532,23 @@ def serve_tautulli_form(token, prefill_url):
             fields = urllib.parse.parse_qs(self.rfile.read(length).decode("utf-8", "replace"))
             raw_url = (fields.get("url") or [""])[0]
             api_key = (fields.get("api_key") or [""])[0].strip()
+            verify = (fields.get("skip_cert_check") or [""])[0] != "1"
             try:
                 url = clean_tautulli_url(raw_url)
                 if not api_key:
                     raise SetupError("Enter the API key.")
-                version = test_tautulli(url, api_key)
+                version = test_tautulli(url, api_key, verify)
                 if not form_session_matches(session_hash):
                     raise SetupError("This form was cancelled or replaced. Ask Claude for a new link.")
-                save_tautulli(url, api_key)
+                save_tautulli(url, api_key, verify)
             except SetupError as exc:
                 message = str(exc).replace(api_key, "[hidden]") if api_key else str(exc)
                 update_form_status(session_hash, last_error=message)
-                return self._form(error=message, url=raw_url)
+                # The skip option only appears once a certificate problem has actually happened.
+                return self._form(error=message, url=raw_url,
+                                  cert_option=isinstance(exc, TautulliCertificateError))
             update_form_status(session_hash, state="done", tautulli=url, tautulli_version=version,
-                               last_error=None)
+                               certificate_check=verify, last_error=None)
             self._send(200, DONE_BODY.format(version=html.escape(str(version))))
             state["finished"] = True
 
@@ -565,7 +609,8 @@ def cmd_tautulli_wait(args):
         if state == "done":
             os.remove(form_status_path())
             return {"step": "done", "tautulli": status.get("tautulli"),
-                    "tautulli_version": status.get("tautulli_version"), "how": "form"}
+                    "tautulli_version": status.get("tautulli_version"), "how": "form",
+                    "certificate_check": status.get("certificate_check", True)}
         if state == "expired" or (status.get("expires_at") and time.time() > status["expires_at"] + 5):
             os.remove(form_status_path())
             return {"step": "expired", "message": "The form expired before it was used. Run tautulli-form again."}
@@ -607,6 +652,8 @@ def main():
     sub.add_parser("tautulli-remove")
     auto = sub.add_parser("tautulli-auto")
     auto.add_argument("url")
+    auto.add_argument("--skip-cert-check", action="store_true",
+                      help="only after the user explicitly agrees: don't verify Tautulli's https certificate")
     form = sub.add_parser("tautulli-form")
     form.add_argument("--url", default="")
     sub.add_parser("tautulli-wait")

@@ -72,7 +72,9 @@ through the chat:
 - **If Claude Code runs on another machine** (over SSH or in the cloud), that link won't open from your
   browser, so Claude gives you a command to run in a terminal on that machine instead.
 
-Either way, the key is tested before it's saved to the same private config file. You can also set
+Either way, the key is tested before it's saved to the same private config file. If your Tautulli uses
+`https` with a self-signed certificate, setup will say so and let you choose: use Tautulli's plain `http`
+address on your home network, or skip the certificate check for that address only. You can also set
 `TAUTULLI_URL` and `TAUTULLI_API_KEY` environment variables.
 
 ### Manual setup

@@ -52,6 +52,12 @@ these steps keep it out of the conversation:
      they can add a login in Tautulli under **Settings → Web Interface** if they want.
    - `step: needs_form`: Tautulli has a login (that's good). Go to step 4.
    - `error: Could not talk to Tautulli`: the address or port is probably wrong; ask them to check it.
+   - `step: certificate_problem`: Tautulli uses `https` with a certificate that can't be verified,
+     usually a self-signed one. Explain the choice in plain words: use Tautulli's plain `http://`
+     address on their home network (simplest), or skip the certificate check for this address. Skipping
+     means another device on their network could, in theory, pretend to be Tautulli and capture the key,
+     so only do it on a network they trust. Only if they clearly agree to skip, run
+     `tautulli-auto <address> --skip-cert-check`. Never add that flag on your own.
 4. **One-time form.** Run `tautulli-form --url <address>`. Give them the `form_url` as a clickable link
    and explain: "This opens a small page on your own computer. Paste your Tautulli API key there (from
    **Settings → Web Interface → API**) and click **Test and save**. Then tell me when it says
@@ -59,7 +65,10 @@ these steps keep it out of the conversation:
 5. **Confirm.** When they say it's done, run `tautulli-wait`.
    - `step: done`: tell them Tautulli is connected (address and version).
    - `step: waiting`: not saved yet; if `last_error` is set, explain it in plain words and ask them to
-     fix it in the form.
+     fix it in the form. If it's the certificate message, the form now shows a "Skip the certificate
+     check" box; explain the same trade-off as above and let them decide.
+   - If `certificate_check` is false in the result, mention once that certificate checking is off for
+     Tautulli, at their request.
    - `step: expired`: run `tautulli-form` again.
 
 **If the link won't open** (for example, Claude Code is running on another machine over SSH or in the

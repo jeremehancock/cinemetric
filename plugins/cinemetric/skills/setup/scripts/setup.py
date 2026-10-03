@@ -27,7 +27,7 @@ import urllib.parse
 import urllib.request
 import uuid
 
-VERSION = "0.2.1"
+VERSION = "0.2.2"
 PRODUCT = "Cinemetric"
 TIMEOUT_SECONDS = 15
 FINISH_WAIT_SECONDS = 60
@@ -42,6 +42,10 @@ PLEX_TV_RULES = [
 
 class SetupError(Exception):
     """An error with a message that is safe to show the user."""
+
+
+class DamagedFile(SetupError):
+    """A config or sign-in file exists but can't be read as JSON."""
 
 
 # ---------------------------------------------------------------- files
@@ -79,8 +83,17 @@ def read_private(path):
         return None
     if os.name == "posix" and (info.st_uid != os.getuid() or info.st_mode & 0o077):
         raise SetupError(f"Refusing to read {path}: other users can access it. Fix with: chmod 600 {path}")
-    with open(path, encoding="utf-8") as fh:
-        return json.load(fh)
+    try:
+        with open(path, encoding="utf-8") as fh:
+            data = json.load(fh)
+    except (OSError, ValueError):
+        raise DamagedFile(
+            f"{path} is empty or damaged, so the saved connection can't be used. Run setup again "
+            "and replace it (select N --replace); for Tautulli, run the tautulli step again too."
+        ) from None
+    if not isinstance(data, dict):
+        raise DamagedFile(f"{path} is damaged (it should contain a JSON object). Run setup again.")
+    return data
 
 
 # ---------------------------------------------------------------- http
@@ -228,8 +241,11 @@ def cmd_select(args):
                 "client_id": pending["client_id"],
             }
             # Keep an existing Tautulli setup when switching Plex servers.
-            config.update({k: v for k, v in (read_private(config_path()) or {}).items()
-                           if k.startswith("tautulli_")})
+            try:
+                previous = read_private(config_path()) or {}
+            except DamagedFile:
+                previous = {}
+            config.update({k: v for k, v in previous.items() if k.startswith("tautulli_")})
             write_private(config_path(), config)
             os.remove(pending_path())
             return {"step": "done", "server": name, "address": uri, "config_file": config_path()}
@@ -240,7 +256,10 @@ def cmd_select(args):
 
 
 def cmd_status(args):
-    config = read_private(config_path())
+    try:
+        config = read_private(config_path())
+    except DamagedFile as exc:
+        return {"configured": False, "damaged": True, "message": str(exc)}
     if not config:
         return {"configured": False}
     return {

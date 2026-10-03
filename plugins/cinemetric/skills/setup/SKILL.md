@@ -15,7 +15,9 @@ Script: `python3 ${CLAUDE_SKILL_DIR}/scripts/setup.py <command>`. It prints JSON
 ## Steps
 
 1. **Check first.** Run `status`. If `configured` is true, tell the user which address is configured and
-   ask whether they want to replace it before continuing.
+   ask whether they want to replace it before continuing. If `damaged` is true, the saved settings
+   file is empty or broken: explain that the connection needs setting up again, then continue and use
+   `--replace` in step 4 (nothing usable will be lost).
 2. **Start.** Run `start`. Give the user the `sign_in_url` as a clickable link and explain:
    "Open this link, sign in to Plex if asked, and approve **Cinemetric**. Then tell me when you're done."
    Mention that the link expires after `expires_in_minutes` minutes. Then stop and wait for their reply.

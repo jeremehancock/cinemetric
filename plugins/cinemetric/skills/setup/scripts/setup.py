@@ -6,12 +6,16 @@ Steps (each is a separate run, because the user approves in their browser in bet
   finish         after the user approves, collect the token and list their servers
   select N       test server N, then save its address and token to the config file
   status         say whether Cinemetric is configured (never shows the token)
+  tautulli       optional: add Tautulli. Run it in your own terminal; it asks for the
+                 address and hides the API key as you type it
+  tautulli-remove  forget the saved Tautulli address and key
 
 The token goes straight from plex.tv into a private file; it is never printed.
 Uses only the Python standard library. Output is JSON on stdout; errors go to stderr.
 """
 
 import argparse
+import getpass
 import json
 import os
 import re
@@ -23,7 +27,7 @@ import urllib.parse
 import urllib.request
 import uuid
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 PRODUCT = "Cinemetric"
 TIMEOUT_SECONDS = 15
 FINISH_WAIT_SECONDS = 60
@@ -218,11 +222,15 @@ def cmd_select(args):
     for uri in server["connections"]:
         name = test_server(uri, server["token"], pending["client_id"])
         if name:
-            write_private(config_path(), {
+            config = {
                 "plex_url": uri,
                 "plex_token": server["token"],
                 "client_id": pending["client_id"],
-            })
+            }
+            # Keep an existing Tautulli setup when switching Plex servers.
+            config.update({k: v for k, v in (read_private(config_path()) or {}).items()
+                           if k.startswith("tautulli_")})
+            write_private(config_path(), config)
             os.remove(pending_path())
             return {"step": "done", "server": name, "address": uri, "config_file": config_path()}
     raise SetupError(
@@ -235,7 +243,63 @@ def cmd_status(args):
     config = read_private(config_path())
     if not config:
         return {"configured": False}
-    return {"configured": True, "address": config.get("plex_url"), "has_token": bool(config.get("plex_token"))}
+    return {
+        "configured": True,
+        "address": config.get("plex_url"),
+        "has_token": bool(config.get("plex_token")),
+        "tautulli": {"address": config.get("tautulli_url"), "has_api_key": bool(config.get("tautulli_api_key"))}
+        if config.get("tautulli_url") else None,
+    }
+
+
+def test_tautulli(url, api_key):
+    """Return Tautulli's version if the address and key work; raise SetupError otherwise."""
+    query = urllib.parse.urlencode({"apikey": api_key, "cmd": "get_tautulli_info"})
+    request = urllib.request.Request(f"{url}/api/v2?{query}", headers={"Accept": "application/json"})
+    try:
+        with _opener().open(request, timeout=TIMEOUT_SECONDS) as resp:
+            data = json.loads(resp.read())
+    except urllib.error.HTTPError as exc:
+        raise SetupError(f"Tautulli returned HTTP {exc.code}. Check the address.") from None
+    except (urllib.error.URLError, OSError, ValueError) as exc:
+        reason = str(getattr(exc, "reason", exc)).replace(api_key, "[hidden]")
+        raise SetupError(f"Could not talk to Tautulli at {url}: {reason}") from None
+    response = data.get("response", {}) if isinstance(data, dict) else {}
+    if response.get("result") != "success":
+        raise SetupError("Tautulli rejected the API key. Copy it again from Tautulli: Settings → Web Interface → API.")
+    return (response.get("data") or {}).get("tautulli_version") or "?"
+
+
+def cmd_tautulli(args):
+    if not sys.stdin.isatty():
+        raise SetupError(
+            "Run this in your own terminal so the API key never passes through the chat: "
+            f"python3 {os.path.abspath(__file__)} tautulli"
+        )
+    config = read_private(config_path()) or {}
+    print("Add Tautulli to Cinemetric (optional; used for watch history and stats).", file=sys.stderr)
+    url = input("Tautulli address, e.g. http://192.168.1.10:8181: ").strip()
+    parts = urllib.parse.urlsplit(url)
+    if parts.scheme not in ("http", "https") or not parts.hostname or parts.username or parts.query:
+        raise SetupError("The address must look like http://host:8181 (no username, ? or # parts).")
+    url = urllib.parse.urlunsplit((parts.scheme, parts.netloc, parts.path.rstrip("/"), "", ""))
+    api_key = getpass.getpass("Tautulli API key (Settings → Web Interface → API; hidden as you type): ").strip()
+    if not api_key:
+        raise SetupError("No API key entered.")
+    version = test_tautulli(url, api_key)
+    config.update({"tautulli_url": url, "tautulli_api_key": api_key})
+    write_private(config_path(), config)
+    return {"step": "done", "tautulli": url, "tautulli_version": version}
+
+
+def cmd_tautulli_remove(args):
+    config = read_private(config_path()) or {}
+    removed = [k for k in list(config) if k.startswith("tautulli_")]
+    for key in removed:
+        del config[key]
+    if removed:
+        write_private(config_path(), config)
+    return {"step": "done", "removed": bool(removed)}
 
 
 def cmd_cancel(args):
@@ -254,10 +318,13 @@ def main():
     select.add_argument("--replace", action="store_true", help="overwrite an existing config")
     sub.add_parser("status")
     sub.add_parser("cancel")
+    sub.add_parser("tautulli")
+    sub.add_parser("tautulli-remove")
     args = parser.parse_args()
 
     handlers = {"start": cmd_start, "finish": cmd_finish, "select": cmd_select,
-                "status": cmd_status, "cancel": cmd_cancel}
+                "status": cmd_status, "cancel": cmd_cancel,
+                "tautulli": cmd_tautulli, "tautulli-remove": cmd_tautulli_remove}
     try:
         result = handlers[args.command](args)
     except SetupError as exc:

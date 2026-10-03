@@ -10,14 +10,18 @@ Cinemetric is designed so you can hand it your Plex token without worrying about
   maintenance-window options); everything else in it is discarded without being printed.
 - **Only Plex.** Report skills contact only the Plex server address you configured. The `setup` skill
   also contacts Plex's own sign-in service (`plex.tv` and `clients.plex.tv`) to sign you in and list your
-  servers. Nothing else: no analytics, no update checks, no third-party services.
+  servers. If you add Tautulli, `watch-activity` and setup also contact the Tautulli address you gave,
+  running only read-only commands (`TAUTULLI_COMMANDS` in the script). Nothing else: no analytics, no
+  update checks, no third-party services.
 - **Sign in with Plex, no copy-pasted tokens.** Setup receives the token straight from Plex and writes it
   to the private config file. It never passes through the chat. Each install is listed in Plex under
   **Authorized Devices** as "Cinemetric" and can be revoked there.
 - **No redirects.** If the server answers with a redirect, the script stops instead of following it,
   so your token is never forwarded to a different address.
 - **Token stays hidden.** The token is sent in a request header, never in a URL, and is never printed,
-  logged, or included in error messages.
+  logged, or included in error messages. Tautulli only accepts its API key in the URL, so the key is
+  removed from any error message and never printed. It's entered in your own terminal, hidden as you
+  type, never through the chat.
 - **Private files only.** Config and in-progress sign-in files are created readable only by you (`600`,
   folder `700`); the sign-in file is deleted once setup finishes. The config file is refused if it's owned by another user or readable by
   other users (it must be `chmod 600`).

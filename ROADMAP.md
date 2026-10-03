@@ -27,12 +27,12 @@ Listed in the order they're likely to be built.
 - [ ] **Failed or stuck tasks**: Plex doesn't report task failures through its API, so this needs
       another source (for example its logs) before it can be added
 
-### 2. `watch-activity`
+### 2. `watch-activity` (done)
 
-- [ ] Use **Tautulli** when it's set up, for full watch history and stats
-- [ ] Fall back to **Plex's own watch history** when Tautulli isn't available (less detail)
-- [ ] Report most watched titles and users, recent plays, and watch time trends
-- [ ] Add an optional Tautulli step to `setup` (address and API key saved in the same private config
+- [x] Use **Tautulli** when it's set up, for full watch history and stats
+- [x] Fall back to **Plex's own watch history** when Tautulli isn't available (less detail)
+- [x] Report most watched titles and users, recent plays, and watch time trends
+- [x] Add an optional Tautulli step to `setup` (address and API key saved in the same private config
       file, never shown in the chat)
 
 ### 3. `dashboard` (scheduled)

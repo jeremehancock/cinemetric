@@ -11,6 +11,12 @@ and what needs tidying up.
 > Cinemetric is an independent project. It is not affiliated with, endorsed by, or sponsored by
 > Plex, Inc. or Anthropic. "Plex" and "Claude" are trademarks of their respective owners.
 
+> [!CAUTION]
+> **AI can make mistakes.** Cinemetric's scripts collect the numbers, but the reports you read are
+> written by Claude, an AI model. It can misread data, summarize something incorrectly, or draw a
+> conclusion the numbers don't fully support. Double-check anything important in Plex (or Tautulli)
+> before acting on it, especially before deleting, replacing or re-encoding files.
+
 ## Skills
 
 | Skill | What it does |
@@ -18,6 +24,7 @@ and what needs tidying up.
 | `setup` | Connects Cinemetric to your server using **Sign in with Plex**; no copying tokens around |
 | `library-report` | Counts, storage, 4K/1080p and codec breakdown, 10-bit video, recently added, unavailable files, unmatched items, missing posters, very large files |
 | `server-health` | Version and updates, remote access, CPU and memory, who's streaming now (direct play vs transcode, bandwidth), running tasks, library scans, scheduled maintenance |
+| `watch-activity` | Plays and watch time, most watched movies, shows and music, most active users and devices, daily trends, recent plays. Uses Tautulli if you have it, otherwise Plex's own history |
 
 More skills are planned; see [ROADMAP.md](ROADMAP.md).
 
@@ -47,8 +54,18 @@ Your token goes straight from Plex into `~/.config/cinemetric/config.json`, a fi
 It never appears in the chat. Cinemetric shows up in Plex under **Settings → Authorized Devices**,
 where you can revoke it at any time.
 
-Then try: *"Give me a Plex library report"*, *"What's been added to my Movies library recently?"* or
-*"How's my Plex server doing?"*
+Then try: *"Give me a Plex library report"*, *"What's been added to my Movies library recently?"*,
+*"How's my Plex server doing?"* or *"What's been watched on Plex this month?"*
+
+### Optional: add Tautulli
+
+If you run [Tautulli](https://tautulli.com), Cinemetric can use it for fuller watch stats (watch time,
+devices, busiest times). Without it, `watch-activity` uses Plex's own history, which only counts plays.
+
+Ask Claude to *"add Tautulli to Cinemetric"*. It will give you a command to run **in your own terminal**
+(not in the chat). The command asks for your Tautulli address and API key (from Tautulli's
+**Settings → Web Interface → API**), hides the key as you type, tests it, and saves it to the same
+private config file. You can also set `TAUTULLI_URL` and `TAUTULLI_API_KEY` environment variables.
 
 ### Manual setup
 

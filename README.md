@@ -82,3 +82,7 @@ manual setup and think a token leaked, use "sign out of all devices" in your Ple
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+## AI Assistance Disclosure
+
+This tool was developed with assistance from AI language models.

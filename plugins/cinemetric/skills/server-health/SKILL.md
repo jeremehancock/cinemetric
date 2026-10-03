@@ -40,7 +40,9 @@ The JSON contains `server` (basics, `update`, `remote_access`, `resource_use`), 
 `maintenance_settings`), `worth_a_look`, and `unavailable`.
 
 Any part can be `null` if the server didn't provide it; those are listed in `unavailable`. Skip them
-quietly, or mention once that a part couldn't be checked (some need the server owner's account).
+quietly, or mention once that a part couldn't be checked. If the reason is "only available to the
+server owner's account", the user is probably connected to a server someone shared with them; say
+that those parts need the owner's account, not that anything is broken.
 
 Present, in this order:
 

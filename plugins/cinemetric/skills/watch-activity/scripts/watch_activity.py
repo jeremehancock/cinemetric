@@ -26,7 +26,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.2.2"
+VERSION = "0.2.3"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 PLEX_PAGE_SIZE = 200
@@ -463,7 +463,17 @@ def build_report(config, args):
                 "cinemetric:setup skill (or set PLEX_URL and PLEX_TOKEN)."
             )
         print("reading watch history from Plex", file=sys.stderr)
-        report = plex_report(PlexClient(*config["plex"]), args)
+        client = PlexClient(*config["plex"])
+        try:
+            report = plex_report(client, args)
+        except ReportError as exc:
+            if "401" not in str(exc) and "403" not in str(exc):
+                raise
+            client.get("/")  # still fails if the token itself is bad
+            raise ReportError(
+                "OWNER_ONLY: Plex only shares the server's watch history with the server owner's "
+                "account. Connect with the owner's account, or set up Tautulli."
+            ) from None
 
     return {
         "cinemetric_version": VERSION,

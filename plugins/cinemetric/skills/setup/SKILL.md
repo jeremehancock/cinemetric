@@ -39,19 +39,36 @@ If the user gives up partway, run `cancel` to delete the in-progress sign-in fil
 Tautulli gives the `cinemetric:watch-activity` skill full watch history, watch time and device
 stats. Without it, that skill falls back to Plex's own (play-count only) history.
 
-Tautulli has no "sign in" approval like Plex, so its API key has to be typed once. To keep it out of
-the chat, the user runs the step **in their own terminal**, not through you:
+Tautulli has no "sign in" approval like Plex. Never ask the user to paste the API key into the chat;
+these steps keep it out of the conversation:
 
-1. Run `status`. If `tautulli` is already set, tell them which address and ask whether to replace it.
-2. Give them the exact command, using the full path to this skill's script:
-   `python3 ${CLAUDE_SKILL_DIR}/scripts/setup.py tautulli`
-   Explain that it asks for the Tautulli address (e.g. `http://192.168.1.10:8181`) and the API key,
-   which they'll find in Tautulli under **Settings → Web Interface → API**. The key is hidden as they
-   type it, and the script tests it before saving.
-3. When they say it's done, run `status` to confirm `tautulli` is set.
+1. **Check.** Run `status`. If `tautulli` is already set, tell them which address and ask whether to
+   replace it before continuing.
+2. **Ask for the address only.** For example `http://192.168.1.10:8181` (Tautulli's default port is
+   8181). The address isn't secret; the key is.
+3. **Try fetching the key automatically.** Run `tautulli-auto <address>`.
+   - `step: done`: connected with no typing. `tautulli_has_no_login` means Tautulli has no password,
+     so anyone on their network could fetch the key the same way. Mention this once, gently, and that
+     they can add a login in Tautulli under **Settings → Web Interface** if they want.
+   - `step: needs_form`: Tautulli has a login (that's good). Go to step 4.
+   - `error: Could not talk to Tautulli`: the address or port is probably wrong; ask them to check it.
+4. **One-time form.** Run `tautulli-form --url <address>`. Give them the `form_url` as a clickable link
+   and explain: "This opens a small page on your own computer. Paste your Tautulli API key there (from
+   **Settings → Web Interface → API**) and click **Test and save**. Then tell me when it says
+   connected." Mention it expires after `expires_in_minutes` minutes. Then stop and wait.
+5. **Confirm.** When they say it's done, run `tautulli-wait`.
+   - `step: done`: tell them Tautulli is connected (address and version).
+   - `step: waiting`: not saved yet; if `last_error` is set, explain it in plain words and ask them to
+     fix it in the form.
+   - `step: expired`: run `tautulli-form` again.
 
-Don't run `setup.py tautulli` yourself; it refuses when it isn't in a real terminal. To forget
-Tautulli, run `tautulli-remove`. Switching Plex servers keeps the Tautulli setup.
+**If the link won't open** (for example, Claude Code is running on another machine over SSH or in the
+cloud, so `127.0.0.1` isn't their computer), run `cancel` and use the terminal fallback instead: give
+them `python3 ${CLAUDE_SKILL_DIR}/scripts/setup.py tautulli` to run **in their own terminal** on the
+machine where Cinemetric runs. It asks for the address and key, hiding the key as they type. Don't run
+`setup.py tautulli` yourself; it refuses outside a real terminal. Afterwards, run `status` to confirm.
+
+To forget Tautulli, run `tautulli-remove`. Switching Plex servers keeps the Tautulli setup.
 
 ## If something fails
 

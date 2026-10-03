@@ -62,10 +62,18 @@ Then try: *"Give me a Plex library report"*, *"What's been added to my Movies li
 If you run [Tautulli](https://tautulli.com), Cinemetric can use it for fuller watch stats (watch time,
 devices, busiest times). Without it, `watch-activity` uses Plex's own history, which only counts plays.
 
-Ask Claude to *"add Tautulli to Cinemetric"*. It will give you a command to run **in your own terminal**
-(not in the chat). The command asks for your Tautulli address and API key (from Tautulli's
-**Settings → Web Interface → API**), hides the key as you type, tests it, and saves it to the same
-private config file. You can also set `TAUTULLI_URL` and `TAUTULLI_API_KEY` environment variables.
+Ask Claude to *"add Tautulli to Cinemetric"* and tell it your Tautulli address. Your API key never goes
+through the chat:
+
+- **If Tautulli has no login**, Cinemetric fetches the key from Tautulli itself. Nothing else to do.
+- **If Tautulli has a login**, Claude gives you a link to a small one-time page that runs only on your
+  own computer. Paste the key there (from Tautulli's **Settings → Web Interface → API**) and click
+  **Test and save**. The page closes itself once it's done, or after 10 minutes.
+- **If Claude Code runs on another machine** (over SSH or in the cloud), that link won't open from your
+  browser, so Claude gives you a command to run in a terminal on that machine instead.
+
+Either way, the key is tested before it's saved to the same private config file. You can also set
+`TAUTULLI_URL` and `TAUTULLI_API_KEY` environment variables.
 
 ### Manual setup
 

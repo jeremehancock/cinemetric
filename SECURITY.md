@@ -22,6 +22,12 @@ Cinemetric is designed so you can hand it your Plex token without worrying about
   logged, or included in error messages. Tautulli only accepts its API key in the URL, so the key is
   removed from any error message and never printed. It's entered in your own terminal, hidden as you
   type, never through the chat.
+- **Tautulli setup stays on your computer.** The one-time key form listens only on `127.0.0.1` (not your
+  network), at an address with a random code, and only answers requests addressed to `127.0.0.1` or
+  `localhost`. It shuts down after one successful save, when cancelled, or after 10 minutes.
+- **One exception to read-only.** To fetch the key automatically, setup uses Tautulli's `get_apikey`
+  command. If Tautulli has never had an API key at all, Tautulli itself creates one in response and
+  saves it in its own settings. If Tautulli already has a key (the usual case), nothing changes.
 - **Private files only.** Config and in-progress sign-in files are created readable only by you (`600`,
   folder `700`); the sign-in file is deleted once setup finishes. The config file is refused if it's owned by another user or readable by
   other users (it must be `chmod 600`).

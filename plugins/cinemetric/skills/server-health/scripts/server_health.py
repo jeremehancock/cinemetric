@@ -27,7 +27,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.2.2"
+VERSION = "0.2.3"
 TIMEOUT_SECONDS = 30
 MAX_TITLE_LENGTH = 120
 
@@ -222,13 +222,18 @@ def days_ago(epoch, now):
 
 
 def optional(name, fn, unavailable):
-    """Run one optional part of the report; record its name instead of failing the whole run."""
+    """Run one optional part of the report; record its name instead of failing the whole run.
+
+    The token already worked for "/", so a 401 or 403 here means this part is limited to the
+    server owner (the user may be connected to a server someone shared with them).
+    """
     try:
         return fn()
     except ReportError as exc:
-        if "401" in str(exc):
-            raise
-        unavailable.append({"part": name, "reason": str(exc)})
+        reason = str(exc)
+        if "401" in reason or "403" in reason:
+            reason = "only available to the server owner's account"
+        unavailable.append({"part": name, "reason": reason})
         return None
 
 

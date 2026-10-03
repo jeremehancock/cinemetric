@@ -29,6 +29,9 @@ The script prints `error: ...` on stderr and exits 1. Explain the problem in pla
 
 - **`NOT_CONFIGURED`**: Cinemetric isn't connected to a server yet. Use the `cinemetric:setup` skill,
   then run this again. Never ask the user to paste a token or API key into the chat.
+- **`OWNER_ONLY`**: they're probably connected to a server someone shared with them, and Plex only
+  gives watch history to the owner. Nothing is broken; Tautulli (run by the owner) or the owner's
+  account would be needed.
 - **`TAUTULLI_NOT_CONFIGURED`**: they asked for Tautulli specifically but it isn't set up. See
   "Adding Tautulli" in the `cinemetric:setup` skill.
 - **rejected the credentials (401)** or **Tautulli refused ... Invalid apikey**: the token or API key is

@@ -5,15 +5,19 @@ It runs the other Cinemetric report scripts (so it has exactly their read-only b
 safety rules), then writes a self-contained HTML page: no scripts and no external requests (a
 Content Security Policy blocks them). Uses only the Python standard library.
 
-  dashboard.py [--output PATH] [--hide-names]     build the dashboard
-  dashboard.py schedule install|status|remove [--every hourly|6h|daily] [--hide-names]
-  dashboard.py --scheduled                         what the scheduler runs (cron, launchd or Task Scheduler)
+It never publishes anything: when the user wants the dashboard online, Claude publishes the page as
+a private claude.ai page. This script only remembers that choice and the page's link.
+
+  dashboard.py [--output PATH] [--hide-names | --show-names]   build the dashboard
+  dashboard.py destination local|online|both                    save where the dashboard goes
+  dashboard.py online-page --url LINK | --forget                save or forget the claude.ai page link
 """
 
 import argparse
 import html
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -21,7 +25,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.3.3"
+VERSION = "0.4.0"
 SCRIPT_TIMEOUT_SECONDS = 1800
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -38,7 +42,6 @@ class DashboardError(Exception):
 
 
 def data_dir():
-    # Scheduled runs pass the folder explicitly: schedulers don't carry the user's environment.
     if os.environ.get("CINEMETRIC_DATA_DIR"):
         return os.environ["CINEMETRIC_DATA_DIR"]
     if os.name == "nt":
@@ -620,12 +623,14 @@ def full_page(title, body):
 
 # ---------------------------------------------------------------- saved choices
 
+DESTINATIONS = ("local", "online", "both")
+# The online page's link is handed back to Claude as the page to update, so only accept the exact
+# shape of a claude.ai page link.
+ONLINE_PAGE_RE = re.compile(r"https://claude\.ai/(?:code/)?artifact/[A-Za-z0-9-]{1,100}")
+
+
 def state_path():
     return os.path.join(data_dir(), "dashboard-state.json")
-
-
-def log_path():
-    return os.path.join(data_dir(), "dashboard.log")
 
 
 def load_json(path):
@@ -645,6 +650,16 @@ def save_state(state):
     write_page(state_path(), json.dumps(state, indent=1))
 
 
+def saved_destination(state):
+    value = state.get("destination")
+    return value if value in DESTINATIONS else None
+
+
+def saved_online_page(state):
+    value = state.get("online_page")
+    return value if isinstance(value, str) and ONLINE_PAGE_RE.fullmatch(value) else None
+
+
 def server_name(data):
     return (((data.get("health") or {}).get("server") or {}).get("name")
             or ((data.get("library") or {}).get("server") or {}).get("name"))
@@ -653,246 +668,129 @@ def server_name(data):
 # ---------------------------------------------------------------- build
 
 def build(args):
+    state = load_state()
+    old_schedule_removed, old_schedule_error = remove_old_schedule(state)
+    if args.hide_names is not None and args.hide_names != state.get("hide_names", False):
+        state["hide_names"] = args.hide_names
+        save_state(state)
+    hide_names = bool(state.get("hide_names", False))
+
     data, errors = collect()
-    title, body = render(data, errors, args.hide_names)
+    title, body = render(data, errors, hide_names)
     output = os.path.abspath(os.path.expanduser(args.output))
     write_page(output, full_page(title, body))
 
-    automation = automation_status(load_state())
-    offer = [] if automation else ["automation"]
-    return {
+    destination = saved_destination(state)
+    result = {
         "step": "done",
         "output": output,
         "server": server_name(data),
         "sections_missing": errors,
-        "names_hidden": args.hide_names,
-        "automation": automation,
-        "offer": offer,
+        "names_hidden": hide_names,
+        "destination": destination,
+        "online_page": saved_online_page(state),
+        "ask": [] if destination else ["destination"],
+        "old_schedule_removed": old_schedule_removed,
     }
+    if old_schedule_error:
+        result["old_schedule_error"] = old_schedule_error
+    return result
 
 
-# ---------------------------------------------------------------- automation (cron / launchd / Task Scheduler)
+def cmd_destination(args):
+    state = load_state()
+    state["destination"] = args.choice
+    save_state(state)
+    return {"destination": args.choice, "online_page": saved_online_page(state)}
+
+
+def cmd_online_page(args):
+    state = load_state()
+    if args.forget:
+        state.pop("online_page", None)
+    else:
+        url = args.url.strip()
+        if not ONLINE_PAGE_RE.fullmatch(url):
+            raise DashboardError("That isn't a claude.ai page link. It should look like "
+                                 "https://claude.ai/artifact/... or https://claude.ai/code/artifact/...")
+        state["online_page"] = url
+    save_state(state)
+    return {"destination": saved_destination(state), "online_page": saved_online_page(state)}
+
+
+# ---------------------------------------------------------------- removing schedules from older versions
+#
+# Versions before 0.4.0 could refresh the dashboard on a timer (cron, launchd or Task Scheduler).
+# That feature is gone; these functions only remove a task an older version installed, so nothing
+# keeps running in the background.
 
 CRON_TAG = "# cinemetric-dashboard"
 LAUNCHD_LABEL = "com.cinemetric.dashboard"
 TASK_NAME = "Cinemetric Dashboard"
-INTERVAL_SECONDS = {"hourly": 3600, "6h": 6 * 3600, "daily": 24 * 3600}
-
-
-def scheduler_kind():
-    if sys.platform == "darwin":
-        return "launchd"
-    if os.name == "nt":
-        return "task-scheduler"
-    return "cron"
-
-
-def scheduled_dir():
-    return os.path.join(data_dir(), "scheduled")
-
-
-def snapshot_scripts():
-    """Copy the report scripts to a stable folder, so the schedule survives plugin updates
-    (installed plugin folders are named by version and can be removed)."""
-    ensure_private_dir(data_dir())
-    target = scheduled_dir()
-    staging = target + ".new"
-    shutil.rmtree(staging, ignore_errors=True)
-    for folder, script in [("dashboard", "dashboard.py")] + [(f, s) for f, s, _ in SOURCES.values()]:
-        src = os.path.join(SKILLS_DIR, folder, "scripts", script)
-        dst_dir = os.path.join(staging, "skills", folder, "scripts")
-        os.makedirs(dst_dir, exist_ok=True)
-        shutil.copy2(src, os.path.join(dst_dir, script))
-    shutil.rmtree(target, ignore_errors=True)
-    os.replace(staging, target)
-    return os.path.join(target, "skills", "dashboard", "scripts", "dashboard.py")
 
 
 def run(cmd, **kwargs):
     return subprocess.run(cmd, capture_output=True, text=True, **kwargs)
 
 
-# cron (Linux and other Unix)
-
-CRON_TIMES = {"hourly": "17 * * * *", "6h": "17 */6 * * *", "daily": "17 6 * * *"}
-
-
-def cron_lines():
+def cron_remove():
     if not shutil.which("crontab"):
-        raise DashboardError("NO_SCHEDULER: this computer has no cron scheduler. Run this command on a timer "
-                             f'with your system\'s own scheduler instead: "{sys.executable}" '
-                             f'"{os.path.abspath(__file__)}" --scheduled')
+        return  # no cron, so no cron task to remove
     proc = run(["crontab", "-l"])
     if proc.returncode != 0:
         if "no crontab" in (proc.stderr or "").lower():
-            return []
-        raise DashboardError(f"Couldn't read your scheduled tasks: {proc.stderr.strip()}")
-    return proc.stdout.splitlines()
-
-
-def cron_write(lines):
-    text = "\n".join(lines).strip("\n")
+            return
+        raise DashboardError(f"couldn't read your scheduled tasks: {proc.stderr.strip()}")
+    lines = proc.stdout.splitlines()
+    others = [line for line in lines if not line.rstrip().endswith(CRON_TAG)]
+    if len(others) == len(lines):
+        return
+    text = "\n".join(others).strip("\n")
     proc = run(["crontab", "-"], input=(text + "\n") if text else "")
     if proc.returncode != 0:
-        raise DashboardError(f"Couldn't update your scheduled tasks: {proc.stderr.strip()}")
-
-
-def shell_quote(value):
-    return "'" + str(value).replace("'", "'\"'\"'") + "'"
-
-
-def cron_install(script, every):
-    others = [line for line in cron_lines() if not line.rstrip().endswith(CRON_TAG)]
-    line = (f"{CRON_TIMES[every]} {shell_quote(sys.executable)} {shell_quote(script)} --scheduled "
-            f"--data-dir {shell_quote(data_dir())} >> {shell_quote(log_path())} 2>&1 {CRON_TAG}")
-    cron_write(others + [line])
-
-
-def cron_remove():
-    lines = cron_lines()
-    others = [line for line in lines if not line.rstrip().endswith(CRON_TAG)]
-    if len(others) != len(lines):
-        cron_write(others)
-
-
-def cron_present():
-    return any(line.rstrip().endswith(CRON_TAG) for line in cron_lines())
-
-
-# launchd (macOS)
-
-def launchd_plist_path():
-    return os.path.join(os.path.expanduser("~"), "Library", "LaunchAgents", f"{LAUNCHD_LABEL}.plist")
-
-
-def launchd_install(script, every):
-    import plistlib
-    job = {
-        "Label": LAUNCHD_LABEL,
-        "ProgramArguments": [sys.executable, script, "--scheduled", "--data-dir", data_dir()],
-        "StandardOutPath": log_path(),
-        "StandardErrorPath": log_path(),
-        "ProcessType": "Background",
-    }
-    if every == "daily":
-        job["StartCalendarInterval"] = {"Hour": 6, "Minute": 17}
-    else:
-        job["StartInterval"] = INTERVAL_SECONDS[every]
-    path = launchd_plist_path()
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "wb") as fh:
-        plistlib.dump(job, fh)
-    domain = f"gui/{os.getuid()}"
-    run(["launchctl", "bootout", f"{domain}/{LAUNCHD_LABEL}"])  # replace any older copy; fine if none
-    proc = run(["launchctl", "bootstrap", domain, path])
-    if proc.returncode != 0:
-        legacy = run(["launchctl", "load", "-w", path])  # older macOS
-        if legacy.returncode != 0:
-            raise DashboardError(f"Couldn't schedule the dashboard with launchd: "
-                                 f"{(proc.stderr or legacy.stderr).strip()}")
+        raise DashboardError(f"couldn't update your scheduled tasks: {proc.stderr.strip()}")
 
 
 def launchd_remove():
-    path = launchd_plist_path()
-    run(["launchctl", "bootout", f"gui/{os.getuid()}/{LAUNCHD_LABEL}"])
+    path = os.path.join(os.path.expanduser("~"), "Library", "LaunchAgents", f"{LAUNCHD_LABEL}.plist")
+    run(["launchctl", "bootout", f"gui/{os.getuid()}/{LAUNCHD_LABEL}"])  # fine if it isn't loaded
     if os.path.exists(path):
         os.remove(path)
 
 
-def launchd_present():
-    return os.path.exists(launchd_plist_path())
-
-
-# Task Scheduler (Windows)
-
-def windows_wrapper_path():
-    return os.path.join(data_dir(), "run-dashboard.cmd")
-
-
-def task_install(script, every):
-    # A small wrapper keeps the scheduled command short (Task Scheduler limits its length) and
-    # sends any problems to the log.
-    python = sys.executable
-    wrapper = windows_wrapper_path()
-    with open(wrapper, "w", encoding="utf-8") as fh:
-        fh.write(f'@echo off\r\n"{python}" "{script}" --scheduled --data-dir "{data_dir()}" '
-                 f'>> "{log_path()}" 2>&1\r\n')
-    timing = {
-        "hourly": ["/SC", "HOURLY", "/MO", "1", "/ST", "00:17"],
-        "6h": ["/SC", "HOURLY", "/MO", "6", "/ST", "00:17"],
-        "daily": ["/SC", "DAILY", "/ST", "06:17"],
-    }[every]
-    proc = run(["schtasks", "/Create", "/F", "/TN", TASK_NAME, "/TR", f'"{wrapper}"', *timing])
+def task_remove():
+    if run(["schtasks", "/Query", "/TN", TASK_NAME]).returncode != 0:
+        return  # not there
+    proc = run(["schtasks", "/Delete", "/F", "/TN", TASK_NAME])
     if proc.returncode != 0:
-        raise DashboardError(f"Couldn't schedule the dashboard in Task Scheduler: "
+        raise DashboardError(f"couldn't remove the task from Task Scheduler: "
                              f"{(proc.stderr or proc.stdout).strip()}")
 
 
-def task_remove():
-    run(["schtasks", "/Delete", "/F", "/TN", TASK_NAME])
-    if os.path.exists(windows_wrapper_path()):
-        os.remove(windows_wrapper_path())
+OLD_SCHEDULERS = {"cron": cron_remove, "launchd": launchd_remove, "task-scheduler": task_remove}
 
 
-def task_present():
-    return run(["schtasks", "/Query", "/TN", TASK_NAME]).returncode == 0
-
-
-SCHEDULERS = {
-    "cron": (cron_install, cron_remove, cron_present),
-    "launchd": (launchd_install, launchd_remove, launchd_present),
-    "task-scheduler": (task_install, task_remove, task_present),
-}
-
-
-def automation_status(state):
+def remove_old_schedule(state):
+    """Remove a scheduled task left by an older version. Returns (removed, error)."""
     saved = state.get("automation")
     if not saved:
-        return None
+        return False, None
+    kind = saved.get("scheduler") if isinstance(saved, dict) else None
     try:
-        present = SCHEDULERS[saved.get("scheduler", scheduler_kind())][2]()
-    except DashboardError:
-        present = False
-    if not present:
-        return None
-    return {"every": saved.get("every"), "scheduler": saved.get("scheduler"),
-            "names_hidden": saved.get("hide_names", False), "log": log_path()}
-
-
-def cmd_schedule(args):
-    state = load_state()
-    kind = scheduler_kind()
-    install, remove, _ = SCHEDULERS[kind]
-    if args.action == "status":
-        status = automation_status(state)
-        return {"scheduled": bool(status), **(status or {}), "scheduler": kind}
-    if args.action == "remove":
-        remove()
-        state.pop("automation", None)
-        save_state(state)
-        shutil.rmtree(scheduled_dir(), ignore_errors=True)
-        return {"step": "removed", "scheduler": kind}
-
-    script = snapshot_scripts()
-    # Create the log as private up front; the scheduler would otherwise create it readable by others.
-    os.close(os.open(log_path(), os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600))
-    install(script, args.every)
-    state["automation"] = {"every": args.every, "scheduler": kind, "hide_names": args.hide_names,
-                           "since": time.strftime("%Y-%m-%d")}
+        OLD_SCHEDULERS.get(kind, cron_remove)()
+    except (DashboardError, OSError) as exc:
+        return False, str(exc)
+    shutil.rmtree(os.path.join(data_dir(), "scheduled"), ignore_errors=True)
+    for leftover in ("run-dashboard.cmd", "dashboard.log"):
+        try:
+            os.remove(os.path.join(data_dir(), leftover))
+        except OSError:
+            pass  # already gone, or a stray file that no longer matters
+    if isinstance(saved, dict) and saved.get("hide_names") and "hide_names" not in state:
+        state["hide_names"] = True  # scheduled runs hid names; keep that choice
+    state.pop("automation", None)
     save_state(state)
-    return {"step": "scheduled", "every": args.every, "scheduler": kind, "names_hidden": args.hide_names,
-            "log": log_path(), "output": default_output()}
-
-
-def scheduled_run():
-    """What the scheduler runs: rebuild the local page. Prints only problems (they go to the log)."""
-    state = load_state()
-    hide = (state.get("automation") or {}).get("hide_names", False)
-    args = argparse.Namespace(output=default_output(), hide_names=hide)
-    result = build(args)
-    stamp = time.strftime("%Y-%m-%d %H:%M")
-    if result.get("sections_missing"):
-        print(f"{stamp} partial: {result['sections_missing']}", file=sys.stderr)
+    return True, None
 
 
 # ---------------------------------------------------------------- main
@@ -900,30 +798,25 @@ def scheduled_run():
 def main():
     parser = argparse.ArgumentParser(description="Build the Cinemetric Plex dashboard (HTML).")
     parser.add_argument("--output", default=default_output(), help="where to write the page")
-    parser.add_argument("--hide-names", action="store_true", help="leave out people's names")
-    parser.add_argument("--scheduled", action="store_true", help="used by the scheduler; prints only problems")
-    parser.add_argument("--data-dir", help="Cinemetric's data folder (set by the scheduler)")
+    names = parser.add_mutually_exclusive_group()
+    names.add_argument("--hide-names", dest="hide_names", action="store_true", default=None,
+                       help="leave out people's names (remembered)")
+    names.add_argument("--show-names", dest="hide_names", action="store_false",
+                       help="show people's names again (remembered)")
     sub = parser.add_subparsers(dest="command")
-    schedule = sub.add_parser("schedule", help="refresh the dashboard automatically")
-    schedule.add_argument("action", choices=["install", "status", "remove"])
-    schedule.add_argument("--every", choices=list(INTERVAL_SECONDS), default="daily")
-    schedule.add_argument("--hide-names", action="store_true")
+    dest = sub.add_parser("destination", help="save where the dashboard goes")
+    dest.add_argument("choice", choices=DESTINATIONS)
+    page = sub.add_parser("online-page", help="save or forget the claude.ai page link")
+    which = page.add_mutually_exclusive_group(required=True)
+    which.add_argument("--url", help="the claude.ai page link")
+    which.add_argument("--forget", action="store_true", help="forget the saved link")
     args = parser.parse_args()
-    if args.data_dir:
-        os.environ["CINEMETRIC_DATA_DIR"] = os.path.abspath(args.data_dir)
-        args.output = default_output() if args.output == parser.get_default("output") else args.output
-
-    if args.scheduled:
-        try:
-            scheduled_run()
-        except Exception as exc:  # the log is the only place a scheduled run can report anything
-            print(f"{time.strftime('%Y-%m-%d %H:%M')} error: {exc}", file=sys.stderr)
-            return 1
-        return 0
 
     try:
-        if args.command == "schedule":
-            result = cmd_schedule(args)
+        if args.command == "destination":
+            result = cmd_destination(args)
+        elif args.command == "online-page":
+            result = cmd_online_page(args)
         else:
             result = build(args)
     except DashboardError as exc:

@@ -1,0 +1,77 @@
+[
+ {
+  "title": "Pilot",
+  "grandparentTitle": "The Show",
+  "grandparentRatingKey": "10",
+  "parentIndex": 1,
+  "index": 1,
+  "guid": "plex://episode/e1-test",
+  "thumb": "/thumb/20",
+  "addedAt": 1700000500,
+  "Media": [
+   {
+    "videoResolution": "1080",
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "Part": [
+     {
+      "size": 3000000000
+     }
+    ]
+   },
+   {
+    "videoResolution": "720",
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "Part": [
+     {
+      "size": 1000000000
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "title": "Second",
+  "grandparentTitle": "The Show",
+  "grandparentRatingKey": "10",
+  "parentIndex": 1,
+  "index": 2,
+  "guid": "plex://episode/e2-test",
+  "thumb": "/thumb/21",
+  "addedAt": 1700000600,
+  "Media": [
+   {
+    "videoResolution": "1080",
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "Part": [
+     {
+      "size": 3000000000
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "title": "Unknown",
+  "grandparentTitle": "Mystery Show",
+  "grandparentRatingKey": "11",
+  "parentIndex": 1,
+  "index": 1,
+  "guid": "local://7",
+  "addedAt": 1700000400,
+  "Media": [
+   {
+    "videoResolution": "sd",
+    "videoCodec": "mpeg4",
+    "audioCodec": "mp3",
+    "Part": [
+     {
+      "size": 500000000
+     }
+    ]
+   }
+  ]
+ }
+]

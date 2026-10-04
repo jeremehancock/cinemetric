@@ -1,0 +1,42 @@
+name: Tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test (${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.8 is the oldest Python Cinemetric supports; 3.x is the newest stable release.
+        python: ["3.8", "3.x"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python3 --version
+      - run: python3 -m unittest discover -s tests -v
+
+  # The one check the main branch requires. It reports a failure (never "skipped") if any run
+  # above failed or was cancelled, so the version list can change without touching branch rules.
+  all-tests-passed:
+    name: All tests passed
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - if: needs.test.result != 'success'
+        run: |
+          echo "Tests failed or were cancelled on at least one Python version."
+          exit 1
+      - run: echo "Tests passed on every Python version."

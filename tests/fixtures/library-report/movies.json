@@ -1,0 +1,104 @@
+[
+ {
+  "title": "Arrival",
+  "year": 2016,
+  "guid": "plex://movie/arrival-test",
+  "thumb": "/thumb/1",
+  "addedAt": 1700000300,
+  "Media": [
+   {
+    "videoResolution": "4k",
+    "videoCodec": "hevc",
+    "videoProfile": "main 10",
+    "audioCodec": "truehd",
+    "Part": [
+     {
+      "size": 60000000000
+     }
+    ]
+   },
+   {
+    "videoResolution": "1080",
+    "videoCodec": "h264",
+    "videoProfile": "high",
+    "audioCodec": "ac3",
+    "Part": [
+     {
+      "size": 10000000000
+     }
+    ]
+   },
+   {
+    "proxyType": 42,
+    "videoResolution": "720",
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "Part": [
+     {
+      "size": 2000000000
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "title": "Heat",
+  "year": 1995,
+  "guid": "plex://movie/heat-test",
+  "addedAt": 1700000200,
+  "Media": [
+   {
+    "videoResolution": "1080",
+    "videoCodec": "h264",
+    "videoProfile": "main 10",
+    "audioCodec": "dts",
+    "Part": [
+     {
+      "size": 4000000000
+     },
+     {
+      "size": 4000000000
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "title": "Home Video",
+  "guid": "local://99",
+  "thumb": "/thumb/3",
+  "addedAt": 1700000100,
+  "Media": [
+   {
+    "videoResolution": "sd",
+    "videoCodec": "mpeg2video",
+    "audioCodec": "mp2",
+    "Part": [
+     {
+      "size": 1000000000
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "title": "Lost Film",
+  "year": 2001,
+  "guid": "plex://movie/lost-test",
+  "thumb": "/thumb/4",
+  "addedAt": 1700000000,
+  "Media": [
+   {
+    "deletedAt": 1699999999,
+    "videoResolution": "1080",
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "Part": [
+     {
+      "size": 45000000000
+     }
+    ]
+   }
+  ]
+ }
+]

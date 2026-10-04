@@ -1,0 +1,27 @@
+{
+ "MediaContainer": {
+  "size": 4,
+  "Directory": [
+   {
+    "key": "1",
+    "type": "movie",
+    "title": "Movies"
+   },
+   {
+    "key": "2",
+    "type": "show",
+    "title": "TV"
+   },
+   {
+    "key": "3",
+    "type": "movie",
+    "title": "Kids Movies"
+   },
+   {
+    "key": "4",
+    "type": "photo",
+    "title": "Photos"
+   }
+  ]
+ }
+}

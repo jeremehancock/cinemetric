@@ -1,0 +1,13 @@
+[
+ {
+  "title": "The Show",
+  "guid": "plex://show/the-show-test",
+  "thumb": "/thumb/10",
+  "ratingKey": "10"
+ },
+ {
+  "title": "Mystery Show",
+  "guid": "local://5",
+  "ratingKey": "11"
+ }
+]

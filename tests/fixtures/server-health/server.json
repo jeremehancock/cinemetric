@@ -1,0 +1,218 @@
+{
+ "/": {
+  "MediaContainer": {
+   "friendlyName": "Test Server",
+   "version": "1.40.0.0000-test",
+   "platform": "Linux",
+   "platformVersion": "6.1",
+   "myPlexSigninState": "ok",
+   "myPlexSubscription": "1",
+   "transcoderActiveVideoSessions": 1,
+   "machineIdentifier": "machine-id-for-tests"
+  }
+ },
+ "/updater/status": {
+  "MediaContainer": {
+   "checkedAt": 1700000000,
+   "canInstall": "1",
+   "Release": [
+    {
+     "version": "1.41.0.0000-test",
+     "state": "available"
+    }
+   ]
+  }
+ },
+ "/myplex/account": {
+  "MyPlex": {
+   "mappingState": "failed",
+   "mappingError": "unreachable",
+   "mappingErrorMessage": "Port 32400 is not open",
+   "signInState": "ok",
+   "publicAddress": "198.51.100.7",
+   "privateAddress": "192.0.2.10"
+  }
+ },
+ "/statistics/resources": {
+  "MediaContainer": {
+   "StatisticsResources": [
+    {
+     "at": 1700000060,
+     "hostCpuUtilization": 86,
+     "processCpuUtilization": 30,
+     "hostMemoryUtilization": 52,
+     "processMemoryUtilization": 12
+    },
+    {
+     "at": 1700000000,
+     "hostCpuUtilization": 90,
+     "processCpuUtilization": 40,
+     "hostMemoryUtilization": 50,
+     "processMemoryUtilization": 10
+    }
+   ]
+  }
+ },
+ "/status/sessions": {
+  "MediaContainer": {
+   "size": 2,
+   "Metadata": [
+    {
+     "type": "movie",
+     "title": "Arrival",
+     "year": 2016,
+     "duration": 1000,
+     "viewOffset": 250,
+     "User": {
+      "title": "alex-test"
+     },
+     "Player": {
+      "title": "Living Room TV",
+      "platform": "Roku",
+      "state": "playing",
+      "local": true,
+      "address": "192.0.2.20"
+     },
+     "Session": {
+      "bandwidth": 20000,
+      "location": "lan"
+     },
+     "Media": [
+      {
+       "videoResolution": "4k"
+      }
+     ]
+    },
+    {
+     "type": "episode",
+     "grandparentTitle": "The Show",
+     "parentIndex": 1,
+     "index": 2,
+     "duration": 2000,
+     "viewOffset": 1000,
+     "User": {
+      "title": "sam-test"
+     },
+     "Player": {
+      "product": "Plex Web",
+      "platform": "Chrome",
+      "state": "buffering",
+      "local": false
+     },
+     "Session": {
+      "bandwidth": 4000,
+      "location": "wan"
+     },
+     "TranscodeSession": {
+      "videoDecision": "transcode",
+      "audioDecision": "copy",
+      "speed": "0.8",
+      "throttled": "0",
+      "transcodeHwFullPipeline": "0"
+     },
+     "Media": [
+      {
+       "videoResolution": "1080"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "/activities": {
+  "MediaContainer": {
+   "Activity": [
+    {
+     "type": "library.update.section",
+     "title": "Scanning Movies",
+     "subtitle": "Arrival",
+     "progress": 40
+    }
+   ]
+  }
+ },
+ "/butler": {
+  "ButlerTasks": {
+   "ButlerTask": [
+    {
+     "name": "BackupDatabase",
+     "title": "Backup Database",
+     "enabled": false
+    },
+    {
+     "name": "OptimizeDatabase",
+     "enabled": true
+    },
+    {
+     "name": "ButlerTaskGenerateAdMarkers",
+     "enabled": false
+    }
+   ]
+  }
+ },
+ "/:/prefs": {
+  "MediaContainer": {
+   "Setting": [
+    {
+     "id": "ButlerStartHour",
+     "value": 2,
+     "type": "int"
+    },
+    {
+     "id": "ButlerEndHour",
+     "value": 5,
+     "type": "int"
+    },
+    {
+     "id": "FSEventLibraryUpdatesEnabled",
+     "value": true,
+     "type": "bool"
+    },
+    {
+     "id": "ScheduledLibraryUpdatesEnabled",
+     "value": true,
+     "type": "bool"
+    },
+    {
+     "id": "ScheduledLibraryUpdateInterval",
+     "value": "86400",
+     "type": "int"
+    },
+    {
+     "id": "PlexOnlineToken",
+     "value": "secret-in-prefs-for-tests",
+     "type": "text"
+    },
+    {
+     "id": "FriendlyName",
+     "value": "Test Server",
+     "type": "text"
+    }
+   ]
+  }
+ },
+ "/library/sections": {
+  "MediaContainer": {
+   "Directory": [
+    {
+     "title": "Movies",
+     "type": "movie",
+     "refreshing": "0",
+     "scannedDaysAgo": 1
+    },
+    {
+     "title": "TV",
+     "type": "show",
+     "refreshing": "0",
+     "scannedDaysAgo": 30
+    },
+    {
+     "title": "Music",
+     "type": "artist",
+     "refreshing": "1",
+     "scannedDaysAgo": 40
+    }
+   ]
+  }
+ }
+}

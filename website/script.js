@@ -115,34 +115,4 @@
       }, 1800);
     });
   });
-
-  /* ---------- Demo tabs ---------- */
-  // Without this script both views stay visible one after the other, each with its own label.
-  root.classList.add("tabs-ready");
-  document.querySelectorAll('[role="tablist"]').forEach(function (list) {
-    var tabs = Array.prototype.slice.call(list.querySelectorAll('[role="tab"]'));
-    function select(tab, focus) {
-      tabs.forEach(function (t) {
-        var on = t === tab;
-        t.setAttribute("aria-selected", on ? "true" : "false");
-        t.tabIndex = on ? 0 : -1;
-        var panel = document.getElementById(t.getAttribute("aria-controls"));
-        panel.classList.toggle("is-off", !on);
-        panel.inert = !on;
-      });
-      if (focus) tab.focus();
-    }
-    tabs.forEach(function (tab, i) {
-      tab.addEventListener("click", function () { select(tab, false); });
-      tab.addEventListener("keydown", function (e) {
-        var next = null;
-        if (e.key === "ArrowRight") next = tabs[(i + 1) % tabs.length];
-        else if (e.key === "ArrowLeft") next = tabs[(i - 1 + tabs.length) % tabs.length];
-        else if (e.key === "Home") next = tabs[0];
-        else if (e.key === "End") next = tabs[tabs.length - 1];
-        if (next) { e.preventDefault(); select(next, true); }
-      });
-    });
-    select(tabs[0], false);
-  });
 })();

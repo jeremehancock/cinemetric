@@ -99,3 +99,12 @@ Its `allowed-tools` SHALL pre-approve only `Read` and running its own script.
 - **THEN** it contains these instructions in its own words, and its `allowed-tools` lists only `Read`
   and its own script
 
+### Requirement: Plugin links
+`plugin.json` and `marketplace.json` SHALL give `https://cinemetric.dev` as the plugin's `homepage`.
+`plugin.json` SHALL give `https://github.com/jeremehancock/cinemetric` as its `repository`.
+
+#### Scenario: Checking the manifests
+- **WHEN** someone reads `plugin.json` or `marketplace.json`
+- **THEN** `homepage` is `https://cinemetric.dev`, and `plugin.json`'s `repository` is the GitHub
+  repository
+

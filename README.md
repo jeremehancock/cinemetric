@@ -8,8 +8,8 @@
 plain-English report: what you have, how much space it uses, what quality it's in, what was just added,
 and what needs tidying up.
 
-A showcase website lives in [`website/`](website/): plain HTML, CSS and JavaScript with no build step,
-ready for any static host.
+**Website:** [cinemetric.dev](https://cinemetric.dev). Its source lives in [`website/`](website/): plain HTML,
+CSS and JavaScript with no build step, ready for any static host.
 
 > Cinemetric is an independent project. It is not affiliated with, endorsed by, or sponsored by
 > Plex, Inc. or Anthropic. "Plex" and "Claude" are trademarks of their respective owners.

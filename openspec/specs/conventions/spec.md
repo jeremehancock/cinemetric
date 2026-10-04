@@ -5,9 +5,7 @@
 How every Cinemetric skill is built: its shape, its dependencies, how its script reports results and
 errors, where settings live, and what its `SKILL.md` must tell Claude. Security rules are in the
 `security` spec; what each skill reports is in that skill's own spec.
-
 ## Requirements
-
 ### Requirement: Skill shape
 Each skill SHALL live in `plugins/cinemetric/skills/<name>/` as a `SKILL.md` plus one script in
 `scripts/`. The script collects the facts and prints them; Claude turns them into the written report
@@ -41,7 +39,7 @@ Scripts SHALL print one JSON document to stdout on success and exit 0. Progress 
 SHALL go to stderr. On failure a script SHALL print one line starting with `error: ` to stderr and
 exit 1; when interrupted with Ctrl-C it SHALL exit 130. Error messages SHALL be safe to show the user.
 Errors that a skill needs to recognize SHALL start with a fixed code: `NOT_CONFIGURED`,
-`TAUTULLI_NOT_CONFIGURED`, `OWNER_ONLY` or `NO_SCHEDULER`.
+`TAUTULLI_NOT_CONFIGURED` or `OWNER_ONLY`.
 
 #### Scenario: Not connected yet
 - **WHEN** a report script runs and no Plex address and token are configured

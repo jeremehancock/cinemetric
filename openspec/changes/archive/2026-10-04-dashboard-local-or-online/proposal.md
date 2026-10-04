@@ -38,7 +38,7 @@ blocked only because scheduled runs couldn't publish. Without a scheduler, that 
 ### Modified Capabilities
 
 - `dashboard`: removes "Automatic updates on the computer's own scheduler" and "Scheduled runs survive
-  plugin updates"; changes "Output" (new fields, no `automation`); adds requirements for choosing and
+  plugin updates"; replaces "Output" with "Build output" (new fields, no `automation`); adds requirements for choosing and
   remembering destinations, remembering the online page's link, and cleaning up an old schedule.
 - `conventions`: "Output and errors" drops `NO_SCHEDULER` from the list of fixed error codes.
 - `security`: adds "Dashboard goes online only by choice" (only when the user chose it, only as a

@@ -2,13 +2,12 @@
 
 ## Purpose
 
-One HTML page on the user's computer that combines the library report, server health and watch
-activity, optionally kept up to date by the computer's own scheduler. Script:
-`skills/dashboard/scripts/dashboard.py`. How Claude offers and explains it is in the skill's
-`SKILL.md`.
+One HTML page that combines the library report, server health and watch activity, saved on the
+user's computer, published by Claude as a private claude.ai page, or both, and refreshed in place
+each time the user runs the skill. Script: `skills/dashboard/scripts/dashboard.py`. How Claude
+offers, publishes and explains it is in the skill's `SKILL.md`.
 
 ## Requirements
-
 ### Requirement: Built from the other report scripts
 The dashboard SHALL get its data by running `library_report.py`, `server_health.py` and
 `watch_activity.py` (with `--days 30 --top 8 --recent 10`) side by side, so it has exactly their
@@ -27,45 +26,83 @@ same page. It SHALL contain no scripts and SHALL load nothing from outside itsel
 are inline, and text uses fonts already installed on the computer. The page SHALL declare a Content
 Security Policy that blocks all outside requests. It SHALL show the state that stays true between
 updates (library, server version and settings, watch history) and leave out what's playing right now.
-`--hide-names` SHALL leave out the top viewers list and the names in recent plays.
+When names are hidden, the page SHALL leave out the top viewers list and the names in recent plays.
+`--hide-names` and `--show-names` SHALL change the saved preference; without either, the saved
+preference SHALL be used (names shown if none was ever saved). The same page is used for every
+destination, so the preference applies to the local file and the online page alike.
 
 #### Scenario: Hiding names
 - **WHEN** the dashboard is built with `--hide-names`
 - **THEN** no user names appear on the page
+
+#### Scenario: Hiding names is remembered
+- **WHEN** the dashboard was built once with `--hide-names` and is then built with neither flag
+- **THEN** no user names appear on the page and `names_hidden` is `true`
 
 #### Scenario: No outside resources
 - **WHEN** the dashboard page is generated
 - **THEN** it contains no `http://` or `https://` links to stylesheets, fonts, images or scripts, and
   its `<head>` starts with a Content Security Policy of `default-src 'none'`
 
-### Requirement: Output
+### Requirement: Build output
 The page SHALL be written to `dashboard.html` in the data folder (or `--output PATH`), replacing it in
-one step. The script SHALL print `output`, `server`, `sections_missing`, `names_hidden`, `automation`
-(the schedule, if one is active) and `offer` (containing `automation` when no schedule is active).
+one step, whatever destination was chosen: for an online-only dashboard this file is what gets
+published. The script SHALL print `output`, `server`, `sections_missing`, `names_hidden`,
+`destination` (`local`, `online`, `both`, or `null` if never chosen), `online_page` (the saved link,
+or `null`), `ask` (containing `destination` when none is saved) and `old_schedule_removed`.
 
-#### Scenario: No schedule yet
-- **WHEN** the dashboard is built and no scheduled task exists
-- **THEN** `automation` is `null` and `offer` contains `automation`
+#### Scenario: First run
+- **WHEN** the dashboard is built and no destination has been saved
+- **THEN** the page is written, `destination` is `null` and `ask` contains `destination`
 
-### Requirement: Automatic updates on the computer's own scheduler
-`schedule install --every hourly|6h|daily [--hide-names]` SHALL add one task: a crontab line tagged
-`# cinemetric-dashboard` on Linux and other Unix systems, a launchd agent `com.cinemetric.dashboard`
-on macOS, or a Task Scheduler task "Cinemetric Dashboard" on Windows. Installing again SHALL replace
-the existing task. `schedule status` SHALL report whether it's active and `schedule remove` SHALL
-delete it. Scheduled runs SHALL use `--scheduled`, not Claude, and write only problems to
-`dashboard.log`. If there is no `crontab` command, install SHALL fail with `NO_SCHEDULER` and the
-command the user can schedule themselves.
+#### Scenario: Later run
+- **WHEN** the dashboard is built after `both` was saved and an online page link was saved
+- **THEN** `destination` is `both`, `online_page` is the saved link and `ask` is empty
 
-#### Scenario: Changing the interval
-- **WHEN** `schedule install --every 6h` runs while a daily schedule exists
-- **THEN** there is still exactly one scheduled task, now running every 6 hours
+### Requirement: Choosing where the dashboard goes
+`destination local|online|both` SHALL save the choice in `dashboard-state.json` and print it, along
+with the saved `online_page`. Choosing `local` SHALL keep any saved online page link (the page still
+exists on claude.ai until the user deletes it), so switching back to `online` or `both` updates the
+same page. The script itself SHALL never contact claude.ai: publishing is done by Claude.
 
-### Requirement: Scheduled runs survive plugin updates
-`schedule install` SHALL copy the dashboard and the three report scripts to a `scheduled` folder in the
-data folder and schedule that copy, because installed plugin folders change with each version.
-`schedule remove` SHALL delete the copy.
+#### Scenario: Saving a choice
+- **WHEN** `destination both` runs
+- **THEN** the next build prints `destination: "both"` and `ask` no longer contains `destination`
 
-#### Scenario: Plugin updated
-- **WHEN** Cinemetric is updated after automation was installed
-- **THEN** scheduled runs keep working with the copied scripts until `schedule install` is run again
+#### Scenario: Switching to local only
+- **WHEN** `destination local` runs while an online page link is saved
+- **THEN** `destination` is `local` and `online_page` still holds the saved link
+
+### Requirement: Remembering the online page
+`online-page --url URL` SHALL save the link of the published page so later runs update the same page.
+It SHALL accept only `https://claude.ai/` links whose path is an artifact link
+(`/artifact/<id>` or `/code/artifact/<id>`, with an id of letters, digits and `-`), and refuse anything
+else with an error, so the saved value can't point anywhere else. `online-page --forget` SHALL clear
+the saved link (for example after the page was deleted), so the next publish creates a new page.
+
+#### Scenario: Saving a link
+- **WHEN** `online-page --url https://claude.ai/code/artifact/0b8f2c1e-4d2a-4f7e-9a51-3c6d7e8f9a0b` runs
+- **THEN** later builds print that link as `online_page`
+
+#### Scenario: A link to somewhere else
+- **WHEN** `online-page --url https://example.com/page` runs
+- **THEN** the script exits with an error and the saved link is unchanged
+
+### Requirement: Cleaning up an old schedule
+When `dashboard-state.json` records automatic updates set up by an earlier version, a build SHALL
+remove that scheduled task (the crontab line tagged `# cinemetric-dashboard`, the launchd agent
+`com.cinemetric.dashboard`, or the Task Scheduler task "Cinemetric Dashboard"), delete the copied
+`scheduled` folder, `run-dashboard.cmd` and `dashboard.log`, forget the schedule, and print
+`old_schedule_removed: true`. If the task can't be removed, the build SHALL still finish, keep the
+record so it's tried again next time, and print the reason in `old_schedule_error`. Builds with no
+recorded schedule SHALL NOT run any scheduler command.
+
+#### Scenario: Upgrading with automatic updates on
+- **WHEN** the dashboard is built and the state records a daily cron schedule from an earlier version
+- **THEN** the tagged crontab line and the `scheduled` folder are gone, and the output has
+  `old_schedule_removed: true`
+
+#### Scenario: Never scheduled
+- **WHEN** the dashboard is built and the state has no schedule record
+- **THEN** no scheduler command runs and `old_schedule_removed` is `false`
 

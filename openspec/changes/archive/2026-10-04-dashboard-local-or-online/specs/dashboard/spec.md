@@ -24,7 +24,9 @@ destination, so the preference applies to the local file and the online page ali
 - **THEN** it contains no `http://` or `https://` links to stylesheets, fonts, images or scripts, and
   its `<head>` starts with a Content Security Policy of `default-src 'none'`
 
-### Requirement: Output
+## ADDED Requirements
+
+### Requirement: Build output
 The page SHALL be written to `dashboard.html` in the data folder (or `--output PATH`), replacing it in
 one step, whatever destination was chosen: for an online-only dashboard this file is what gets
 published. The script SHALL print `output`, `server`, `sections_missing`, `names_hidden`,
@@ -38,8 +40,6 @@ or `null`), `ask` (containing `destination` when none is saved) and `old_schedul
 #### Scenario: Later run
 - **WHEN** the dashboard is built after `both` was saved and an online page link was saved
 - **THEN** `destination` is `both`, `online_page` is the saved link and `ask` is empty
-
-## ADDED Requirements
 
 ### Requirement: Choosing where the dashboard goes
 `destination local|online|both` SHALL save the choice in `dashboard-state.json` and print it, along
@@ -89,6 +89,11 @@ recorded schedule SHALL NOT run any scheduler command.
 - **THEN** no scheduler command runs and `old_schedule_removed` is `false`
 
 ## REMOVED Requirements
+
+### Requirement: Output
+**Reason**: Replaced by "Build output". Its `automation` and `offer` fields described the scheduler,
+which is gone; the new requirement lists the destination fields instead.
+**Migration**: Read `destination`, `online_page` and `ask` instead of `automation` and `offer`.
 
 ### Requirement: Automatic updates on the computer's own scheduler
 **Reason**: The dashboard is now refreshed only when the user runs the skill. The scheduler added a

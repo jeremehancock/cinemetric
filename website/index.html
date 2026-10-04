@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cinemetric · Claude skills for your Plex server</title>
+  <meta name="description" content="Ask Claude about your Plex server and get clear, plain-English reports: your library, server health, who's watching and a dashboard. Read-only, private, free.">
+  <meta name="theme-color" content="#15171a">
+  <meta name="color-scheme" content="dark">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Social preview. Once the site is live, set og:url and make og:image a full address,
+       e.g. https://your-domain/og-image.png (some sites ignore relative image paths). -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Cinemetric · Claude skills for your Plex server">
+  <meta property="og:description" content="Plain-English reports on your Plex library, server health and watch activity, plus a dashboard. Read-only and private.">
+  <meta property="og:image" content="og-image.png">
+  <!-- <meta property="og:url" content="https://your-domain/"> -->
+  <meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <svg width="0" height="0" class="sr-defs" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="mark-grad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#f5bb2e"/>
+        <stop offset="1" stop-color="#cc8a00"/>
+      </linearGradient>
+      <symbol id="mark" viewBox="0 0 64 64">
+        <path d="M45.5 20.5a17 17 0 1 0 0 23" fill="none" stroke="url(#mark-grad)" stroke-width="7" stroke-linecap="round"/>
+        <path d="M28 24.5v15l12-7.5z" fill="url(#mark-grad)"/>
+      </symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.39-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    </defs>
+  </svg>
+
+  <header class="site-header" id="top">
+    <div class="wrap header-inner">
+      <a class="brand" href="#top" aria-label="Cinemetric, back to top">
+        <svg class="brand-mark" aria-hidden="true"><use href="#mark"/></svg>
+        <span>Cinemetric</span>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <a href="#skills">Skills</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#setup">Setup</a>
+        <a class="nav-gh" href="https://github.com/jeremehancock/cinemetric" aria-label="Cinemetric on GitHub" target="_blank" rel="noopener noreferrer">
+          <svg aria-hidden="true"><use href="#i-github"/></svg><span>GitHub</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ============ HERO ============ -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="poster-wall" aria-hidden="true">
+        <div class="poster-row">
+          <i style="background-image:url(posters/p01.jpg)"></i><i style="background-image:url(posters/p02.jpg)"></i><i style="background-image:url(posters/p03.jpg)"></i><i style="background-image:url(posters/p04.jpg)"></i><i style="background-image:url(posters/p05.jpg)"></i><i style="background-image:url(posters/p06.jpg)"></i><i style="background-image:url(posters/p07.jpg)"></i><i style="background-image:url(posters/p08.jpg)"></i><i style="background-image:url(posters/p09.jpg)"></i><i style="background-image:url(posters/p10.jpg)"></i>
+          <i style="background-image:url(posters/p01.jpg)"></i><i style="background-image:url(posters/p02.jpg)"></i><i style="background-image:url(posters/p03.jpg)"></i><i style="background-image:url(posters/p04.jpg)"></i><i style="background-image:url(posters/p05.jpg)"></i><i style="background-image:url(posters/p06.jpg)"></i><i style="background-image:url(posters/p07.jpg)"></i><i style="background-image:url(posters/p08.jpg)"></i><i style="background-image:url(posters/p09.jpg)"></i><i style="background-image:url(posters/p10.jpg)"></i>
+        </div>
+        <div class="poster-row reverse">
+          <i style="background-image:url(posters/p11.jpg)"></i><i style="background-image:url(posters/p12.jpg)"></i><i style="background-image:url(posters/p13.jpg)"></i><i style="background-image:url(posters/p14.jpg)"></i><i style="background-image:url(posters/p15.jpg)"></i><i style="background-image:url(posters/p16.jpg)"></i><i style="background-image:url(posters/p17.jpg)"></i><i style="background-image:url(posters/p18.jpg)"></i><i style="background-image:url(posters/p19.jpg)"></i><i style="background-image:url(posters/p20.jpg)"></i>
+          <i style="background-image:url(posters/p11.jpg)"></i><i style="background-image:url(posters/p12.jpg)"></i><i style="background-image:url(posters/p13.jpg)"></i><i style="background-image:url(posters/p14.jpg)"></i><i style="background-image:url(posters/p15.jpg)"></i><i style="background-image:url(posters/p16.jpg)"></i><i style="background-image:url(posters/p17.jpg)"></i><i style="background-image:url(posters/p18.jpg)"></i><i style="background-image:url(posters/p19.jpg)"></i><i style="background-image:url(posters/p20.jpg)"></i>
+        </div>
+        <div class="poster-row">
+          <i style="background-image:url(posters/p21.jpg)"></i><i style="background-image:url(posters/p22.jpg)"></i><i style="background-image:url(posters/p23.jpg)"></i><i style="background-image:url(posters/p24.jpg)"></i><i style="background-image:url(posters/p25.jpg)"></i><i style="background-image:url(posters/p26.jpg)"></i><i style="background-image:url(posters/p27.jpg)"></i><i style="background-image:url(posters/p28.jpg)"></i><i style="background-image:url(posters/p29.jpg)"></i><i style="background-image:url(posters/p30.jpg)"></i>
+          <i style="background-image:url(posters/p21.jpg)"></i><i style="background-image:url(posters/p22.jpg)"></i><i style="background-image:url(posters/p23.jpg)"></i><i style="background-image:url(posters/p24.jpg)"></i><i style="background-image:url(posters/p25.jpg)"></i><i style="background-image:url(posters/p26.jpg)"></i><i style="background-image:url(posters/p27.jpg)"></i><i style="background-image:url(posters/p28.jpg)"></i><i style="background-image:url(posters/p29.jpg)"></i><i style="background-image:url(posters/p30.jpg)"></i>
+        </div>
+      </div>
+      <div class="hero-shade" aria-hidden="true"></div>
+
+      <div class="wrap hero-inner">
+        <p class="eyebrow reveal"><span class="dot" aria-hidden="true"></span> A Claude Code plugin for Plex</p>
+        <h1 id="hero-title" class="reveal">Your Plex server,<br><span class="accent-text">explained.</span></h1>
+        <p class="lede reveal">Ask Claude about your media library, your server and who's been watching. Cinemetric gathers the numbers and Claude explains them in plain English. Nothing on your server is ever changed.</p>
+
+        <div class="terminal reveal" role="group" aria-label="Install commands">
+          <div class="terminal-bar" aria-hidden="true"><span></span><span></span><span></span><em>Claude Code</em></div>
+          <div class="cmd">
+            <code><span class="prompt" aria-hidden="true">&gt;</span> /plugin marketplace add jeremehancock/cinemetric</code>
+            <button class="copy" type="button" data-copy="/plugin marketplace add jeremehancock/cinemetric" aria-label="Copy: /plugin marketplace add jeremehancock/cinemetric"><svg aria-hidden="true"><use href="#i-copy"/></svg></button>
+          </div>
+          <div class="cmd">
+            <code><span class="prompt" aria-hidden="true">&gt;</span> /plugin install cinemetric@cinemetric</code>
+            <button class="copy" type="button" data-copy="/plugin install cinemetric@cinemetric" aria-label="Copy: /plugin install cinemetric@cinemetric"><svg aria-hidden="true"><use href="#i-copy"/></svg></button>
+          </div>
+          <div class="cmd ask">
+            <code><span class="prompt" aria-hidden="true">&gt;</span> Set up Cinemetric<span class="caret" aria-hidden="true"></span></code>
+          </div>
+        </div>
+
+        <div class="hero-ctas reveal">
+          <a class="btn btn-primary" href="#setup">Get started <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn-ghost" href="#skills">See what it does</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SKILL SHELF ============ -->
+    <section class="section shelf-section" id="skills" aria-labelledby="skills-title">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="kicker">The library</p>
+          <h2 id="skills-title">Five skills. One curious question at a time.</h2>
+          <p>Just ask Claude in your own words. Each skill knows when it's needed, runs a small script against your server and turns the result into a clear report.</p>
+        </div>
+
+        <ul class="shelf" role="list">
+          <li class="reveal"><a class="poster" href="#skill-setup" style="--a:#3a7bd5;--b:#1b2a4a">
+            <span class="poster-art" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><circle cx="16" cy="24" r="9" fill="none" stroke="currentColor" stroke-width="3.5"/><path d="M25 24h18M36 24v7M42 24v5" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/></svg>
+            </span>
+            <span class="poster-title">setup</span>
+            <span class="poster-sub">Sign in with Plex</span>
+          </a></li>
+          <li class="reveal"><a class="poster" href="#skill-library" style="--a:#e5a00d;--b:#4a3205">
+            <span class="poster-art" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><rect x="8" y="10" width="7" height="28" rx="1.5" fill="currentColor"/><rect x="18" y="14" width="7" height="24" rx="1.5" fill="currentColor" opacity=".75"/><rect x="28" y="8" width="7" height="30" rx="1.5" fill="currentColor" opacity=".9"/><path d="M37 13l6 1.5-6 24-6-1.5z" fill="currentColor" opacity=".6"/></svg>
+            </span>
+            <span class="poster-title">library-report</span>
+            <span class="poster-sub">What you have</span>
+          </a></li>
+          <li class="reveal"><a class="poster" href="#skill-health" style="--a:#2fbf71;--b:#0f3a24">
+            <span class="poster-art" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><path d="M4 26h9l4-10 6 20 5-14 3 4h13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="poster-title">server-health</span>
+            <span class="poster-sub">How it's doing</span>
+          </a></li>
+          <li class="reveal"><a class="poster" href="#skill-watch" style="--a:#d9467a;--b:#47142a">
+            <span class="poster-art" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><path d="M4 24s7-12 20-12 20 12 20 12-7 12-20 12S4 24 4 24z" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="24" r="6" fill="currentColor"/></svg>
+            </span>
+            <span class="poster-title">watch-activity</span>
+            <span class="poster-sub">Who watched what</span>
+          </a></li>
+          <li class="reveal"><a class="poster" href="#skill-dashboard" style="--a:#8b5cf6;--b:#2a1a4d">
+            <span class="poster-art" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><rect x="6" y="8" width="16" height="14" rx="2.5" fill="currentColor"/><rect x="26" y="8" width="16" height="22" rx="2.5" fill="currentColor" opacity=".7"/><rect x="6" y="26" width="16" height="14" rx="2.5" fill="currentColor" opacity=".7"/><rect x="26" y="34" width="16" height="6" rx="2.5" fill="currentColor"/></svg>
+            </span>
+            <span class="poster-title">dashboard</span>
+            <span class="poster-sub">All of it, one page</span>
+          </a></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ SKILL: SETUP ============ -->
+    <section class="section feature" id="skill-setup" aria-labelledby="f-setup">
+      <div class="wrap feature-grid">
+        <div class="feature-copy reveal">
+          <p class="kicker" style="--k:#5b9bf0">setup</p>
+          <h2 id="f-setup">Connect in a minute. No token wrangling.</h2>
+          <p>Cinemetric uses <strong>Sign in with Plex</strong>, the same approval screen other Plex apps use. You approve it in your browser, pick a server and you're done.</p>
+          <ul class="ticks">
+            <li>Your token goes straight from Plex into a private file on your computer. It never appears in the chat.</li>
+            <li>Lists every server your account can use and tests each address, preferring local, encrypted ones.</li>
+            <li>Optionally adds <strong>Tautulli</strong> for richer watch stats, without the API key passing through the chat either.</li>
+            <li>Shows up in Plex under <em>Authorized Devices</em>, so you can revoke it any time.</li>
+          </ul>
+          <p class="ask-line">Ask Claude: <q>Set up Cinemetric</q></p>
+        </div>
+
+        <figure class="mock demo reveal" aria-label="Example: the setup steps">
+          <div class="mock-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><em>Claude Code</em></div>
+          <div class="tabpanel" id="panel-setup-1">
+            <pre class="term"><code><span class="t-you">&gt; Set up Cinemetric</span>
+<span class="t-dot">⏺</span> Open this link, sign in to Plex if asked, and
+  approve <b>Cinemetric</b>. Then tell me when you're done.
+
+  <span class="t-link">Sign in with Plex</span> <span class="t-dim">(expires in 30 minutes)</span>
+
+<span class="t-you">&gt; done</span>
+<span class="t-dot">⏺</span> Your Plex account can use 2 servers:
+  1. Media NAS <span class="t-dim">(yours)</span>
+  2. Cabin Mini <span class="t-dim">(shared with you)</span>
+  Which one should I use?
+
+<span class="t-you">&gt; 1</span>
+<span class="t-dot">⏺</span> Connected to <b>Media NAS</b> at a local,
+  encrypted address. You can ask for a library
+  report now.
+
+  You can revoke access any time in Plex under
+  Settings → Authorized Devices ("Cinemetric").</code></pre>
+          </div>
+          <figcaption>What Claude writes in your terminal, with made-up sample data.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============ SKILL: LIBRARY ============ -->
+    <section class="section feature flip" id="skill-library" aria-labelledby="f-library">
+      <div class="wrap feature-grid">
+        <div class="feature-copy reveal">
+          <p class="kicker">library-report</p>
+          <h2 id="f-library">Know exactly what's on the shelf.</h2>
+          <p>A full picture of every library: how much you have, how much space it takes and what quality it's in, plus the little things that need tidying up.</p>
+          <ul class="ticks">
+            <li>Item counts and storage used, per library and in total.</li>
+            <li>Quality breakdowns: 4K, 1080p and lower, video and audio codecs, and 10-bit video.</li>
+            <li>What was added recently.</li>
+            <li>Housekeeping: unmatched items, missing posters, unavailable files and very large files.</li>
+          </ul>
+          <p class="ask-line">Ask Claude: <q>Give me a Plex library report</q> or <q>What's been added to Movies recently?</q></p>
+        </div>
+
+        <figure class="mock demo reveal" aria-label="Example: a library report summary">
+          <div class="mock-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><em>Claude Code</em></div>
+          <div class="tabpanel" id="panel-library-1">
+            <pre class="term"><code><span class="t-you">&gt; Give me a Plex library report</span>
+<span class="t-dot">⏺</span> <b>Media NAS</b> (Plex 1.41.1) has 4 libraries:
+  9,412 items using 42.1 TB.
+
+  <b class="t-h">Per library</b>
+  <table class="t-table"><thead><tr><th>Library</th><th>Items</th><th>Size</th><th>4K</th></tr></thead><tbody><tr><td>Movies</td><td>1,284</td><td>18.6 TB</td><td>24%</td></tr><tr><td>TV Shows</td><td>6,930</td><td>21.1 TB</td><td>9%</td></tr><tr><td>Music</td><td>1,150</td><td>2.3 TB</td><td>–</td></tr><tr><td>Home Videos</td><td>38</td><td>100 GB</td><td>0%</td></tr></tbody></table>
+  Movies are mostly HEVC; 455 files are 10-bit.
+
+  <b class="t-h">Recently added</b>
+  • The Long Voyage, Paper Lanterns (Movies)
+  • Harbor Lights S2E6 (TV Shows)
+
+  <b class="t-h">Worth a look</b>
+  • 1 file Plex can't find on disk, usually a
+    moved file or a drive that isn't mounted.
+  • 7 unmatched items with no proper metadata.
+  • 3 movies are missing posters.
+
+  <b class="t-h">Observations</b>
+  • About 60% of your TV is H.264; converting
+    it to HEVC would save space.</code></pre>
+          </div>
+          <figcaption>What Claude writes in your terminal, with made-up sample data.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============ SKILL: HEALTH ============ -->
+    <section class="section feature" id="skill-health" aria-labelledby="f-health">
+      <div class="wrap feature-grid">
+        <div class="feature-copy reveal">
+          <p class="kicker" style="--k:#3ed184">server-health</p>
+          <h2 id="f-health">A checkup for your server, on demand.</h2>
+          <p>See how Plex is doing right now and what deserves a look, from available updates to why someone's stream is buffering.</p>
+          <ul class="ticks">
+            <li>Version and available updates, and whether remote access works.</li>
+            <li>CPU and memory use.</li>
+            <li>Who's streaming right now: direct play or transcode, and how much bandwidth.</li>
+            <li>Running tasks, library scan freshness and scheduled maintenance, with anything off flagged for you.</li>
+          </ul>
+          <p class="ask-line">Ask Claude: <q>How's my Plex server doing?</q> or <q>Why is Plex transcoding?</q></p>
+        </div>
+
+        <figure class="mock demo reveal" aria-label="Example: two people streaming right now">
+          <div class="mock-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><em>Claude Code</em></div>
+          <div class="tabpanel" id="panel-health-1">
+            <pre class="term"><code><span class="t-you">&gt; How&#x27;s my Plex server doing?</span>
+<span class="t-dot">⏺</span> Mostly fine, but there's a Plex update waiting.
+
+  <b class="t-h">Server</b>
+  • Media NAS · Plex 1.41.1 on Linux
+  • Update available: 1.41.2
+  • Remote access: working
+  • CPU 38% (avg 31%) · memory 52% (avg 51%)
+
+  <b class="t-h">Right now</b>: 2 streams, 14.2 Mbps
+  1 direct play, 1 transcode
+  • alex · The Long Voyage · Living Room TV
+    Direct play · 64%
+  • sam · Harbor Lights S2E5 · Pixel 9
+    Transcode (hardware) · 22%
+
+  <b class="t-h">Background</b>
+  • Nothing running. Movies and TV were
+    scanned 3 hours ago.
+  • Maintenance runs 02:00–05:00.
+
+  <b class="t-h">Worth a look</b>
+  • Plex 1.41.2 is out. Updates bring fixes
+    and security patches.</code></pre>
+          </div>
+          <figcaption>What Claude writes in your terminal, with made-up sample data.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============ SKILL: WATCH ============ -->
+    <section class="section feature flip" id="skill-watch" aria-labelledby="f-watch">
+      <div class="wrap feature-grid">
+        <div class="feature-copy reveal">
+          <p class="kicker" style="--k:#ef6a9a">watch-activity</p>
+          <h2 id="f-watch">See what everyone's been watching.</h2>
+          <p>Plays, watch time, favourites and habits over the last 30 days, or any period you ask about.</p>
+          <ul class="ticks">
+            <li>Total plays and watch time.</li>
+            <li>Most watched movies, shows and music.</li>
+            <li>Most active users and the devices they use.</li>
+            <li>Daily trends and recent plays.</li>
+            <li>Uses <strong>Tautulli</strong> if you have it; otherwise Plex's own history (which counts plays only).</li>
+          </ul>
+          <p class="ask-line">Ask Claude: <q>What's been watched on Plex this month?</q> or <q>Who watches the most?</q></p>
+        </div>
+
+        <figure class="mock demo reveal" aria-label="Example: most watched in the last 30 days">
+          <div class="mock-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><em>Claude Code</em></div>
+          <div class="tabpanel" id="panel-watch-1">
+            <pre class="term"><code><span class="t-you">&gt; What&#x27;s been watched on Plex this month?</span>
+<span class="t-dot">⏺</span> In the last 30 days, 6 people watched 486
+  things for 311 hours.
+
+  <b class="t-h">What got watched</b> (TV 301 · movies 112 · music 73)
+  <table class="t-table"><thead><tr><th>Top shows</th><th>Plays</th><th>Hours</th></tr></thead><tbody><tr><td>Harbor Lights</td><td>64</td><td>51</td></tr><tr><td>Quiet Hours</td><td>41</td><td>31</td></tr><tr><td>North of Nowhere</td><td>29</td><td>25</td></tr></tbody></table>
+  Top movie: The Long Voyage (9 plays, 18 hours)
+
+  <b class="t-h">Who watched</b>
+  • alex 162 plays (104 h), sam 121 (83 h),
+    jordan 88 (57 h)
+  • Mostly on Roku, then Android and Chrome
+  • Busiest moment: 4 streams at once
+
+  <b class="t-h">Trend</b>
+  A little busier lately (255 plays vs 231 in
+  the first half); weekends are the peaks.
+
+  <b class="t-h">Observations</b>
+  • Most plays are TV.
+  • alex and sam account for 60% of watch time.</code></pre>
+          </div>
+          <figcaption>What Claude writes in your terminal, with made-up sample data.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============ SKILL: DASHBOARD ============ -->
+    <section class="section feature" id="skill-dashboard" aria-labelledby="f-dash">
+      <div class="wrap feature-grid">
+        <div class="feature-copy reveal">
+          <p class="kicker" style="--k:#a382ff">dashboard</p>
+          <h2 id="f-dash">Everything, on one good-looking page.</h2>
+          <p>Library stats, server health and watch activity together, with charts. Ask Claude to refresh it whenever you like.</p>
+          <ul class="ticks">
+            <li>Save it <strong>on your computer</strong>, as a <strong>private claude.ai page</strong> you can open from anywhere, or <strong>both</strong>.</li>
+            <li>Each refresh updates the same file and the same link, so your bookmarks keep working.</li>
+            <li>Can hide viewer names, handy before you share it.</li>
+            <li>Nothing runs in the background. It updates only when you ask.</li>
+          </ul>
+          <p class="ask-line">Ask Claude: <q>Build my Plex dashboard</q></p>
+        </div>
+
+        <figure class="mock demo reveal" aria-label="Example: building the dashboard">
+          <div class="mock-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><div class="tabs" role="tablist" aria-label="Example views"><button type="button" role="tab" id="tab-dashboard-1" aria-controls="panel-dashboard-1" aria-selected="true">In your browser</button><button type="button" role="tab" id="tab-dashboard-2" aria-controls="panel-dashboard-2" aria-selected="false" tabindex="-1">In your terminal</button></div></div>
+          <div class="tab-stack">
+          <div class="tabpanel" role="tabpanel" id="panel-dashboard-1" aria-labelledby="tab-dashboard-1" tabindex="0">
+            <p class="panel-label">In your browser</p>
+            <div class="shot"><img src="screens/dashboard.jpg" width="900" height="1718" loading="lazy" alt="The real Cinemetric dashboard in dark mode: library size, plays and watch time, a server card with an update notice, a plays-per-day bar chart, top shows, movies, music and viewers."></div>
+            <p class="caption">The real dashboard, filled with made-up sample data. Scroll inside it to see more.</p>
+          </div>
+          <div class="tabpanel" role="tabpanel" id="panel-dashboard-2" aria-labelledby="tab-dashboard-2" tabindex="0">
+            <p class="panel-label">In your terminal</p>
+            <pre class="term"><code><span class="t-you">&gt; Build my Plex dashboard</span>
+<span class="t-dot">⏺</span> Where should the dashboard go: on this
+  computer, online as a private claude.ai page,
+  or both?
+
+<span class="t-you">&gt; Both</span>
+<span class="t-dot">⏺</span> Your dashboard is ready.
+  • On this computer:
+    ~/.local/share/cinemetric/dashboard.html
+  • Online: your private claude.ai page
+
+  Ask me to refresh it any time. Both copies
+  update in place, so bookmarks keep working.</code></pre>
+            <p class="caption">What Claude writes in your terminal, with made-up sample data.</p>
+          </div>
+          </div>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============ PRIVACY ============ -->
+    <section class="section privacy" id="privacy" aria-labelledby="privacy-title">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="kicker">Built to be trusted</p>
+          <h2 id="privacy-title">Look, don't touch.</h2>
+          <p>Cinemetric reads from your server and never writes to it. Your keys stay with you.</p>
+        </div>
+        <ul class="cards" role="list">
+          <li class="card reveal">
+            <svg class="card-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
+            <h3>Read-only, always</h3>
+            <p>Every skill only reads. Nothing on your Plex server or in Tautulli is ever deleted, renamed or changed.</p>
+          </li>
+          <li class="card reveal">
+            <svg class="card-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            <h3>Keys stay private</h3>
+            <p>Your Plex token and Tautulli key go straight into a file only you can read. They never pass through the chat.</p>
+          </li>
+          <li class="card reveal">
+            <svg class="card-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8.5 12l2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <h3>Encrypted by default</h3>
+            <p>Certificates are checked unless you say otherwise. It only talks to your server, Tautulli and Plex sign-in.</p>
+          </li>
+          <li class="card reveal">
+            <svg class="card-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M16 15l5 5m0-5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <h3>Nothing to install</h3>
+            <p>Small Python scripts using only the standard library. No pip installs, no background services, no SSH.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ SETUP GUIDE ============ -->
+    <section class="section setup" id="setup" aria-labelledby="setup-title">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="kicker">Getting started</p>
+          <h2 id="setup-title">Up and running in four steps.</h2>
+          <p>You'll need <strong>Claude Code</strong>, <strong>Python 3.8 or newer</strong>, and a computer that can reach your Plex server over the network.</p>
+        </div>
+
+        <ol class="steps" role="list">
+          <li class="step reveal">
+            <span class="step-num" aria-hidden="true">1</span>
+            <div class="step-body">
+              <h3>Add the marketplace</h3>
+              <p>In Claude Code, run:</p>
+              <div class="codeblock">
+                <code>/plugin marketplace add jeremehancock/cinemetric</code>
+                <button class="copy" type="button" data-copy="/plugin marketplace add jeremehancock/cinemetric" aria-label="Copy: /plugin marketplace add jeremehancock/cinemetric"><svg aria-hidden="true"><use href="#i-copy"/></svg></button>
+              </div>
+            </div>
+          </li>
+          <li class="step reveal">
+            <span class="step-num" aria-hidden="true">2</span>
+            <div class="step-body">
+              <h3>Install the plugin</h3>
+              <div class="codeblock">
+                <code>/plugin install cinemetric@cinemetric</code>
+                <button class="copy" type="button" data-copy="/plugin install cinemetric@cinemetric" aria-label="Copy: /plugin install cinemetric@cinemetric"><svg aria-hidden="true"><use href="#i-copy"/></svg></button>
+              </div>
+            </div>
+          </li>
+          <li class="step reveal">
+            <span class="step-num" aria-hidden="true">3</span>
+            <div class="step-body">
+              <h3>Connect your server</h3>
+              <p>Ask Claude <q>Set up Cinemetric</q> (or run the command below). Open the <strong>Sign in with Plex</strong> link it gives you, approve Cinemetric, tell Claude you're done, then pick your server. Cinemetric tests the connection and saves it.</p>
+              <div class="codeblock">
+                <code>/cinemetric:setup</code>
+                <button class="copy" type="button" data-copy="/cinemetric:setup" aria-label="Copy: /cinemetric:setup"><svg aria-hidden="true"><use href="#i-copy"/></svg></button>
+              </div>
+            </div>
+          </li>
+          <li class="step reveal">
+            <span class="step-num" aria-hidden="true">4</span>
+            <div class="step-body">
+              <h3>Start asking</h3>
+              <ul class="chips" role="list">
+                <li>Give me a Plex library report</li>
+                <li>How's my Plex server doing?</li>
+                <li>What's been watched on Plex this month?</li>
+                <li>Build my Plex dashboard</li>
+              </ul>
+            </div>
+          </li>
+        </ol>
+
+        <div class="extras">
+          <details class="extra reveal">
+            <summary><span>Optional: add Tautulli for fuller watch stats</span></summary>
+            <div class="extra-body">
+              <p>If you run <a href="https://tautulli.com" target="_blank" rel="noopener noreferrer">Tautulli</a>, ask Claude to <q>add Tautulli to Cinemetric</q> and tell it your Tautulli address. You get watch time, devices and busiest times. Your API key never goes through the chat:</p>
+              <ul>
+                <li><strong>No login on Tautulli?</strong> Cinemetric fetches the key from Tautulli itself.</li>
+                <li><strong>Tautulli has a login?</strong> Claude gives you a link to a small one-time page that runs only on your computer. Paste the key from <em>Settings → Web Interface → API</em> and click <em>Test and save</em>.</li>
+                <li><strong>Claude Code on another machine</strong> (over SSH or in the cloud)? Claude gives you a command to run in a terminal on that machine instead.</li>
+              </ul>
+              <p><a class="more" href="https://github.com/jeremehancock/cinemetric#optional-add-tautulli" target="_blank" rel="noopener noreferrer">Full Tautulli details in the README <svg aria-hidden="true"><use href="#i-arrow"/></svg></a></p>
+            </div>
+          </details>
+
+          <details class="extra reveal">
+            <summary><span>Can't use Sign in with Plex? Set it up by hand</span></summary>
+            <div class="extra-body">
+              <p>Create <code>~/.config/cinemetric/config.json</code> yourself, in your own editor (don't paste your token into a chat):</p>
+              <div class="codeblock multi">
+<pre><code>{
+  "plex_url": "http://192.168.1.10:32400",
+  "plex_token": "YOUR-TOKEN-HERE"
+}</code></pre>
+              </div>
+              <p>Then make it private to you:</p>
+              <div class="codeblock">
+                <code>chmod 600 ~/.config/cinemetric/config.json</code>
+                <button class="copy" type="button" data-copy="chmod 600 ~/.config/cinemetric/config.json" aria-label="Copy: chmod 600 ~/.config/cinemetric/config.json"><svg aria-hidden="true"><use href="#i-copy"/></svg></button>
+              </div>
+              <p>You can also use <code>PLEX_URL</code> and <code>PLEX_TOKEN</code> environment variables instead.</p>
+              <p><a class="more" href="https://github.com/jeremehancock/cinemetric#manual-setup" target="_blank" rel="noopener noreferrer">Manual setup in the README <svg aria-hidden="true"><use href="#i-arrow"/></svg></a></p>
+            </div>
+          </details>
+
+          <details class="extra reveal">
+            <summary><span>Changed your mind? Revoke access</span></summary>
+            <div class="extra-body">
+              <p>In Plex, go to <em>Settings → Authorized Devices</em> and remove <strong>Cinemetric</strong>. Run setup again any time to reconnect. If you used manual setup and think a token leaked, use <em>sign out of all devices</em> in your Plex account settings.</p>
+              <p><a class="more" href="https://github.com/jeremehancock/cinemetric#revoking-access" target="_blank" rel="noopener noreferrer">Revoking access in the README <svg aria-hidden="true"><use href="#i-arrow"/></svg></a></p>
+            </div>
+          </details>
+        </div>
+
+        <p class="readme-link reveal"><a class="btn btn-ghost" href="https://github.com/jeremehancock/cinemetric#readme" target="_blank" rel="noopener noreferrer"><svg aria-hidden="true"><use href="#i-github"/></svg> Read the full guide on GitHub</a></p>
+      </div>
+    </section>
+
+    <!-- ============ NOTICES ============ -->
+    <section class="section notices" aria-label="Things to know">
+      <div class="wrap notice-grid">
+        <div class="notice caution reveal">
+          <h2>AI can make mistakes</h2>
+          <p>Cinemetric's scripts collect the numbers, but the reports you read are written by Claude, an AI model. It can misread data or draw a conclusion the numbers don't fully support. Double-check anything important in Plex or Tautulli before acting on it, especially before deleting, replacing or re-encoding files.</p>
+        </div>
+        <div class="notice reveal">
+          <h2>Early days</h2>
+          <p>Cinemetric is a work in progress. Skills, setup steps and report formats may change. Ideas and bug reports are welcome on <a href="https://github.com/jeremehancock/cinemetric/issues" target="_blank" rel="noopener noreferrer">GitHub issues</a>.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <div class="footer-brand">
+        <a class="brand" href="#top" aria-label="Cinemetric, back to top">
+          <svg class="brand-mark" aria-hidden="true"><use href="#mark"/></svg>
+          <span>Cinemetric</span>
+        </a>
+        <p class="credit">Created by <a href="https://jeremehancock.com" target="_blank" rel="noopener noreferrer">Jereme Hancock</a></p>
+      </div>
+      <div class="footer-links">
+        <a class="btn btn-ghost sm" href="https://github.com/jeremehancock/cinemetric" target="_blank" rel="noopener noreferrer"><svg aria-hidden="true"><use href="#i-github"/></svg> View on GitHub</a>
+        <a href="https://github.com/jeremehancock/cinemetric/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
+        <a href="https://github.com/jeremehancock/cinemetric/blob/main/SECURITY.md" target="_blank" rel="noopener noreferrer">Security</a>
+      </div>
+    </div>
+    <div class="wrap">
+      <p class="legal">Cinemetric is an independent project. It is not affiliated with, endorsed by, or sponsored by Plex, Inc. or Anthropic. "Plex" and "Claude" are trademarks of their respective owners.</p>
+    </div>
+  </footer>
+
+  <div class="sr-only" aria-live="polite" id="live"></div>
+  <script src="script.js"></script>
+</body>
+</html>

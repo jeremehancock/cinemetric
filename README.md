@@ -27,7 +27,7 @@ and what needs tidying up.
 | `watch-activity` | Plays and watch time, most watched movies, shows and music, most active users and devices, daily trends, recent plays. Uses Tautulli if you have it, otherwise Plex's own history |
 | `dashboard` | One page with library, server and watch stats and charts, saved on your computer. Can update itself automatically on Linux, macOS or Windows |
 
-More skills are planned; see [ROADMAP.md](ROADMAP.md).
+More skills are planned; see [Roadmap](#roadmap).
 
 Every Cinemetric skill is **read-only**: it never changes anything on your server. See [SECURITY.md](SECURITY.md).
 
@@ -109,6 +109,28 @@ python3 plugins/cinemetric/skills/library-report/scripts/library_report.py --lib
 A Plex token gives the same access as your account. To revoke Cinemetric, remove "Cinemetric" under
 **Settings → Authorized Devices** in Plex, then run setup again if you want to reconnect. If you used
 manual setup and think a token leaked, use "sign out of all devices" in your Plex account settings.
+
+## Roadmap
+
+Plans can change; feedback and ideas are welcome via GitHub issues. What the existing skills do, and
+the rules every skill follows, are written down as specs in [openspec/specs/](openspec/specs/). New
+work starts as an OpenSpec change proposal (`/opsx:propose`) before any code is written.
+
+**Unfinished parts of existing skills**
+
+- [ ] **`server-health`: failed or stuck tasks.** Plex doesn't report task failures through its API, so
+      this needs another source (for example its logs) before it can be added.
+- [ ] **`dashboard`: test the macOS and Windows schedulers on real machines** (so far tested with
+      stand-ins on Linux).
+
+**Ideas for later**
+
+- [ ] **Dashboard as a claude.ai page**: publish the dashboard and keep it updated automatically. On hold:
+      Claude Code's background mode (`claude -p`) didn't have the page-publishing tool on the account
+      it was tested with, so scheduled runs couldn't update the page.
+- [ ] **`duplicates`**: titles with more than one copy or version, and how much space the extras use
+- [ ] **`quality-upgrades`**: titles only available in SD or 720p that may be worth replacing
+- [ ] **`users-and-shares`**: who has access to your server and which libraries are shared with whom
 
 ## License
 

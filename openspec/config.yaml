@@ -11,9 +11,9 @@ context: |
     - SKILL.md: Claude's instructions at run time (how to call the script, explain errors and
       present results). Claude reads only this when a user runs the skill, so it must stand on
       its own. Specs don't repeat it.
-    - README.md: how users install and set up Cinemetric.
+    - README.md: how users install and set up Cinemetric, plus the Roadmap section (open items
+      and ideas only; finished work is described by the specs).
     - SECURITY.md: a short summary for users that links to openspec/specs/security/spec.md.
-    - ROADMAP.md: open items and ideas only. Finished work is described by the specs.
 
   Plain, friendly English for anything a user reads. Version bumps touch every script's VERSION,
   plugin.json and marketplace.json together.

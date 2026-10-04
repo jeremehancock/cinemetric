@@ -11,15 +11,15 @@
 
 ## 3. First run
 
-- [ ] 3.1 Commit on a branch and open a pull request into `main`
-- [ ] 3.2 Watch the run: both Python versions and **All tests passed** go green. If Python 3.8 isn't available on the runner, apply the fallback from the design (older Ubuntu image or `uv`) with a one-line comment, and run again
-- [ ] 3.3 Confirm a failure is caught: push a temporary commit that breaks one test, see **All tests passed** fail, then remove that commit
+- [x] 3.1 Commit on a branch and open a pull request into `main`
+- [x] 3.2 Watch the run: both Python versions and **All tests passed** go green. If Python 3.8 isn't available on the runner, apply the fallback from the design (older Ubuntu image or `uv`) with a one-line comment, and run again
+- [x] 3.3 Confirm a failure is caught: push a temporary commit that breaks one test, see **All tests passed** fail, then remove that commit
 
 ## 4. Block merging on failure
 
-- [ ] 4.1 Show the maintainer the exact ruleset (target: default branch; require status check **All tests passed**; branches don't need to be up to date; no bypass) and get confirmation before changing GitHub
-- [ ] 4.2 Create the ruleset with `gh api` and read it back to confirm it is active
-- [ ] 4.3 Confirm on the open pull request that GitHub now lists **All tests passed** as required
+- [x] 4.1 Show the maintainer the exact ruleset (target: default branch; require status check **All tests passed**; branches don't need to be up to date; no bypass) and get confirmation before changing GitHub
+- [x] 4.2 Create the ruleset with `gh api` and read it back to confirm it is active
+- [x] 4.3 Confirm on the open pull request that GitHub now lists **All tests passed** as required
 
 ## 5. Docs
 

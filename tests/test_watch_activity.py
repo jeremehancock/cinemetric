@@ -97,7 +97,7 @@ class SmallHelpers(OfflineTestCase):
         self.assertEqual(wa.stat_rows(["junk", {"stat_id": "top_tv", "rows": None}], "top_tv"), [])
 
     def test_hours(self):
-        self.assertEqual(wa.hours(5400), 99)  # deliberately wrong: checking that CI catches failures
+        self.assertEqual(wa.hours(5400), 1.5)
         self.assertEqual(wa.hours(None), 0.0)
 
 

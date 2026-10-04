@@ -25,7 +25,7 @@ CSS and JavaScript with no build step, ready for any static host.
 | Skill | What it does |
 |---|---|
 | `setup` | Connects Cinemetric to your server using **Sign in with Plex**; no copying tokens around |
-| `library-report` | Counts, storage, 4K/1080p and codec breakdown, 10-bit video, recently added, unavailable files, unmatched items, missing posters, very large files |
+| `library-report` | Counts, storage, 4K/1080p and codec breakdown, 10-bit video, recently added, unavailable files, unmatched items, missing posters, very large files, duplicates |
 | `server-health` | Version and updates, remote access, CPU and memory, who's streaming now (direct play vs transcode, bandwidth), running tasks, library scans, scheduled maintenance |
 | `watch-activity` | Plays and watch time, most watched movies, shows and music, most active users and devices, daily trends, recent plays. Uses Tautulli if you have it, otherwise Plex's own history |
 | `dashboard` | One page with library, server and watch stats and charts. Saved on your computer, as a private claude.ai page you can open anywhere, or both; each refresh updates the same file and link |
@@ -126,7 +126,6 @@ work starts as an OpenSpec change proposal (`/opsx:propose`) before any code is 
 
 **Ideas for later**
 
-- [ ] **`duplicates`**: titles with more than one copy or version, and how much space the extras use
 - [ ] **`quality-upgrades`**: titles only available in SD or 720p that may be worth replacing
 - [ ] **`users-and-shares`**: who has access to your server and which libraries are shared with whom
 

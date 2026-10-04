@@ -1,0 +1,130 @@
+## ADDED Requirements
+
+### Requirement: Static site in its own folder
+The website SHALL live entirely in the top-level `website/` folder, with `index.html` at its root, so a
+static host (such as Coolify) can serve that folder as-is. All links between the site's own files SHALL
+be relative, so the site works whether it is served from a domain root or a sub-path.
+
+#### Scenario: Serving the folder
+- **WHEN** a static web server is pointed at `website/`
+- **THEN** visiting the root address shows the full landing page with its styles, script and images,
+  with no build or install step first
+
+#### Scenario: Opening the file directly
+- **WHEN** `website/index.html` is opened straight from disk in a browser
+- **THEN** the page renders with its styles and images and all content is readable
+
+### Requirement: No frameworks or build step
+The site SHALL be written in plain HTML, CSS and JavaScript. It SHALL NOT use a JavaScript or CSS
+framework, a bundler, a package manager or any generated files. It SHALL NOT load scripts, styles or
+fonts from other servers; everything it needs is in `website/`.
+
+#### Scenario: Checking dependencies
+- **WHEN** the files in `website/` are inspected
+- **THEN** there is no `package.json`, no framework library, and no `<script>` or `<link>` pointing at
+  another domain
+
+### Requirement: Works without JavaScript
+All content SHALL be present in the HTML. JavaScript SHALL only add enhancements (animations, copy
+buttons, header effects, tabs). If scripts are turned off or fail, every section and command SHALL
+still be visible and readable.
+
+#### Scenario: Scripts disabled
+- **WHEN** the page is loaded with JavaScript turned off
+- **THEN** every section, feature description and setup command is visible, and nothing is stuck
+  hidden waiting for an animation
+
+### Requirement: Shows every skill
+The site SHALL describe each of the plugin's skills: `setup`, `library-report`, `server-health`,
+`watch-activity` and `dashboard`. For each one it SHALL say what the skill reports or does and give at
+least one example of what to ask Claude. Each skill SHALL have a demo panel showing what the user
+really gets, and nothing else: for `setup`, `library-report`, `server-health` and `watch-activity`, a
+Claude Code terminal conversation that follows that skill's `SKILL.md` presentation order; for
+`dashboard`, a screenshot of the real dashboard page built by the dashboard script, with the
+conversation as a second tab. The site SHALL NOT show designed graphics as if they were a skill's
+output. Demo data (names, titles, numbers) SHALL be made up, never real server data.
+
+#### Scenario: A visitor reads the features
+- **WHEN** a visitor scrolls through the features section
+- **THEN** they see all five skills, each with a description, an example request and a demo panel in
+  the skill's real output format
+
+#### Scenario: Switching dashboard demo tabs
+- **WHEN** a visitor switches between "In your browser" and "In your terminal"
+- **THEN** the panel keeps the same size, nothing below it moves, and only the active tab's caption
+  is shown
+
+#### Scenario: Dashboard demo tabs without JavaScript
+- **WHEN** scripts are off
+- **THEN** the dashboard screenshot and the conversation are both shown one after the other, each with
+  its own label
+
+### Requirement: Shows how to set up
+The site SHALL include a setup guide covering: requirements (Claude Code, Python 3.8+, network access to
+the Plex server), the two install commands, connecting with Sign in with Plex, optionally adding
+Tautulli, the manual-setup fallback, and how to revoke access. Each command SHALL have a button that
+copies it. The guide SHALL link to the README for full details.
+
+#### Scenario: Copying an install command
+- **WHEN** a visitor clicks the copy button next to `/plugin marketplace add jeremehancock/cinemetric`
+- **THEN** that exact command is placed on their clipboard and the button briefly confirms it was copied
+
+#### Scenario: Wanting more detail
+- **WHEN** a visitor needs more than the short setup steps
+- **THEN** the setup section links to the README on GitHub
+
+### Requirement: Matches the project's promises
+The site's claims SHALL match the README and specs: every skill is read-only, credentials never pass
+through the chat, Tautulli is optional. The site SHALL show that Cinemetric is not affiliated with,
+endorsed by or sponsored by Plex, Inc. or Anthropic, and the caution that AI-written reports can contain
+mistakes. It SHALL NOT use Plex's or Anthropic's logos. The hero background MAY show real posters, taken
+from the owner's own Plex server with the owner's agreement, saved as small local images with no
+server address or token in them, and shown blurred and dimmed as decoration.
+
+#### Scenario: Trademark notice
+- **WHEN** a visitor reaches the bottom of the page
+- **THEN** they see the not-affiliated notice alongside the footer
+
+#### Scenario: Plex-like look without Plex's logo
+- **WHEN** the page is styled to feel like Plex
+- **THEN** it uses its own Cinemetric mark and colors in the same spirit, not the Plex logo or wordmark
+
+### Requirement: Links without underlines
+Links SHALL NOT be underlined. Links inside text SHALL stand apart from the text around them by color
+and weight.
+
+#### Scenario: A link in a paragraph
+- **WHEN** a visitor reads a paragraph that contains a link
+- **THEN** the link shows in the accent color and a heavier weight, with no underline
+
+### Requirement: Footer credit and link
+The footer SHALL link to the GitHub repository at `https://github.com/jeremehancock/cinemetric` and SHALL
+name Jereme Hancock as the creator, with the name linking to `https://jeremehancock.com`.
+
+#### Scenario: Footer contents
+- **WHEN** a visitor looks at the footer
+- **THEN** it shows "Created by Jereme Hancock" with the name linking to jeremehancock.com, and a
+  working link to the GitHub repository
+
+### Requirement: Outside links open in a new tab
+Every link that leaves the site SHALL open in a new tab and SHALL use `rel="noopener noreferrer"` (or
+`noopener`) so the opened page can't control the site's tab.
+
+#### Scenario: Clicking the GitHub link
+- **WHEN** a visitor clicks any link to GitHub, Tautulli or jeremehancock.com
+- **THEN** it opens in a new tab and the site stays open in the original tab
+
+### Requirement: Accessible and responsive
+The page SHALL work from phone width (360px) to large desktop without horizontal scrolling, SHALL be
+usable with a keyboard alone (visible focus, a skip link), SHALL give images and icons text
+alternatives or hide purely decorative ones from screen readers, and SHALL keep text contrast at WCAG AA
+or better. When the visitor's system asks for reduced motion, animations SHALL be turned off.
+
+#### Scenario: Reduced motion
+- **WHEN** the visitor's operating system has "reduce motion" turned on
+- **THEN** content appears without scroll-in or background animations
+
+#### Scenario: Phone width
+- **WHEN** the page is viewed 360px wide
+- **THEN** all sections stack into one column, code blocks wrap or scroll within themselves, and the
+  page itself never scrolls sideways

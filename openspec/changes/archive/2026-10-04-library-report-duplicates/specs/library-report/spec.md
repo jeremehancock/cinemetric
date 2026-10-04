@@ -1,20 +1,4 @@
-# library-report Specification
-
-## Purpose
-
-A read-only summary of what's in a Plex server's libraries: counts, storage, video quality and codecs,
-recent additions and housekeeping problems. Script: `skills/library-report/scripts/library_report.py`.
-How Claude presents it is in the skill's `SKILL.md`.
-
-## Requirements
-
-### Requirement: Plex paths used
-The script SHALL request only `/`, `/library/sections` and `/library/sections/{id}/all`, reading items
-in pages of 500.
-
-#### Scenario: Large library
-- **WHEN** a library has more than 500 items of a type
-- **THEN** the script fetches them page by page until it has them all
+## MODIFIED Requirements
 
 ### Requirement: Options
 The script SHALL accept `--library NAME` (repeatable, case-insensitive; error if nothing matches),
@@ -55,24 +39,7 @@ The report SHALL contain `cinemetric_version`, `generated_at`, `server` (name, v
 - **WHEN** a library is a music library
 - **THEN** its entry has no `duplicates` section
 
-### Requirement: Media breakdown
-`media` SHALL include the number of files and their total size in GB, resolution split (4K, 2K,
-1080p, 720p, SD, or the raw value), video codecs, audio codecs, the number of 10-bit files, very
-large files (up to 15 examples, largest first, plus a total) and files Plex lists as unavailable (up
-to 15 examples plus a count). A file counts as 10-bit when its video profile contains "10"; the
-report SHALL NOT call these files HDR, because the library listing doesn't say which files are HDR.
-
-#### Scenario: A file Plex can't find
-- **WHEN** a media item has a `deletedAt` value
-- **THEN** it is counted in `unavailable_files` and listed in `unavailable_examples`
-
-### Requirement: Housekeeping
-`housekeeping` SHALL count items with no poster and items that are unmatched (no `guid`, or a
-`local://` one), each with up to 15 examples.
-
-#### Scenario: Unmatched movie
-- **WHEN** a movie's `guid` starts with `local://`
-- **THEN** it is counted in `unmatched_count`
+## ADDED Requirements
 
 ### Requirement: Duplicates within a library
 A copy SHALL be one of an item's media versions (a `Media` entry). A copy SHALL NOT be counted if

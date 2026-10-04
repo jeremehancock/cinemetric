@@ -20,7 +20,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.4.1"
+VERSION = "0.5.0"
 PAGE_SIZE = 500
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
@@ -289,6 +289,113 @@ def housekeeping(items, label_fn, poster_field="thumb"):
     }
 
 
+def copies(item):
+    """An item's versions that count as copies: found on disk and not a Plex optimized version.
+
+    A version split across several files (parts) is still one copy.
+    """
+    out = []
+    for media in item.get("Media", []) or []:
+        if media.get("deletedAt") or media.get("proxyType"):
+            continue
+        out.append({
+            "resolution": resolution_bucket(media.get("videoResolution")),
+            "video_codec": str(media.get("videoCodec") or "unknown").lower(),
+            "bytes": sum(int(p.get("size") or 0) for p in media.get("Part", []) or []),
+        })
+    return sorted(out, key=lambda c: -c["bytes"])
+
+
+def gb(size):
+    return round(size / 1e9, 1)
+
+
+def top_examples(rows, limit):
+    """Largest extra space first; swaps the internal byte count for extra_gb."""
+    rows = sorted(rows, key=lambda r: -r["bytes"])[:limit]
+    return [dict({k: v for k, v in r.items() if k != "bytes"}, extra_gb=gb(r["bytes"])) for r in rows]
+
+
+def library_duplicates(items, label_fn, limit, by_show=False):
+    """Items in one library with two or more copies. Extra space is every copy except the largest."""
+    titles = extra_copies = extra = 0
+    rows = {}
+    for item in items:
+        found = copies(item)
+        if len(found) < 2:
+            continue
+        spare = sum(c["bytes"] for c in found[1:])
+        titles += 1
+        extra_copies += len(found) - 1
+        extra += spare
+        if by_show:
+            row = rows.setdefault(item.get("grandparentRatingKey") or item.get("grandparentTitle"), {
+                "title": clean(item.get("grandparentTitle")), "episodes": 0, "bytes": 0})
+            row["episodes"] += 1
+            row["bytes"] += spare
+        else:
+            rows[len(rows)] = {
+                "title": label_fn(item),
+                "bytes": spare,
+                "copies": [{"resolution": c["resolution"], "video_codec": c["video_codec"], "gb": gb(c["bytes"])}
+                           for c in found],
+            }
+    return {
+        "titles": titles,
+        "extra_copies": extra_copies,
+        "extra_gb": gb(extra),
+        "examples": top_examples(rows.values(), limit),
+    }
+
+
+def remember_guids(guids, items, library, label_fn, show=False):
+    """Record each matched item's largest copy by guid, for finding the same title in other libraries."""
+    for item in items:
+        if is_unmatched(item):
+            continue
+        found = copies(item)
+        if not found:
+            continue
+        per_library = guids.setdefault(str(item.get("guid")), {})
+        best = per_library.get(library)
+        if best and best["bytes"] >= found[0]["bytes"]:
+            continue
+        per_library[library] = {
+            "title": clean(item.get("grandparentTitle")) if show else label_fn(item),
+            "show": show,
+            "resolution": found[0]["resolution"],
+            "bytes": found[0]["bytes"],
+        }
+
+
+def cross_library_duplicates(guids, limit):
+    """Titles whose guid is in two or more libraries. Each library counts once, by its largest copy."""
+    titles = extra = 0
+    rows = {}
+    for guid, per_library in guids.items():
+        if len(per_library) < 2:
+            continue
+        entries = sorted(per_library.items(), key=lambda kv: -kv[1]["bytes"])
+        spare = sum(entry["bytes"] for _, entry in entries[1:])
+        titles += 1
+        extra += spare
+        first = entries[0][1]
+        if first["show"]:
+            libraries = sorted(per_library)
+            row = rows.setdefault((first["title"], tuple(libraries)), {
+                "title": first["title"], "episodes": 0, "bytes": 0, "libraries": libraries})
+            row["episodes"] += 1
+            row["bytes"] += spare
+        else:
+            rows[guid] = {
+                "title": first["title"],
+                "bytes": spare,
+                "libraries": [{"library": name, "resolution": entry["resolution"], "gb": gb(entry["bytes"])}
+                              for name, entry in entries],
+            }
+    return {"titles": titles, "extra_gb": gb(extra), "examples": top_examples(rows.values(), limit)}
+
+
 def movie_label(item):
     year = item.get("year")
     return clean(f"{item.get('title')} ({year})" if year else item.get("title"))
@@ -301,7 +408,7 @@ def episode_label(item):
     )
 
 
-def summarise_section(client, section, args):
+def summarise_section(client, section, args, guids):
     sid, kind = section.get("key"), section.get("type")
     out = {"name": clean(section.get("title")), "type": kind}
     large = int(args.large_gb * 1e9)
@@ -315,6 +422,8 @@ def summarise_section(client, section, args):
         out["media"] = tally.as_dict()
         out["recently_added"] = recent(movies, args.recent, movie_label)
         out["housekeeping"] = housekeeping(movies, movie_label)
+        out["duplicates"] = library_duplicates(movies, movie_label, args.duplicate_examples)
+        remember_guids(guids, movies, out["name"], movie_label)
 
     elif kind == "show":
         shows = client.get_all(sid, TYPE_SHOW)
@@ -330,6 +439,8 @@ def summarise_section(client, section, args):
         out["media"] = tally.as_dict()
         out["recently_added"] = recent(episodes, args.recent, episode_label)
         out["housekeeping"] = housekeeping(shows, lambda s: clean(s.get("title")))
+        out["duplicates"] = library_duplicates(episodes, episode_label, args.duplicate_examples, by_show=True)
+        remember_guids(guids, episodes, out["name"], episode_label, show=True)
 
     elif kind == "artist":
         tracks = client.get_all(sid, TYPE_TRACK)
@@ -364,10 +475,10 @@ def build_report(client, args):
         if not sections:
             raise ReportError("No library matched --library. Run without it to see all names.")
 
-    libraries = []
+    libraries, guids = [], {}
     for section in sections:
         print(f"reading library: {clean(section.get('title'))}", file=sys.stderr)
-        libraries.append(summarise_section(client, section, args))
+        libraries.append(summarise_section(client, section, args, guids))
 
     totals = {"libraries": len(libraries), "files": 0, "size_gb": 0.0}
     for lib in libraries:
@@ -384,6 +495,7 @@ def build_report(client, args):
             "platform": root.get("platform"),
         },
         "totals": totals,
+        "cross_library_duplicates": cross_library_duplicates(guids, args.duplicate_examples),
         "libraries": libraries,
     }
 
@@ -394,8 +506,10 @@ def main():
     parser.add_argument("--library", action="append", help="limit to a library by name (repeatable)")
     parser.add_argument("--recent", type=int, default=10, help="recently added items per library")
     parser.add_argument("--large-gb", type=float, default=40.0, help="flag files at least this many GB")
+    parser.add_argument("--duplicate-examples", type=int, default=15, help="duplicate examples listed per section")
     args = parser.parse_args()
     args.recent = max(0, min(args.recent, 100))
+    args.duplicate_examples = max(0, min(args.duplicate_examples, 500))
 
     try:
         client = PlexClient(*load_config())

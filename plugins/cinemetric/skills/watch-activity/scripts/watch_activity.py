@@ -5,12 +5,7 @@ Uses Tautulli when it is configured (full history, watch time, platforms) and fa
 to Plex's own watch history otherwise (play counts only). Uses only the Python standard
 library. Prints one JSON document to stdout; errors go to stderr.
 
-Safety rules enforced here (see SECURITY.md):
-  * GET requests only: Plex paths in ALLOWED_PATHS, Tautulli commands in TAUTULLI_COMMANDS.
-  * Redirects are refused, so credentials can never be forwarded to another host.
-  * The Plex token is sent as a header. Tautulli only accepts its API key in the URL, so the
-    key is scrubbed from every error message. Neither is ever printed.
-  * A config file that other users can read is refused.
+Safety rules: see openspec/specs/security/spec.md in the Cinemetric repository.
 """
 
 import argparse

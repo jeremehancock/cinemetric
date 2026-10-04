@@ -6,12 +6,7 @@ Covers server basics (version, updates, remote access, resource use), live activ
 scheduled maintenance). Uses only the Python standard library. Prints one JSON
 document to stdout; errors go to stderr.
 
-Safety rules enforced here (see SECURITY.md):
-  * GET requests only, and only to the paths in ALLOWED_PATHS.
-  * Redirects are refused, so the token can never be forwarded to another host.
-  * The token is sent as a header (never in a URL) and is never printed.
-  * A config file that other users can read is refused.
-  * From the server settings, only the maintenance-related ones in PREF_IDS are kept.
+Safety rules: see openspec/specs/security/spec.md in the Cinemetric repository.
 """
 
 import argparse

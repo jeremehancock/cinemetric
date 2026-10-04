@@ -1,0 +1,27 @@
+schema: spec-driven
+
+context: |
+  Cinemetric is a Claude Code plugin: read-only Claude skills that report on a Plex Media Server
+  (and optionally Tautulli). Each skill is plugins/cinemetric/skills/<name>/SKILL.md plus one
+  Python 3.8+ script using only the standard library. The script prints JSON; Claude writes the
+  report by following SKILL.md.
+
+  Where each kind of fact lives (write each fact in one place only):
+    - openspec/specs/: what the scripts must do, and the rules every skill follows. Source of truth.
+    - SKILL.md: Claude's instructions at run time (how to call the script, explain errors and
+      present results). Claude reads only this when a user runs the skill, so it must stand on
+      its own. Specs don't repeat it.
+    - README.md: how users install and set up Cinemetric.
+    - SECURITY.md: a short summary for users that links to openspec/specs/security/spec.md.
+    - ROADMAP.md: open items and ideas only. Finished work is described by the specs.
+
+  Plain, friendly English for anything a user reads. Version bumps touch every script's VERSION,
+  plugin.json and marketplace.json together.
+
+rules:
+  specs:
+    - Describe script behavior (inputs, outputs, errors, safety). Don't restate SKILL.md's
+      presentation instructions.
+    - When a change alters a rule that SKILL.md also tells Claude, update SKILL.md in the same change.
+  tasks:
+    - Include a version bump task (scripts, plugin.json, marketplace.json) for user-visible changes.

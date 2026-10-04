@@ -4,11 +4,7 @@
 Talks to the server over its normal HTTP API using a token. Uses only the Python
 standard library. Prints one JSON document to stdout; errors go to stderr.
 
-Safety rules enforced here (see SECURITY.md):
-  * GET requests only, and only to the paths in ALLOWED_PATHS.
-  * Redirects are refused, so the token can never be forwarded to another host.
-  * The token is sent as a header (never in a URL) and is never printed.
-  * A config file that other users can read is refused.
+Safety rules: see openspec/specs/security/spec.md in the Cinemetric repository.
 """
 
 import argparse
@@ -24,7 +20,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.3.0"
+VERSION = "0.3.3"
 PAGE_SIZE = 500
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120

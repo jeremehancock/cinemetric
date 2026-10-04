@@ -36,11 +36,12 @@ import urllib.parse
 import urllib.request
 import uuid
 
-VERSION = "0.3.0"
+VERSION = "0.3.3"
 PRODUCT = "Cinemetric"
 TIMEOUT_SECONDS = 15
 FINISH_WAIT_SECONDS = 60
 FORM_LIFETIME_SECONDS = 600
+MAX_TITLE_LENGTH = 120
 
 # The only Tautulli API commands this script may run.
 TAUTULLI_COMMANDS = {"get_apikey", "get_tautulli_info"}
@@ -121,6 +122,14 @@ def read_private(path):
     return data
 
 
+# ---------------------------------------------------------------- text
+
+def clean(text):
+    """Titles are untrusted data: strip control characters and cap the length."""
+    text = re.sub(r"[\x00-\x1f\x7f]", " ", str(text or "")).strip()
+    return text[:MAX_TITLE_LENGTH]
+
+
 # ---------------------------------------------------------------- http
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -171,7 +180,7 @@ def test_server(uri, token, client_id):
     )
     try:
         with _opener().open(request, timeout=5) as resp:
-            return json.loads(resp.read()).get("MediaContainer", {}).get("friendlyName") or "?"
+            return clean(json.loads(resp.read()).get("MediaContainer", {}).get("friendlyName")) or "?"
     except Exception:
         return None
 
@@ -226,7 +235,7 @@ def cmd_finish(args):
             key=lambda c: (not c.get("local"), c.get("protocol") != "https"),
         )
         servers.append({
-            "name": res.get("name"),
+            "name": clean(res.get("name")),
             "owned": bool(res.get("owned")),
             "token": res.get("accessToken") or token,
             "connections": [c["uri"] for c in connections if c.get("uri") and not c.get("relay")],
@@ -344,7 +353,7 @@ def test_tautulli(url, api_key, verify_tls=True):
         response = {}
     if response.get("result") != "success":
         raise SetupError("Tautulli rejected the API key. Copy it again from Tautulli: Settings → Web Interface → API.")
-    return (response.get("data") or {}).get("tautulli_version") or "?"
+    return clean((response.get("data") or {}).get("tautulli_version")) or "?"
 
 
 def save_tautulli(url, api_key, verify_tls=True):

@@ -5,12 +5,7 @@ Uses Tautulli when it is configured (full history, watch time, platforms) and fa
 to Plex's own watch history otherwise (play counts only). Uses only the Python standard
 library. Prints one JSON document to stdout; errors go to stderr.
 
-Safety rules enforced here (see SECURITY.md):
-  * GET requests only: Plex paths in ALLOWED_PATHS, Tautulli commands in TAUTULLI_COMMANDS.
-  * Redirects are refused, so credentials can never be forwarded to another host.
-  * The Plex token is sent as a header. Tautulli only accepts its API key in the URL, so the
-    key is scrubbed from every error message. Neither is ever printed.
-  * A config file that other users can read is refused.
+Safety rules: see openspec/specs/security/spec.md in the Cinemetric repository.
 """
 
 import argparse
@@ -26,7 +21,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.3.0"
+VERSION = "0.3.3"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 PLEX_PAGE_SIZE = 200
@@ -82,20 +77,35 @@ def read_config_file():
 
 
 def load_config():
-    """Return {"plex": (url, token, verify) or None, "tautulli": (url, key, verify) or None}.
+    """Return {"plex": (url, token, verify) or None, "tautulli": (url, key, verify) or None,
+    "tautulli_problem": reason or None}.
 
-    Environment variables win over the config file.
+    Environment variables win over the config file, and the file is only read when the
+    environment leaves something missing. If Plex is fully set up from the environment, a
+    problem with the file only makes Tautulli unavailable (with the reason) instead of failing.
     """
-    data = read_config_file()
-    plex_url = os.environ.get("PLEX_URL") or data.get("plex_url")
-    plex_token = os.environ.get("PLEX_TOKEN") or data.get("plex_token")
-    taut_url = os.environ.get("TAUTULLI_URL") or data.get("tautulli_url")
-    taut_key = os.environ.get("TAUTULLI_API_KEY") or data.get("tautulli_api_key")
+    env = os.environ.get
+    plex_from_env = bool(env("PLEX_URL") and env("PLEX_TOKEN"))
+    tautulli_from_env = bool(env("TAUTULLI_URL") and env("TAUTULLI_API_KEY"))
+    data, problem = {}, None
+    if not (plex_from_env and tautulli_from_env):
+        try:
+            data = read_config_file()
+        except ReportError as exc:
+            if not plex_from_env:
+                raise
+            problem = str(exc)
 
-    config = {"plex": None, "tautulli": None}
+    plex_url = env("PLEX_URL") or data.get("plex_url")
+    plex_token = env("PLEX_TOKEN") or data.get("plex_token")
+    taut_url = env("TAUTULLI_URL") or data.get("tautulli_url")
+    taut_key = env("TAUTULLI_API_KEY") or data.get("tautulli_api_key")
+
+    config = {"plex": None, "tautulli": None, "tautulli_problem": problem}
     if plex_url and plex_token:
-        config["plex"] = (validate_url(plex_url, "plex_url"), str(plex_token).strip(),
-                          data.get("verify_tls", True) is not False)
+        # Plex from the environment keeps certificate checks on, like the other report scripts.
+        verify = True if plex_from_env else data.get("verify_tls", True) is not False
+        config["plex"] = (validate_url(plex_url, "plex_url"), str(plex_token).strip(), verify)
     if taut_url and taut_key:
         config["tautulli"] = (validate_url(taut_url, "tautulli_url"), str(taut_key).strip(),
                               data.get("tautulli_verify_tls", True) is not False)
@@ -451,6 +461,10 @@ def build_report(config, args):
                 if args.source == "tautulli":
                     raise
                 fallback_reason = f"Tautulli is configured but failed: {exc}"
+        elif config["tautulli_problem"]:
+            fallback_reason = f"Tautulli settings couldn't be read: {config['tautulli_problem']}"
+            if args.source == "tautulli":
+                raise ReportError(fallback_reason)
         elif args.source == "tautulli":
             raise ReportError("TAUTULLI_NOT_CONFIGURED: no Tautulli address and API key are set up.")
         else:
@@ -496,6 +510,9 @@ def check(config):
         except ReportError as exc:
             result["tautulli"] = {"ok": False, "error": str(exc)}
             result["ok"] = False
+    elif config["tautulli_problem"]:
+        result["tautulli"] = {"ok": False, "error": config["tautulli_problem"]}
+        result["ok"] = False
     return result
 
 

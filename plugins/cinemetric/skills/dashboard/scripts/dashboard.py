@@ -2,8 +2,8 @@
 """Cinemetric dashboard: one HTML page combining the library report, server health and watch activity.
 
 It runs the other Cinemetric report scripts (so it has exactly their read-only behaviour and
-safety rules), then writes a self-contained HTML page: no scripts, no external requests except
-optional web fonts. Uses only the Python standard library.
+safety rules), then writes a self-contained HTML page: no scripts and no external requests (a
+Content Security Policy blocks them). Uses only the Python standard library.
 
   dashboard.py [--output PATH] [--hide-names]     build the dashboard
   dashboard.py schedule install|status|remove [--every hourly|6h|daily] [--hide-names]
@@ -21,7 +21,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.3.0"
+VERSION = "0.3.3"
 SCRIPT_TIMEOUT_SECONDS = 1800
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -444,7 +444,10 @@ CSS = """
   --line: #dde1e5; --grid: #e6e9ec; --axis: #c2c8ce; --accent: #2a78d6; --accent-soft: #cde2fb;
   --good: #0a7d0a; --good-bg: #e3f3e3; --warn: #8a5a00; --warn-bg: #fff1d1; --crit: #b52828; --crit-bg: #fbe3e3;
   --q-4k: #184f95; --q-1080: #2a78d6; --q-720: #6da7ec; --q-sd: #b7d3f6; --q-other: #c2c8ce;
-  --font-display: "Big Shoulders Display", "Arial Narrow", "Roboto Condensed", sans-serif;
+  /* Installed fonts only (nothing is downloaded). Narrow faces: Office/Windows, Android, macOS,
+     Windows 10+, then common Linux ones. */
+  --font-display: "Big Shoulders Display", "Arial Narrow", "Roboto Condensed", "Avenir Next Condensed",
+    Bahnschrift, "Nimbus Sans Narrow", "Liberation Sans Narrow", "DejaVu Sans Condensed", sans-serif;
   --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
@@ -462,6 +465,7 @@ CSS = """
   color-scheme: dark; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body); }
+.masthead h1, .tile-value, .card-head h2 { font-stretch: condensed; }
 .page { max-width: 72rem; margin: 0 auto; padding-inline: 16px; padding-block: 20px 40px;
   display: grid; gap: 16px; }
 h1, h2, h3 { margin: 0; text-wrap: balance; }
@@ -561,8 +565,9 @@ tbody th { font-weight: 600; white-space: nowrap; }
   .recent li { grid-template-columns: 1fr; gap: 0; } }
 """
 
-FONTS = ('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800'
-         '&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">')
+# The page loads nothing from outside itself; the browser enforces this. Text uses installed fonts.
+CSP = ('<meta http-equiv="Content-Security-Policy" '
+       'content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data:">')
 
 
 def render(data, errors, hide_names):
@@ -608,9 +613,9 @@ def write_page(path, content):
 
 
 def full_page(title, body):
-    return (f'<!doctype html>\n<html lang="en"><head><meta charset="utf-8">\n'
+    return (f'<!doctype html>\n<html lang="en"><head>{CSP}\n<meta charset="utf-8">\n'
             f'<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
-            f'{title}\n{FONTS}\n<style>{CSS}</style>\n</head><body>\n{body}\n</body></html>\n')
+            f'{title}\n<style>{CSS}</style>\n</head><body>\n{body}\n</body></html>\n')
 
 
 # ---------------------------------------------------------------- saved choices

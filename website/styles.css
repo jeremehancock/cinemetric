@@ -251,23 +251,10 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
   padding-bottom: 6px;
 }
 .mock > :not(.mock-bar) { margin-left: 20px; margin-right: 20px; }
-.mock figcaption, .mock .caption { color: var(--faint); font-size: .78rem; margin-top: 14px; margin-bottom: 10px; }
+.mock figcaption { color: var(--faint); font-size: .78rem; margin-top: 14px; margin-bottom: 10px; }
 
-/* ---------- Demo tabs ---------- */
+/* ---------- Demo panels ---------- */
 .demo .mock-bar { gap: 7px; padding: 8px 10px 8px 14px; }
-.tabs { display: none; margin-left: auto; gap: 4px; background: rgba(0, 0, 0, .25); padding: 3px; border-radius: 9px; }
-.tabs-ready .tabs { display: flex; }
-.tabs [role="tab"] {
-  font: inherit; font-size: .8rem; font-weight: 700; color: var(--muted); background: none; border: 0;
-  padding: 6px 12px; border-radius: 7px; cursor: pointer; transition: color .2s, background .2s;
-}
-.tabs [role="tab"]:hover { color: var(--text); }
-.tabs [role="tab"][aria-selected="true"] { color: var(--accent-ink); background: var(--accent); }
-.tabpanel:focus-visible { outline-offset: -3px; }
-.panel-label { color: var(--accent-hi); font-size: .74rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; margin: 16px 0 0; }
-.tabs-ready .panel-label { display: none; }
-.tabpanel + .tabpanel { border-top: 1px dashed var(--line-2); }
-.tabs-ready .tabpanel + .tabpanel { border-top: 0; }
 .term {
   margin: 14px 0 0; padding: 0; max-height: 430px; overflow: auto;
   font: .8rem/1.6 var(--mono); color: #d7dbe0; white-space: pre; tab-size: 2;
@@ -292,14 +279,6 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
   background: #101113; padding: 16px;
 }
 .shot img { width: 100%; height: auto; }
-
-/* Both tabs sit in the same grid cell, so the panel is always as tall as the taller tab and nothing
-   below it moves when switching. The inactive tab is invisible (and inert), not removed. */
-.tabs-ready .tab-stack { display: grid; }
-.tabs-ready .tab-stack > .tabpanel { grid-area: 1 / 1; }
-.tabs-ready .tab-stack > .tabpanel { display: flex; flex-direction: column; }
-.tabs-ready .tab-stack .caption { margin-top: auto; padding-top: 14px; }
-.tabs-ready .tab-stack > .tabpanel.is-off { visibility: hidden; }
 
 /* ---------- Privacy cards ---------- */
 .privacy { background: linear-gradient(180deg, transparent, var(--bg-2) 25%, var(--bg-2) 75%, transparent); }
@@ -413,7 +392,6 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
   .step-num { width: 40px; height: 40px; font-size: 1.1rem; border-radius: 12px; }
   .mock > :not(.mock-bar) { margin-left: 14px; margin-right: 14px; }
   .demo .mock-bar > span { display: none; }
-  .tabs { margin-left: 0; }
   .term { font-size: .72rem; white-space: pre-wrap; overflow-wrap: anywhere; }
   .footer-inner { flex-direction: column; align-items: flex-start; }
 }

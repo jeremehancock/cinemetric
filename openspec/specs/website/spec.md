@@ -32,7 +32,7 @@ fonts from other servers; everything it needs is in `website/`.
 
 ### Requirement: Works without JavaScript
 All content SHALL be present in the HTML. JavaScript SHALL only add enhancements (animations, copy
-buttons, header effects, tabs). If scripts are turned off or fail, every section and command SHALL
+buttons, header effects). If scripts are turned off or fail, every section and command SHALL
 still be visible and readable.
 
 #### Scenario: Scripts disabled
@@ -46,8 +46,8 @@ The site SHALL describe each of the plugin's skills: `setup`, `library-report`, 
 least one example of what to ask Claude. Each skill SHALL have a demo panel showing what the user
 really gets, and nothing else: for `setup`, `library-report`, `server-health` and `watch-activity`, a
 Claude Code terminal conversation that follows that skill's `SKILL.md` presentation order; for
-`dashboard`, a screenshot of the real dashboard page built by the dashboard script, with the
-conversation as a second tab. The site SHALL NOT show designed graphics as if they were a skill's
+`dashboard`, only a screenshot of the real dashboard page built by the dashboard script, with no
+terminal conversation and no tabs. The site SHALL NOT show designed graphics as if they were a skill's
 output. Demo data (names, titles, numbers) SHALL be made up, never real server data.
 
 #### Scenario: A visitor reads the features
@@ -55,15 +55,10 @@ output. Demo data (names, titles, numbers) SHALL be made up, never real server d
 - **THEN** they see all five skills, each with a description, an example request and a demo panel in
   the skill's real output format
 
-#### Scenario: Switching dashboard demo tabs
-- **WHEN** a visitor switches between "In your browser" and "In your terminal"
-- **THEN** the panel keeps the same size, nothing below it moves, and only the active tab's caption
-  is shown
-
-#### Scenario: Dashboard demo tabs without JavaScript
-- **WHEN** scripts are off
-- **THEN** the dashboard screenshot and the conversation are both shown one after the other, each with
-  its own label
+#### Scenario: Dashboard demo
+- **WHEN** a visitor reaches the dashboard section, with or without JavaScript
+- **THEN** the demo panel shows the dashboard screenshot and its caption, and there is no tab bar or
+  terminal conversation
 
 ### Requirement: Shows how to set up
 The site SHALL include a setup guide covering: requirements (Claude Code, Python 3.8+, network access to

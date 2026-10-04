@@ -1,0 +1,60 @@
+{
+ "/": {
+  "MediaContainer": {
+   "friendlyName": "Test Server",
+   "version": "1.40.0.0000-test"
+  }
+ },
+ "/accounts": {
+  "MediaContainer": {
+   "Account": [
+    {
+     "id": 1,
+     "name": "alex-test"
+    },
+    {
+     "id": 2,
+     "name": ""
+    }
+   ]
+  }
+ },
+ "history": [
+  {
+   "type": "movie",
+   "title": "Arrival",
+   "year": 2016,
+   "accountID": 1,
+   "viewedDaysAgo": 0.1
+  },
+  {
+   "type": "episode",
+   "grandparentTitle": "The Show",
+   "parentIndex": 1,
+   "index": 2,
+   "accountID": 1,
+   "viewedDaysAgo": 1
+  },
+  {
+   "type": "episode",
+   "grandparentTitle": "The Show",
+   "parentIndex": 1,
+   "index": 1,
+   "accountID": 2,
+   "viewedDaysAgo": 2
+  },
+  {
+   "type": "track",
+   "grandparentTitle": "Test Band",
+   "title": "Test Song",
+   "accountID": 99,
+   "viewedDaysAgo": 3
+  },
+  {
+   "type": "movie",
+   "title": "Old Film",
+   "accountID": 1,
+   "viewedDaysAgo": 30
+  }
+ ]
+}

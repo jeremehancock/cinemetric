@@ -1,0 +1,165 @@
+{
+ "get_tautulli_info": {
+  "tautulli_version": "v2.14.0-test"
+ },
+ "get_home_stats": [
+  {
+   "stat_id": "top_movies",
+   "rows": [
+    {
+     "title": "Arrival",
+     "year": 2016,
+     "total_plays": 5,
+     "total_duration": 36000
+    }
+   ]
+  },
+  {
+   "stat_id": "top_tv",
+   "rows": [
+    {
+     "grandparent_title": "The Show",
+     "title": "Pilot",
+     "total_plays": 8,
+     "total_duration": 14400
+    }
+   ]
+  },
+  {
+   "stat_id": "top_music",
+   "rows": []
+  },
+  {
+   "stat_id": "top_platforms",
+   "rows": [
+    {
+     "platform": "Roku",
+     "total_plays": 10,
+     "total_duration": 40000
+    }
+   ]
+  },
+  {
+   "stat_id": "most_concurrent",
+   "rows": [
+    {
+     "title": "Concurrent Transcodes",
+     "count": 1,
+     "started": 1699990000
+    },
+    {
+     "title": "Concurrent Streams",
+     "count": 3,
+     "started": 1700000000
+    }
+   ]
+  }
+ ],
+ "get_home_stats:top_users": {
+  "stat_id": "top_users",
+  "rows": [
+   {
+    "friendly_name": "alex-test",
+    "user": "alex-login",
+    "total_plays": 9,
+    "total_duration": 30000
+   },
+   {
+    "user": "sam-test",
+    "total_plays": 4,
+    "total_duration": 20400
+   }
+  ]
+ },
+ "get_plays_by_date:plays": {
+  "categories": [
+   "2026-09-01",
+   "2026-09-02",
+   "2026-09-03",
+   "2026-09-04"
+  ],
+  "series": [
+   {
+    "name": "Movies",
+    "data": [
+     1,
+     0,
+     2,
+     2
+    ]
+   },
+   {
+    "name": "TV",
+    "data": [
+     2,
+     3,
+     1,
+     2
+    ]
+   },
+   {
+    "name": "Total",
+    "data": [
+     3,
+     3,
+     3,
+     4
+    ]
+   }
+  ]
+ },
+ "get_plays_by_date:duration": {
+  "categories": [
+   "2026-09-01",
+   "2026-09-02",
+   "2026-09-03",
+   "2026-09-04"
+  ],
+  "series": [
+   {
+    "name": "Movies",
+    "data": [
+     3600,
+     0,
+     7200,
+     7200
+    ]
+   },
+   {
+    "name": "TV",
+    "data": [
+     3600,
+     5400,
+     1800,
+     3600
+    ]
+   },
+   {
+    "name": "Total",
+    "data": [
+     7200,
+     5400,
+     9000,
+     10800
+    ]
+   }
+  ]
+ },
+ "get_history": {
+  "recordsFiltered": 1,
+  "data": [
+   {
+    "date": 1700000000,
+    "friendly_name": "alex-test",
+    "full_title": "Arrival",
+    "media_type": "movie",
+    "platform": "Roku",
+    "play_duration": 6000,
+    "percent_complete": 95,
+    "transcode_decision": "copy",
+    "live": 0,
+    "ip_address": "192.0.2.20"
+   }
+  ]
+ }
+}

@@ -36,7 +36,7 @@ import urllib.parse
 import urllib.request
 import uuid
 
-VERSION = "0.10.0"
+VERSION = "0.10.1"
 PRODUCT = "Cinemetric"
 TIMEOUT_SECONDS = 15
 FINISH_WAIT_SECONDS = 60
@@ -229,6 +229,11 @@ def cmd_finish(args):
     for res in resources:
         if "server" not in str(res.get("provides", "")):
             continue
+        owned = bool(res.get("owned"))
+        # The account token may only go to the user's own servers, never to someone else's.
+        server_token = res.get("accessToken") or (token if owned else None)
+        if not server_token:
+            continue
         connections = sorted(
             res.get("connections", []) or [],
             # Prefer local, then https, and never relays.
@@ -236,8 +241,8 @@ def cmd_finish(args):
         )
         servers.append({
             "name": clean(res.get("name")),
-            "owned": bool(res.get("owned")),
-            "token": res.get("accessToken") or token,
+            "owned": owned,
+            "token": server_token,
             "connections": [c["uri"] for c in connections if c.get("uri") and not c.get("relay")],
         })
     if not servers:

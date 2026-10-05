@@ -1,0 +1,35 @@
+{
+ "_note": "Made-up data. addedDaysAgo and viewedDaysAgo become Plex's addedAt and viewedAt, and gb becomes a part size in bytes, when the tests load this file.",
+ "/": {"MediaContainer": {"friendlyName": "Test Server", "version": "1.40.0.0000"}},
+ "/library/sections": {"MediaContainer": {"Directory": [
+  {"key": "1", "type": "movie", "title": "Movies"},
+  {"key": "2", "type": "show", "title": "TV Shows"},
+  {"key": "3", "type": "artist", "title": "Music"}
+ ]}},
+ "movies": [
+  {"ratingKey": "101", "title": "Old Unplayed", "year": 2010, "addedDaysAgo": 730, "Media": [{"Part": [{"gb": 8}]}]},
+  {"ratingKey": "102", "title": "Finished Recently", "year": 2011, "addedDaysAgo": 900, "Media": [{"Part": [{"gb": 10}]}]},
+  {"ratingKey": "103", "title": "Finished Long Ago", "year": 2012, "addedDaysAgo": 1100, "Media": [{"Part": [{"gb": 5}]}]},
+  {"ratingKey": "104", "title": "Added Recently", "year": 2024, "addedDaysAgo": 60, "Media": [{"Part": [{"gb": 4}]}]},
+  {"ratingKey": "105", "title": "Two Versions", "year": 2013, "addedDaysAgo": 800, "Media": [{"Part": [{"gb": 60}]}, {"Part": [{"gb": 12}]}]},
+  {"ratingKey": "106", "title": "All Missing", "year": 2014, "addedDaysAgo": 800, "Media": [{"deletedAt": 1700000000, "Part": [{"gb": 9}]}]},
+  {"ratingKey": "107", "title": "No Added Date", "year": 2015, "Media": [{"Part": [{"gb": 3}]}]},
+  {"ratingKey": "108", "title": "Half Watched", "year": 2016, "addedDaysAgo": 500, "Media": [{"Part": [{"gb": 2}]}]},
+  {"ratingKey": "110", "title": "Optimized", "year": 2017, "addedDaysAgo": 700, "Media": [{"Part": [{"gb": 6}]}, {"proxyType": 42, "Part": [{"gb": 2}]}]}
+ ],
+ "episodes": [
+  {"ratingKey": "2011", "grandparentRatingKey": "201", "grandparentTitle": "Old Show", "addedDaysAgo": 700, "Media": [{"Part": [{"gb": 1.5}]}]},
+  {"ratingKey": "2012", "grandparentRatingKey": "201", "grandparentTitle": "Old Show", "addedDaysAgo": 690, "Media": [{"Part": [{"gb": 1.5}]}]},
+  {"ratingKey": "2021", "grandparentRatingKey": "202", "grandparentTitle": "Show With New Episode", "addedDaysAgo": 730, "Media": [{"Part": [{"gb": 2}]}]},
+  {"ratingKey": "2022", "grandparentRatingKey": "202", "grandparentTitle": "Show With New Episode", "addedDaysAgo": 7, "Media": [{"Part": [{"gb": 2}]}]},
+  {"ratingKey": "2031", "grandparentRatingKey": "203", "grandparentTitle": "One Episode Finished", "addedDaysAgo": 800, "Media": [{"Part": [{"gb": 1}]}]},
+  {"ratingKey": "2032", "grandparentRatingKey": "203", "grandparentTitle": "One Episode Finished", "addedDaysAgo": 800, "Media": [{"Part": [{"gb": 1}]}]},
+  {"ratingKey": "2033", "grandparentRatingKey": "203", "grandparentTitle": "One Episode Finished", "addedDaysAgo": 800, "Media": [{"Part": [{"gb": 1}]}]}
+ ],
+ "history": [
+  {"type": "movie", "ratingKey": "102", "accountID": 2, "viewedDaysAgo": 30},
+  {"type": "episode", "ratingKey": "2032", "grandparentKey": "/library/metadata/203", "accountID": 3, "viewedDaysAgo": 31},
+  {"type": "track", "ratingKey": "9001", "accountID": 1, "viewedDaysAgo": 40},
+  {"type": "movie", "ratingKey": "103", "accountID": 1, "viewedDaysAgo": 365}
+ ]
+}

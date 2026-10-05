@@ -69,6 +69,8 @@ the specs leave open. At least the following SHALL be covered:
 - `setup`: Tautulli address cleaning and private file permissions.
 - `users-and-shares`: the plex.tv address rules, the owner-only error, dropping emails and access
   tokens, the people and libraries in the report, and the "things worth a look" flags.
+- `unwatched`: choosing a source, which plays count (finished only, every account), which titles are
+  listed (cutoff, show added dates), sizes, and the report totals.
 
 #### Scenario: A shared helper is fixed in one script only
 - **WHEN** a fix to `validate_url` or `clean` is applied to one script but not the others
@@ -83,6 +85,10 @@ the specs leave open. At least the following SHALL be covered:
 #### Scenario: A change leaks a friend's email
 - **WHEN** a change to `users_and_shares.py` lets an email address from a plex.tv fixture into the
   output
+- **THEN** a test fails
+
+#### Scenario: A partly watched title counts as played
+- **WHEN** a change to `unwatched.py` treats a Tautulli play with `watched_status` 0.5 as finished
 - **THEN** a test fails
 
 ### Requirement: Tests run on GitHub

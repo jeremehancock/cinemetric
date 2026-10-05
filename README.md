@@ -30,7 +30,8 @@ CSS and JavaScript with no build step, ready for any static host.
 | `server-health` | Version and updates, remote access, CPU and memory, who's streaming now (direct play vs transcode, bandwidth), streaming settings (hardware transcoding, remote limits), running tasks, library scans, scheduled maintenance |
 | `watch-activity` | Who's watching right now, plays and watch time, most watched movies, shows and music, most active users and devices, daily trends, recent plays, the most streams at once, and titles started but never finished. Works for everyone or one person. Uses Tautulli if you have it, otherwise Plex's own history |
 | `users-and-shares` | Who your server is shared with (friends, Plex Home, managed users, pending invites), which libraries each person can see, who can download, and when each person last played something. Reads the share list from your plex.tv account; only the server owner can use it |
-| `dashboard` | One page with library, server, watch and sharing stats and charts. Saved on your computer, as a private claude.ai page you can open anywhere, or both; each refresh updates the same file and link |
+| `unwatched` | Movies and shows nobody has finished in a while (added more than 6 months ago, no finished play by anyone since), largest first, with how much space they use and when each was last finished. Facts only: it never suggests deleting anything. Uses Tautulli if you have it, otherwise Plex's own history |
+| `dashboard` | One page with library, server, watch, unwatched and sharing stats and charts. Saved on your computer, as a private claude.ai page you can open anywhere, or both; each refresh updates the same file and link |
 
 More skills are planned, and ideas are welcome; see [Roadmap](#roadmap).
 
@@ -62,7 +63,8 @@ where you can revoke it at any time.
 
 Then try: *"Give me a Plex library report"*, *"What's been added to my Movies library recently?"*,
 *"How's my Plex server doing?"*, *"What's been watched on Plex this month?"*,
-*"Who have I shared my Plex server with?"* or *"Build my Plex dashboard"*
+*"Who have I shared my Plex server with?"*, *"What on my Plex server has nobody watched in months?"*
+or *"Build my Plex dashboard"*
 
 ### Optional: add Tautulli
 
@@ -126,9 +128,6 @@ each idea below might be built are in [openspec/ideas.md](openspec/ideas.md).
 
 New skills:
 
-- [ ] **`unwatched`**: titles nobody has played, how long ago each was added, and how much space they
-      use, so you can see where your storage goes. Facts only: it never suggests deleting anything.
-      Most accurate with Tautulli, since Plex on its own only knows what your own account has watched.
 - [ ] **`playback-check`**: files likely to transcode on common devices (image-based subtitles, TrueHD
       or DTS audio, bitrates above your remote streaming limit), plus which devices transcode most when
       Tautulli is set up

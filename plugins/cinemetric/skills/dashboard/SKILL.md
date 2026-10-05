@@ -1,6 +1,6 @@
 ---
 name: dashboard
-description: "Build or refresh the Plex dashboard: one HTML page combining library stats, server health, watch activity and who the server is shared with, with charts. Saved on this computer, as a private claude.ai page, or both, and updated in place each time. Read-only. Use when the user asks for a Plex dashboard or overview page, to update or refresh it, or to change where it's saved or published."
+description: "Build or refresh the Plex dashboard: one HTML page combining library stats, server health, watch activity, titles nobody has finished in a while, and who the server is shared with, with charts. Saved on this computer, as a private claude.ai page, or both, and updated in place each time. Read-only. Use when the user asks for a Plex dashboard or overview page, to update or refresh it, or to change where it's saved or published."
 argument-hint: "[--hide-names | --show-names]"
 allowed-tools: Read, Artifact, Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/dashboard.py *), Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/dashboard.py), Bash(python ${CLAUDE_SKILL_DIR}/scripts/dashboard.py *), Bash(python ${CLAUDE_SKILL_DIR}/scripts/dashboard.py)
 ---
@@ -41,7 +41,10 @@ Script: `python3 ${CLAUDE_SKILL_DIR}/scripts/dashboard.py` (prints JSON; errors 
 4. **Summarize** in a few lines: overall status, anything under "Needs a look", one or two highlights,
    and where the dashboard is (path and/or link). Items in the Sharing section (old invites, inactive
    people, "all libraries", downloads) can get one line as things to check; they're often deliberate,
-   so don't present them as problems, and they don't affect the overall status.
+   so don't present them as problems, and they don't affect the overall status. The Unwatched section
+   (titles added more than 6 months ago that nobody has finished in that time) can get one line of
+   facts, such as how many titles and how much space. Never suggest deleting anything; it doesn't
+   affect the overall status either.
 
 ## Publishing online
 
@@ -81,11 +84,14 @@ what the reason says.
 
 - **`NOT_CONFIGURED`**: Cinemetric isn't connected yet. Use the `cinemetric:setup` skill first.
 - A missing section means one report failed; explain its reason in plain words (same errors as the
-  `library-report`, `server-health`, `watch-activity` and `users-and-shares` skills). The rest of the
+  `library-report`, `server-health`, `watch-activity`, `users-and-shares` and `unwatched` skills). The
+  rest of the
   dashboard still works.
 - **`sections_missing.sharing` starting with `OWNER_ONLY`**: they're connected to a server someone
   shared with them. Only the owner can see who a server is shared with, so that section will always be
   empty for them. Nothing is broken.
+- **`sections_missing.unwatched` starting with `OWNER_ONLY`**: same cause. Plex only shows everyone's
+  plays to the owner; with Tautulli set up, that section works too.
 
 Never work around an error by editing scripts, reading the config file, or contacting the server
 another way.

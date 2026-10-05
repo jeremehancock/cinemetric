@@ -202,17 +202,19 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
 
 /* ---------- Shelf ---------- */
 .shelf-section { padding-top: 40px; }
+/* Every card is the same size; a short last row is centered under the full ones. */
 .shelf {
+  --per-row: 4; --gap: 16px;
   list-style: none; margin: 0; padding: 0;
-  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap);
 }
+.shelf li { flex: 0 0 calc((100% - (var(--per-row) - 1) * var(--gap)) / var(--per-row)); }
 .poster {
-  position: relative; display: flex; flex-direction: column; justify-content: flex-end;
-  aspect-ratio: 2 / 3; padding: 16px 14px; border-radius: var(--radius); overflow: hidden;
-  container-type: inline-size;
+  position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px;
+  height: 100%; min-height: 210px; padding: 22px 20px; border-radius: var(--radius); overflow: hidden;
   text-decoration: none; color: var(--text);
   background:
-    radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--a) 45%, transparent), transparent 65%),
+    radial-gradient(120% 90% at 20% 0%, color-mix(in srgb, var(--a) 45%, transparent), transparent 65%),
     linear-gradient(170deg, var(--b), #0d0e10 85%);
   background-color: var(--b);
   box-shadow: 0 20px 40px -24px rgba(0, 0, 0, .9), inset 0 0 0 1px rgba(255, 255, 255, .07);
@@ -222,18 +224,18 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
   content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
   box-shadow: inset 0 0 0 0 var(--accent); transition: box-shadow .25s;
 }
-.poster:hover, .poster:focus-visible { transform: translateY(-8px) scale(1.02); box-shadow: 0 34px 60px -28px rgba(0, 0, 0, 1); color: var(--text); }
+.poster:hover, .poster:focus-visible { transform: translateY(-6px); box-shadow: 0 34px 60px -28px rgba(0, 0, 0, 1); color: var(--text); }
 .poster:hover::after, .poster:focus-visible::after { box-shadow: inset 0 0 0 3px var(--accent); }
 .poster:focus-visible { outline: none; }
-.poster-art { position: absolute; top: 22%; left: 50%; transform: translateX(-50%); width: 46%; color: var(--a); filter: drop-shadow(0 8px 24px color-mix(in srgb, var(--a) 60%, transparent)); transition: transform .4s var(--ease); }
-.poster:hover .poster-art { transform: translateX(-50%) scale(1.08); }
-.poster-art svg { width: 100%; height: auto; }
-.poster-title {
-  font-family: var(--mono); font-weight: 700; white-space: nowrap;
-  /* Shrink with the poster so the longest name ("users-and-shares", 16 characters) fits on one line. */
-  font-size: .8rem; font-size: clamp(.68rem, 10cqi, .98rem);
+.poster-art {
+  position: absolute; top: 22px; left: 20px; width: 64px; color: var(--a);
+  filter: drop-shadow(0 8px 24px color-mix(in srgb, var(--a) 60%, transparent));
+  transform-origin: left top; transition: transform .4s var(--ease);
 }
-.poster-sub { color: var(--muted); font-size: .88rem; }
+.poster:hover .poster-art { transform: scale(1.08); }
+.poster-art svg { display: block; width: 100%; height: auto; }
+.poster-title { font-family: var(--mono); font-weight: 700; font-size: .98rem; white-space: nowrap; }
+.poster-sub { color: var(--muted); font-size: .95rem; }
 
 /* ---------- Feature rows ---------- */
 .feature { padding: clamp(56px, 8vw, 96px) 0; }
@@ -403,8 +405,8 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1000px) {
-  .shelf { grid-template-columns: repeat(6, minmax(170px, 1fr)); overflow-x: auto; scroll-snap-type: x mandatory; padding: 12px 4px 20px; margin: -12px -4px 0; scrollbar-width: thin; }
-  .shelf li { scroll-snap-align: start; }
+  .shelf { --per-row: 2; }
+  .poster { min-height: 180px; }
   .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 860px) {
@@ -439,6 +441,14 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
   .menu-js .nav a.current { box-shadow: inset 3px 0 0 var(--accent); border-radius: 2px 8px 8px 2px; }
   .hero { padding: 120px 0 70px; }
   .poster-row i { width: 110px; }
+  /* Phones: one row per skill, icon on the left. */
+  .shelf { --per-row: 1; --gap: 12px; }
+  .poster {
+    display: grid; grid-template-columns: 48px 1fr; grid-template-rows: auto auto;
+    column-gap: 16px; row-gap: 2px; align-content: center; min-height: 0; padding: 16px 18px;
+  }
+  .poster-art { position: static; grid-row: 1 / span 2; align-self: center; width: 48px; }
+  .poster-title, .poster-sub { grid-column: 2; }
   .cards { grid-template-columns: 1fr; }
   .step { grid-template-columns: 1fr; gap: 12px; padding: 20px; }
   .step-num { width: 40px; height: 40px; font-size: 1.1rem; border-radius: 12px; }

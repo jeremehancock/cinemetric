@@ -89,6 +89,11 @@ Present, in this order:
 5. **Observations**: two or three plain-language takeaways, e.g. "Most of your TV is H.264; converting
    to HEVC would save space" or "Your 4K movies make up 12% of titles but 45% of storage". Only say what
    the numbers support.
+6. **Follow-up**: end a full report (one covering at least one movie or TV library) with one short
+   offer, such as "Want to see which of these titles nobody has finished in the last 6 months?" If
+   they say yes, use the `cinemetric:unwatched` skill. Skip this when the user asked something narrow
+   (only duplicates, only recently added, and so on) or has already been shown unwatched titles in
+   this conversation.
 
 Keep it readable: plain English, no raw JSON, no file paths.
 
@@ -101,6 +106,8 @@ Keep it readable: plain English, no raw JSON, no file paths.
   this skill; if the user wants changes, tell them to make them in Plex itself. For duplicates, that
   means the title's "..." menu in Plex (where its versions are listed, and where a version can be
   deleted) or the Duplicates filter in a library's filter list.
+- For which titles nobody watches (titles that take up space and haven't been finished by anyone in
+  months), suggest the `cinemetric:unwatched` skill; this report doesn't look at watch history.
 - For upgrade candidates, only list them. Never search for, suggest sources for, download, or replace
   files.
 - Never display, echo, or ask for the Plex token.

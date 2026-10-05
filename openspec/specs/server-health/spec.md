@@ -5,9 +5,7 @@
 A read-only snapshot of how a Plex server is doing right now: version and updates, remote access, CPU
 and memory, live streams, background tasks, library scans and maintenance. Script:
 `skills/server-health/scripts/server_health.py`. How Claude presents it is in the skill's `SKILL.md`.
-
 ## Requirements
-
 ### Requirement: Plex paths used
 The script SHALL request only `/`, `/updater/status`, `/myplex/account`, `/statistics/resources`,
 `/status/sessions`, `/activities`, `/butler`, `/:/prefs` and `/library/sections`.
@@ -16,21 +14,58 @@ The script SHALL request only `/`, `/updater/status`, `/myplex/account`, `/stati
 - **WHEN** the script builds a report
 - **THEN** every request goes to one of those paths
 
-### Requirement: Only maintenance settings are kept
-From `/:/prefs` the script SHALL keep only the settings in `PREF_IDS` (maintenance window start and
-end hour, scan on folder change, scheduled scans and their interval) and discard everything else
-without printing it. The server's public address SHALL be left out of the remote access details.
+### Requirement: Only selected settings are kept
+The script SHALL request `/:/prefs` at most once per report and keep only the settings listed below,
+discarding everything else without printing it. A listed setting the server doesn't return SHALL be
+left out rather than guessed. The server's public address SHALL be left out of the remote access
+details.
+
+Kept in `background.maintenance_settings`:
+- `ButlerStartHour` and `ButlerEndHour` as `maintenance_start_hour` and `maintenance_end_hour`
+- `FSEventLibraryUpdatesEnabled` as `scan_on_folder_change`
+- `ScheduledLibraryUpdatesEnabled` as `scheduled_scans_enabled`
+- `ScheduledLibraryUpdateInterval` as `scheduled_scan_interval_seconds`
+- `autoEmptyTrash` as `empty_trash_after_scan`
+
+Kept in `server.streaming_settings`:
+- `HardwareAcceleratedCodecs` as `hardware_acceleration`
+- `HardwareAcceleratedEncoders` as `hardware_encoding`
+- `TranscoderCanOnlyRemuxVideo` as `video_transcoding_disabled`
+- `WanPerStreamMaxUploadRate` as `remote_stream_limit_kbps` (`0` means no limit)
+- `WanTotalMaxUploadRate` as `remote_total_upload_limit_kbps` (`0` means no limit)
+- `TranscoderTempDirectory` as `custom_transcoder_temp_folder`: `true` when it has a value, `false`
+  when empty. The folder path itself SHALL NOT appear in the report.
+
+On/off settings SHALL be booleans and hour, second and kbps settings SHALL be integers.
 
 #### Scenario: Reading server settings
 - **WHEN** `/:/prefs` returns all of the server's settings
-- **THEN** the report contains only the five maintenance settings
+- **THEN** `background.maintenance_settings` contains only the six maintenance settings,
+  `server.streaming_settings` contains only the six streaming settings, and no other setting's id or
+  value appears anywhere in the report
+
+#### Scenario: Custom transcoder folder
+- **WHEN** `TranscoderTempDirectory` is set to `/mnt/fast/transcode`
+- **THEN** `custom_transcoder_temp_folder` is `true` and `/mnt/fast/transcode` doesn't appear in the
+  report
+
+#### Scenario: Setting missing on this server
+- **WHEN** `/:/prefs` has no `HardwareAcceleratedCodecs` setting
+- **THEN** `server.streaming_settings` has no `hardware_acceleration` key and nothing about hardware
+  transcoding is flagged
+
+#### Scenario: One request for both parts
+- **WHEN** the script builds a report
+- **THEN** `/:/prefs` is requested once
 
 ### Requirement: Partial results instead of failure
-Only `/` is required. Every other part (update check, remote access, CPU and memory, live activity,
-running tasks, stuck task check, library scans, maintenance tasks, maintenance settings) SHALL be
-optional: if it fails, the part is `null` (or, for the stuck task check, each `progress_moved` is
-`null`) and listed in `unavailable` with a reason. A 401 or 403 on an optional part SHALL be reported
-as "only available to the server owner's account", since the token already worked for `/`.
+Only `/` is required. Every other part (update check, remote access, CPU and memory, streaming
+settings, live activity, running tasks, stuck task check, library scans, maintenance tasks,
+maintenance settings) SHALL be optional: if it fails, the part is `null` (or, for the stuck task
+check, each `progress_moved` is `null`) and listed in `unavailable` with a reason. A 401 or 403 on an
+optional part SHALL be reported as "only available to the server owner's account", since the token
+already worked for `/`. When `/:/prefs` fails, both streaming settings and maintenance settings SHALL
+be `null` and listed in `unavailable` with the same reason.
 
 #### Scenario: Connected to a shared server
 - **WHEN** the user isn't the server owner and `/updater/status` returns 403
@@ -42,6 +77,12 @@ as "only available to the server owner's account", since the token already worke
 - **THEN** `running_now` still lists the tasks from the first check, each `progress_moved` is `null`,
   nothing is flagged as `task_not_progressing`, and `unavailable` lists "stuck task check" with the
   reason
+
+#### Scenario: Settings unavailable
+- **WHEN** `/:/prefs` returns 403
+- **THEN** `server.streaming_settings` and `background.maintenance_settings` are `null`, `unavailable`
+  lists "streaming settings" and "maintenance settings" as only available to the server owner's
+  account, `/:/prefs` was requested once, and the rest of the report is present
 
 ### Requirement: Options
 The script SHALL accept `--stale-days N` (days without a library scan that count as overdue, default
@@ -85,9 +126,13 @@ The script SHALL flag facts for Claude to explain in `worth_a_look`, each with a
 - `high_cpu` (average host CPU ≥ 85%) and `high_memory` (average host memory ≥ 90%).
 - `task_not_progressing`: one or more running tasks have `progress_moved` set to `false`. The item
   lists each such task's title and progress, and `seconds_between_checks`.
+- `hardware_transcoding_off`: `hardware_acceleration` is `false`.
+- `video_transcoding_off`: `video_transcoding_disabled` is `true`.
+- `remote_stream_limit_low`: `remote_stream_limit_kbps` is above 0 and below 8000 (the lowest choice
+  Plex labels as 1080p). The item includes `limit_kbps`.
 
 When only folder-change scanning is on, an old last-scanned date SHALL NOT be flagged, because those
-small scans don't update it.
+small scans don't update it. A setting that is missing from `streaming_settings` SHALL NOT be flagged.
 
 #### Scenario: Only folder-change scanning
 - **WHEN** scheduled scans are off, scanning on folder change is on, and a library was last scanned a
@@ -98,6 +143,22 @@ small scans don't update it.
 - **WHEN** a library scan is at 40% in both checks, with the same detail text
 - **THEN** `worth_a_look` has one `task_not_progressing` item listing that scan at 40% and
   `seconds_between_checks` of 15
+
+#### Scenario: Hardware acceleration off
+- **WHEN** `HardwareAcceleratedCodecs` is off
+- **THEN** `worth_a_look` has a `hardware_transcoding_off` item
+
+#### Scenario: Video transcoding turned off
+- **WHEN** `TranscoderCanOnlyRemuxVideo` is on
+- **THEN** `worth_a_look` has a `video_transcoding_off` item
+
+#### Scenario: Low remote limit
+- **WHEN** `WanPerStreamMaxUploadRate` is 4000
+- **THEN** `worth_a_look` has a `remote_stream_limit_low` item with `limit_kbps` of 4000
+
+#### Scenario: 1080p remote limit or no limit
+- **WHEN** `WanPerStreamMaxUploadRate` is 8000, or is 0
+- **THEN** nothing about the remote limit is flagged
 
 ### Requirement: Checking whether running tasks are moving
 A task SHALL be watched if it has a progress value and its type doesn't start with

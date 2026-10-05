@@ -36,7 +36,7 @@ import urllib.parse
 import urllib.request
 import uuid
 
-VERSION = "0.6.0"
+VERSION = "0.7.0"
 PRODUCT = "Cinemetric"
 TIMEOUT_SECONDS = 15
 FINISH_WAIT_SECONDS = 60

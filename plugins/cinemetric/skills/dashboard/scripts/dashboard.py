@@ -25,14 +25,15 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.5.0"
+VERSION = "0.6.0"
 SCRIPT_TIMEOUT_SECONDS = 1800
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SKILLS_DIR = os.path.normpath(os.path.join(HERE, "..", ".."))
 SOURCES = {
     "library": ("library-report", "library_report.py", []),
-    "health": ("server-health", "server_health.py", []),
+    # The dashboard doesn't show the stuck task check, so it skips the wait.
+    "health": ("server-health", "server_health.py", ["--stuck-wait", "0"]),
     "watch": ("watch-activity", "watch_activity.py", ["--days", "30", "--top", "8", "--recent", "10"]),
 }
 

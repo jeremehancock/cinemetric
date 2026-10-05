@@ -1,47 +1,4 @@
-# server-health Specification
-
-## Purpose
-
-A read-only snapshot of how a Plex server is doing right now: version and updates, remote access, CPU
-and memory, live streams, background tasks, library scans and maintenance. Script:
-`skills/server-health/scripts/server_health.py`. How Claude presents it is in the skill's `SKILL.md`.
-
-## Requirements
-
-### Requirement: Plex paths used
-The script SHALL request only `/`, `/updater/status`, `/myplex/account`, `/statistics/resources`,
-`/status/sessions`, `/activities`, `/butler`, `/:/prefs` and `/library/sections`.
-
-#### Scenario: Building the report
-- **WHEN** the script builds a report
-- **THEN** every request goes to one of those paths
-
-### Requirement: Only maintenance settings are kept
-From `/:/prefs` the script SHALL keep only the settings in `PREF_IDS` (maintenance window start and
-end hour, scan on folder change, scheduled scans and their interval) and discard everything else
-without printing it. The server's public address SHALL be left out of the remote access details.
-
-#### Scenario: Reading server settings
-- **WHEN** `/:/prefs` returns all of the server's settings
-- **THEN** the report contains only the five maintenance settings
-
-### Requirement: Partial results instead of failure
-Only `/` is required. Every other part (update check, remote access, CPU and memory, live activity,
-running tasks, stuck task check, library scans, maintenance tasks, maintenance settings) SHALL be
-optional: if it fails, the part is `null` (or, for the stuck task check, each `progress_moved` is
-`null`) and listed in `unavailable` with a reason. A 401 or 403 on an optional part SHALL be reported
-as "only available to the server owner's account", since the token already worked for `/`.
-
-#### Scenario: Connected to a shared server
-- **WHEN** the user isn't the server owner and `/updater/status` returns 403
-- **THEN** `server.update` is `null` and `unavailable` lists "update check" as only available to the
-  server owner's account
-
-#### Scenario: Second task check fails
-- **WHEN** the first `/activities` request works but the second one fails
-- **THEN** `running_now` still lists the tasks from the first check, each `progress_moved` is `null`,
-  nothing is flagged as `task_not_progressing`, and `unavailable` lists "stuck task check" with the
-  reason
+## MODIFIED Requirements
 
 ### Requirement: Options
 The script SHALL accept `--stale-days N` (days without a library scan that count as overdue, default
@@ -61,16 +18,23 @@ time, default 15, limited to 0–300; `0` turns the stuck task check off).
 - **WHEN** run with `--stuck-wait 9999`
 - **THEN** the script waits at most 300 seconds
 
-### Requirement: Live streams
-For each stream, the report SHALL give the user, title, type, player, platform, state, whether it's
-Live TV, progress, source quality, bandwidth, LAN/WAN location and playback method: "direct play" (no
-transcode session), "transcode" (video or audio is transcoded) or "direct stream" (anything else).
-Transcodes SHALL also include the video and audio decisions, hardware use, speed and whether they're
-throttled. Totals SHALL count streams by method and add up bandwidth overall and by LAN/WAN.
+### Requirement: Partial results instead of failure
+Only `/` is required. Every other part (update check, remote access, CPU and memory, live activity,
+running tasks, stuck task check, library scans, maintenance tasks, maintenance settings) SHALL be
+optional: if it fails, the part is `null` (or, for the stuck task check, each `progress_moved` is
+`null`) and listed in `unavailable` with a reason. A 401 or 403 on an optional part SHALL be reported
+as "only available to the server owner's account", since the token already worked for `/`.
 
-#### Scenario: Nothing playing
-- **WHEN** no one is streaming
-- **THEN** `live_activity.streams` is empty and the totals are zero
+#### Scenario: Connected to a shared server
+- **WHEN** the user isn't the server owner and `/updater/status` returns 403
+- **THEN** `server.update` is `null` and `unavailable` lists "update check" as only available to the
+  server owner's account
+
+#### Scenario: Second task check fails
+- **WHEN** the first `/activities` request works but the second one fails
+- **THEN** `running_now` still lists the tasks from the first check, each `progress_moved` is `null`,
+  nothing is flagged as `task_not_progressing`, and `unavailable` lists "stuck task check" with the
+  reason
 
 ### Requirement: Things worth a look
 The script SHALL flag facts for Claude to explain in `worth_a_look`, each with a `kind`:
@@ -98,6 +62,8 @@ small scans don't update it.
 - **WHEN** a library scan is at 40% in both checks, with the same detail text
 - **THEN** `worth_a_look` has one `task_not_progressing` item listing that scan at 40% and
   `seconds_between_checks` of 15
+
+## ADDED Requirements
 
 ### Requirement: Checking whether running tasks are moving
 A task SHALL be watched if it has a progress value and its type doesn't start with

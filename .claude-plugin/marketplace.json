@@ -9,7 +9,7 @@
     {
       "name": "cinemetric",
       "description": "Read-only reports on your Plex Media Server: library stats and housekeeping, server health and live streams, watch activity (with optional Tautulli), and a self-updating dashboard for Linux, macOS and Windows.",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "author": {
         "name": "Jereme Hancock"
       },

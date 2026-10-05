@@ -2,8 +2,9 @@
 
 import argparse
 import time
+from unittest import mock
 
-from helpers import FAKE_TOKEN, FakeServer, OfflineTestCase, Reply, fixture, load_script
+from helpers import FAKE_TOKEN, FakeServer, OfflineTestCase, Reply, fixture, load_script, plex_container
 
 sh = load_script("server-health")
 
@@ -156,12 +157,23 @@ def sample_server(**overrides):
     return FakeServer(routes)
 
 
-class WholeReport(OfflineTestCase):
-    def report(self, server, stale_days=7.0):
+class ReportTestCase(OfflineTestCase):
+    """Builds a report from a FakeServer, with the stuck task wait recorded instead of slept."""
+
+    def setUp(self):
+        super().setUp()
+        self.waits = []
+        patcher = mock.patch.object(sh, "pause", self.waits.append)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def report(self, server, stale_days=7.0, stuck_wait=0):
         client = sh.PlexClient("http://192.0.2.10:32400", FAKE_TOKEN, True)
         server.attach(client._opener)
-        return sh.build_report(client, argparse.Namespace(stale_days=stale_days))
+        return sh.build_report(client, argparse.Namespace(stale_days=stale_days, stuck_wait=stuck_wait))
 
+
+class WholeReport(ReportTestCase):
     def test_server_basics(self):
         server = self.report(sample_server())["server"]
         self.assertEqual(server["name"], "Test Server")
@@ -238,7 +250,126 @@ class WholeReport(OfflineTestCase):
 
     def test_only_allowed_get_requests(self):
         server = sample_server()
-        self.report(server)
+        self.report(server, stuck_wait=15)
         for seen in server.requests:
             self.assertEqual(seen.method, "GET")
             self.assertTrue(any(rule.match(seen.path) for rule in sh.ALLOWED_PATHS), seen.path)
+
+
+# ---------------------------------------------------------------- stuck task check
+
+def task(progress=40, detail="Arrival", uuid="activity-uuid-for-tests", title="Scanning Movies"):
+    found = {"type": "library.update.section", "title": title, "subtitle": detail, "progress": progress}
+    if uuid:
+        found["uuid"] = uuid
+    return found
+
+
+def checks(*answers):
+    """An /activities route that gives each answer in turn: a list of tasks, or a Reply."""
+    answers = list(answers)
+
+    def route(seen):
+        answer = answers.pop(0)
+        return answer if isinstance(answer, Reply) else plex_container(Activity=answer)
+    return route
+
+
+class StuckTasks(ReportTestCase):
+    def run_checks(self, *answers, stuck_wait=15):
+        server = sample_server(**{"/activities": checks(*answers)})
+        report = self.report(server, stuck_wait=stuck_wait)
+        requests = [seen for seen in server.requests if seen.path == "/activities"]
+        return report, len(requests)
+
+    def stuck_notes(self, report):
+        return [n for n in report["worth_a_look"] if n["kind"] == "task_not_progressing"]
+
+    def test_nothing_running(self):
+        report, requests = self.run_checks([])
+        self.assertEqual(report["background"]["running_now"], [])
+        self.assertEqual((requests, self.waits), (1, []))
+
+    def test_task_without_progress_is_not_watched(self):
+        report, requests = self.run_checks([task(progress=None)])
+        self.assertIsNone(report["background"]["running_now"][0]["progress_moved"])
+        self.assertEqual((requests, self.waits), (1, []))
+
+    def test_dvr_tasks_are_not_watched(self):
+        recording = task(94, "Live TV - Session", uuid="rec-uuid", title="Recording")
+        recording["type"] = "grabber.grab"
+        refresh = task(50, "Grabbing", uuid="sub-uuid", title="Refreshing Sub")
+        refresh["type"] = "provider.subscription.refresh"
+        report, requests = self.run_checks([recording, refresh])
+        self.assertEqual([t["progress_moved"] for t in report["background"]["running_now"]], [None, None])
+        self.assertEqual((requests, self.waits), (1, []))
+        self.assertEqual(self.stuck_notes(report), [])
+
+    def test_task_that_is_moving(self):
+        report, requests = self.run_checks([task(40)], [task(55)])
+        self.assertTrue(report["background"]["running_now"][0]["progress_moved"])
+        self.assertEqual((requests, self.waits), (2, [15]))
+        self.assertEqual(self.stuck_notes(report), [])
+
+    def test_same_progress_new_item_counts_as_moving(self):
+        report, _ = self.run_checks([task(40, "Arrival")], [task(40, "Blade Runner")])
+        self.assertTrue(report["background"]["running_now"][0]["progress_moved"])
+
+    def test_task_that_is_not_moving(self):
+        report, _ = self.run_checks([task(40)], [task(40)])
+        self.assertIs(report["background"]["running_now"][0]["progress_moved"], False)
+        self.assertEqual(self.stuck_notes(report), [{
+            "kind": "task_not_progressing", "seconds_between_checks": 15,
+            "tasks": [{"title": "Scanning Movies", "progress_pct": 40}]}])
+
+    def test_task_that_finished_during_the_wait(self):
+        report, _ = self.run_checks([task(40)], [])
+        self.assertIsNone(report["background"]["running_now"][0]["progress_moved"])
+        self.assertEqual(self.stuck_notes(report), [])
+
+    def test_task_that_only_shows_up_later_is_ignored(self):
+        report, _ = self.run_checks([task(40)], [task(55), task(10, uuid="another-uuid", title="Other")])
+        self.assertEqual([t["title"] for t in report["background"]["running_now"]], ["Scanning Movies"])
+
+    def test_matched_by_type_and_title_without_uuid(self):
+        report, _ = self.run_checks([task(40, uuid=None)], [task(40, uuid=None)])
+        self.assertIs(report["background"]["running_now"][0]["progress_moved"], False)
+
+    def test_tasks_that_cant_be_told_apart_are_not_compared(self):
+        twins = [task(40, uuid=None), task(70, uuid=None)]
+        report, _ = self.run_checks(twins, twins)
+        self.assertEqual([t["progress_moved"] for t in report["background"]["running_now"]], [None, None])
+
+    def test_check_turned_off(self):
+        report, requests = self.run_checks([task(40)], stuck_wait=0)
+        self.assertIsNone(report["background"]["running_now"][0]["progress_moved"])
+        self.assertEqual((requests, self.waits), (1, []))
+
+    def test_second_check_fails(self):
+        report, _ = self.run_checks([task(40)], Reply("", status=500))
+        self.assertEqual(report["background"]["running_now"][0]["progress_pct"], 40)
+        self.assertIsNone(report["background"]["running_now"][0]["progress_moved"])
+        self.assertEqual(self.stuck_notes(report), [])
+        self.assertEqual(report["unavailable"], [
+            {"part": "stuck task check", "reason": "Plex returned HTTP 500 for /activities."}])
+
+
+class StuckWaitOption(OfflineTestCase):
+    def parsed_wait(self, *argv):
+        seen = {}
+
+        def capture(client, args):
+            seen["wait"] = args.stuck_wait
+            return {}
+        with mock.patch.object(sh, "load_config", return_value=("http://192.0.2.10:32400", FAKE_TOKEN, True)), \
+                mock.patch.object(sh, "PlexClient"), mock.patch.object(sh, "build_report", capture), \
+                mock.patch.object(sh.sys, "argv", ["server_health.py", *argv]), \
+                mock.patch.object(sh.sys, "stdout"):
+            self.assertEqual(sh.main(), 0)
+        return seen["wait"]
+
+    def test_default_and_limits(self):
+        self.assertEqual(self.parsed_wait(), 15)
+        self.assertEqual(self.parsed_wait("--stuck-wait", "9999"), 300)
+        self.assertEqual(self.parsed_wait("--stuck-wait", "-5"), 0)
+        self.assertEqual(self.parsed_wait("--stuck-wait", "0"), 0)

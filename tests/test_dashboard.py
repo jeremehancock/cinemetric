@@ -149,6 +149,13 @@ class Collecting(OfflineTestCase):
         with mock.patch.object(db.subprocess, "run", return_value=finished(stdout='{"totals": {}}')):
             self.assertEqual(db.run_source("library"), ("library", {"totals": {}}, None))
 
+    def test_server_health_skips_the_stuck_task_check(self):
+        with mock.patch.object(db.subprocess, "run", return_value=finished(stdout="{}")) as run:
+            db.run_source("health")
+        command = run.call_args[0][0]
+        self.assertTrue(command[1].endswith("server_health.py"))
+        self.assertEqual(command[2:], ["--stuck-wait", "0"])
+
     def test_run_source_keeps_only_the_error_line(self):
         reply = finished(1, stderr="reading library: Movies\nerror: NOT_CONFIGURED: not connected\n")
         with mock.patch.object(db.subprocess, "run", return_value=reply):

@@ -177,6 +177,26 @@ class SigningIn(Faked):
         self.assertEqual(saved["servers"][0]["connections"],
                          ["https://192-0-2-10.test.plex.direct:32400", "http://192.0.2.10:32400"])
 
+    def test_account_token_only_goes_to_owned_servers(self):
+        self.start_pending(account_token=FAKE_TOKEN)
+        self.fake({RESOURCES: [
+            {"name": "Mine", "provides": "server", "owned": True,
+             "connections": [{"uri": "http://192.0.2.10:32400", "local": True, "protocol": "http"}]},
+            {"name": "Friend", "provides": "server", "owned": False,
+             "connections": [{"uri": "http://198.51.100.5:32400", "local": False, "protocol": "http"}]},
+        ]})
+        result = su.cmd_finish(None)
+        self.assertEqual([s["name"] for s in result["servers"]], ["Mine"])
+        saved = su.read_private(su.pending_path())
+        self.assertEqual([(s["name"], s["token"]) for s in saved["servers"]], [("Mine", FAKE_TOKEN)])
+
+    def test_only_shared_servers_without_tokens(self):
+        self.start_pending(account_token=FAKE_TOKEN)
+        self.fake({RESOURCES: [{"name": "Friend", "provides": "server", "owned": False,
+                                "connections": [{"uri": "http://198.51.100.5:32400"}]}]})
+        with self.assertRaises(su.SetupError):
+            su.cmd_finish(None)
+
     def test_account_with_no_servers(self):
         self.start_pending(account_token=FAKE_TOKEN)
         self.fake({RESOURCES: [{"name": "Phone", "provides": "player"}]})

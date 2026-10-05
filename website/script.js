@@ -71,6 +71,40 @@
     }, { rootMargin: "-45% 0px -50% 0px" }).observe(hero);
   }
 
+  /* ---------- Phone menu ---------- */
+  // The button starts hidden in the HTML, so without this script phones just show the links inline.
+  var menuBtn = document.querySelector(".menu-btn");
+  var nav = document.getElementById("main-nav");
+  var phone = window.matchMedia("(max-width: 640px)");
+  if (menuBtn && nav) {
+    root.classList.add("menu-js");
+    menuBtn.hidden = false;
+
+    var setMenu = function (open) {
+      header.classList.toggle("menu-open", open);
+      menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      menuBtn.querySelector(".sr-only").textContent = open ? "Close menu" : "Menu";
+    };
+    var isOpen = function () { return header.classList.contains("menu-open"); };
+
+    menuBtn.addEventListener("click", function () { setMenu(!isOpen()); });
+    nav.addEventListener("click", function (e) {
+      if (e.target.closest("a")) setMenu(false);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && isOpen()) {
+        setMenu(false);
+        menuBtn.focus();
+      }
+    });
+    document.addEventListener("click", function (e) {
+      if (isOpen() && !header.contains(e.target)) setMenu(false);
+    });
+    var onWidthChange = function () { if (!phone.matches) setMenu(false); };
+    if (phone.addEventListener) phone.addEventListener("change", onWidthChange);
+    else if (phone.addListener) phone.addListener(onWidthChange);
+  }
+
   /* ---------- Copy buttons ---------- */
   var live = document.getElementById("live");
   var copyIcon = '<svg aria-hidden="true"><use href="#i-copy"/></svg>';

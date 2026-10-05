@@ -49,7 +49,7 @@ There SHALL be no analytics, update checks or other third-party services. Pages 
 SHALL NOT make any network requests when opened.
 
 #### Scenario: Building a report
-- **WHEN** `library-report`, `server-health`, `watch-activity` or `dashboard` runs
+- **WHEN** `library-report`, `server-health`, `watch-activity`, `unwatched` or `dashboard` runs
 - **THEN** the only network requests go to the configured Plex and Tautulli addresses
 
 #### Scenario: Listing users and shares

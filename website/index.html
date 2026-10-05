@@ -319,22 +319,28 @@
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#ef6a9a">watch-activity</p>
           <h2 id="f-watch">See what everyone's been watching.</h2>
-          <p>Plays, watch time, favourites and habits over the last 30 days, or any period you ask about.</p>
+          <p>Who's watching right now, plus plays, watch time, favourites and habits over the last 30 days, or any period you ask about.</p>
           <ul class="ticks">
+            <li>Who's watching right now, on which device, and how far along they are.</li>
             <li>Total plays and watch time.</li>
             <li>Most watched movies, shows and music.</li>
             <li>Most active users and the devices they use.</li>
             <li>Daily trends and recent plays.</li>
             <li>Uses <strong>Tautulli</strong> if you have it; otherwise Plex's own history (which counts plays only).</li>
           </ul>
-          <p class="ask-line">Ask Claude: <q>What's been watched on Plex this month?</q> or <q>Who watches the most?</q></p>
+          <p class="ask-line">Ask Claude: <q>What's been watched on Plex this month?</q>, <q>Who's watching right now?</q> or <q>Who watches the most?</q></p>
         </div>
 
-        <figure class="mock demo reveal" aria-label="Example: most watched in the last 30 days">
+        <figure class="mock demo reveal" aria-label="Example: who is watching now and most watched in the last 30 days">
           <div class="mock-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><em>Claude Code</em></div>
           <div class="tabpanel" id="panel-watch-1">
             <pre class="term"><code><span class="t-you">&gt; What&#x27;s been watched on Plex this month?</span>
-<span class="t-dot">⏺</span> In the last 30 days, 6 people watched 486
+<span class="t-dot">⏺</span> <b class="t-h">Watching now</b>
+  • jordan: Harbor Lights S03E04 on Living Room
+    TV, playing, 40% in
+  • sam: The Long Voyage in Chrome, paused
+
+  In the last 30 days, 6 people watched 486
   things for 311 hours.
 
   <b class="t-h">What got watched</b> (TV 301 · movies 112 · music 73)

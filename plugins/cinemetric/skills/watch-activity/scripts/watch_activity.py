@@ -21,7 +21,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.9.0"
+VERSION = "0.10.0"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 PLEX_PAGE_SIZE = 200
@@ -32,6 +32,7 @@ ALLOWED_PATHS = [
     re.compile(r"^/$"),
     re.compile(r"^/accounts$"),
     re.compile(r"^/status/sessions/history/all$"),
+    re.compile(r"^/status/sessions$"),
 ]
 
 # The only Tautulli API commands this script may run. All of them only read data.
@@ -245,6 +246,10 @@ def as_int(value, default=0):
         return default
 
 
+def as_bool(value):
+    return str(value).strip().lower() in ("1", "true", "yes")
+
+
 def hours(seconds):
     return round(as_int(seconds) / 3600, 1)
 
@@ -443,6 +448,58 @@ def plex_report(client, args):
     }
 
 
+# ---------------------------------------------------------------- watching now
+
+def stream_title(item):
+    kind = item.get("type")
+    if kind == "episode":
+        return clean(
+            f"{item.get('grandparentTitle')} S{as_int(item.get('parentIndex')):02d}"
+            f"E{as_int(item.get('index')):02d}"
+        )
+    if kind == "track":
+        return clean(f"{item.get('grandparentTitle')} - {item.get('title')}")
+    year = item.get("year")
+    return clean(f"{item.get('title')} ({year})" if year else item.get("title"))
+
+
+def now_watching(client):
+    """Who is watching right now, from Plex's current sessions. Technical stream details
+    (playback method, bandwidth, quality) are left to server-health."""
+    sessions = []
+    for item in client.get("/status/sessions").get("Metadata", []) or []:
+        player = item.get("Player") or {}
+        duration = as_int(item.get("duration"))
+        sessions.append({
+            "user": clean((item.get("User") or {}).get("title")),
+            "title": stream_title(item),
+            "type": item.get("type"),
+            "player": clean(player.get("title") or player.get("product")),
+            "platform": clean(player.get("platform")),
+            "state": player.get("state"),
+            "progress_pct": round(100 * as_int(item.get("viewOffset")) / duration) if duration else None,
+            "live_tv": as_bool(item.get("live")),
+        })
+    return sessions
+
+
+def watching_now(config):
+    """Return (now_watching, now_watching_unavailable). Never fails the report."""
+    if not config["plex"]:
+        return None, "Plex is not set up"
+    print("reading current sessions from Plex", file=sys.stderr)
+    try:
+        try:
+            return now_watching(PlexClient(*config["plex"])), None
+        except (AttributeError, KeyError, TypeError, IndexError, ValueError):
+            raise ReportError("Plex sent current sessions in a shape Cinemetric didn't expect.") from None
+    except ReportError as exc:
+        reason = str(exc)
+        if "401" in reason or "403" in reason:
+            reason = "only available to the server owner's account"
+        return None, reason
+
+
 # ---------------------------------------------------------------- main
 
 def build_report(config, args):
@@ -489,11 +546,14 @@ def build_report(config, args):
                 "account. Connect with the owner's account, or set up Tautulli."
             ) from None
 
+    sessions, sessions_problem = watching_now(config)
     return {
         "cinemetric_version": VERSION,
         "generated_at": time.strftime("%Y-%m-%d %H:%M %Z"),
         "period_days": args.days,
         "fallback_reason": fallback_reason,
+        "now_watching": sessions,
+        "now_watching_unavailable": sessions_problem,
         **report,
     }
 

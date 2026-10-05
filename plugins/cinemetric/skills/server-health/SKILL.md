@@ -1,6 +1,6 @@
 ---
 name: server-health
-description: "Check the health of a Plex Media Server: version and available updates, remote access status, CPU and memory use, who is streaming right now (direct play vs transcode, bandwidth), running background tasks and whether any look stuck, library scan freshness, and scheduled maintenance. Read-only. Use when the user asks how their Plex server is doing, whether Plex needs an update, if remote access is working, who is watching Plex right now, why Plex is transcoding or buffering, whether Plex scans and maintenance are running, or whether a Plex scan or task is stuck."
+description: "Check the health of a Plex Media Server: version and available updates, remote access status, CPU and memory use, how current streams are being delivered (direct play vs transcode, bandwidth), running background tasks and whether any look stuck, library scan freshness, and scheduled maintenance. Read-only. Use when the user asks how their Plex server is doing, whether Plex needs an update, if remote access is working, whether anyone is transcoding right now, why Plex is transcoding or buffering, how much bandwidth streams are using, whether Plex scans and maintenance are running, or whether a Plex scan or task is stuck."
 argument-hint: "[--stale-days N] [--stuck-wait SECONDS]"
 allowed-tools: Read, Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/server_health.py *), Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/server_health.py), Bash(python ${CLAUDE_SKILL_DIR}/scripts/server_health.py *), Bash(python ${CLAUDE_SKILL_DIR}/scripts/server_health.py)
 ---

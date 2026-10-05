@@ -28,7 +28,7 @@ CSS and JavaScript with no build step, ready for any static host.
 | `setup` | Connects Cinemetric to your server using **Sign in with Plex**; no copying tokens around |
 | `library-report` | Counts, storage, 4K/1080p and codec breakdown, 10-bit video, recently added, unavailable files, unmatched items, missing posters, very large files, duplicates |
 | `server-health` | Version and updates, remote access, CPU and memory, who's streaming now (direct play vs transcode, bandwidth), running tasks, library scans, scheduled maintenance |
-| `watch-activity` | Plays and watch time, most watched movies, shows and music, most active users and devices, daily trends, recent plays. Uses Tautulli if you have it, otherwise Plex's own history |
+| `watch-activity` | Who's watching right now, plays and watch time, most watched movies, shows and music, most active users and devices, daily trends, recent plays. Uses Tautulli if you have it, otherwise Plex's own history |
 | `users-and-shares` | Who your server is shared with (friends, Plex Home, managed users, pending invites), which libraries each person can see, who can download, and when each person last played something. Reads the share list from your plex.tv account; only the server owner can use it |
 | `dashboard` | One page with library, server, watch and sharing stats and charts. Saved on your computer, as a private claude.ai page you can open anywhere, or both; each refresh updates the same file and link |
 

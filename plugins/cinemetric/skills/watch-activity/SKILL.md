@@ -1,6 +1,6 @@
 ---
 name: watch-activity
-description: "Report on what's been watched on a Plex server: total plays and watch time, most watched movies, shows and music, most active users, devices used, daily trends, and recent plays. Uses Tautulli when it's set up, otherwise Plex's own watch history. Read-only. Use when the user asks what's been watched on Plex, who watches the most, the most popular titles, Plex watch history or stats, or Tautulli stats."
+description: "Report on what's being watched on a Plex server right now and what's been watched over time: who is watching what at the moment, total plays and watch time, most watched movies, shows and music, most active users, devices used, daily trends, and recent plays. Uses Tautulli when it's set up, otherwise Plex's own watch history. Read-only. Use when the user asks who is watching Plex right now, what's playing on Plex, what's been watched on Plex, who watches the most, the most popular titles, Plex watch history or stats, or Tautulli stats."
 argument-hint: "[--days N] [--top N] [--recent N] [--source auto|tautulli|plex]"
 allowed-tools: Read, Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/watch_activity.py *), Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/watch_activity.py), Bash(python ${CLAUDE_SKILL_DIR}/scripts/watch_activity.py *), Bash(python ${CLAUDE_SKILL_DIR}/scripts/watch_activity.py)
 ---
@@ -45,24 +45,32 @@ Plex or Tautulli another way (curl, SSH, etc.).
 
 ## 3. Write the report
 
-The JSON has `source` (`tautulli` or `plex`), `period_days`, `fallback_reason`, `totals`,
+The JSON has `source` (`tautulli` or `plex`), `period_days`, `fallback_reason`, `now_watching`,
+`now_watching_unavailable`, `totals`,
 `plays_by_type`, `top_movies`, `top_shows`, `top_music`, `top_users`, `top_platforms`,
 `most_concurrent_streams`, `daily`, `trend`, and `recent_plays`.
 
 Present, in this order:
 
-1. **Headline**: plays and watch time over the period, and how many people watched, e.g. "In the
+1. **Watching now**: who is watching right now, from `now_watching`: user, what they're watching,
+   device, whether it's playing, paused or buffering, and progress (for `live_tv` entries, say it's Live TV
+   instead of a progress figure). It's a snapshot of the moment the script ran. If the list is empty,
+   say nobody is watching right now in one line. If it's `null`, give `now_watching_unavailable` in
+   one plain line (e.g. "Who's watching now is only available to the server owner's account") and
+   move on. If the user asked only about right now, this part can be the whole answer. For whether
+   streams are transcoding, bandwidth or buffering, use the `cinemetric:server-health` skill.
+2. **Headline**: plays and watch time over the period, and how many people watched, e.g. "In the
    last 30 days, 6 people watched 412 things for 380 hours." With the Plex source there's no watch
    time, so leave hours out.
-2. **What got watched**: top movies, top shows and top music (skip empty lists), with play counts
+3. **What got watched**: top movies, top shows and top music (skip empty lists), with play counts
    and hours when present. Note the split by type (movies vs TV vs music vs Live TV).
-3. **Who watched**: top users with plays and hours; with Tautulli, the most used platforms and the
+4. **Who watched**: top users with plays and hours; with Tautulli, the most used platforms and the
    busiest moment (most streams at once).
-4. **Trend**: compare `trend.recent_half_plays` with `trend.earlier_half_plays` in plain words
+5. **Trend**: compare `trend.recent_half_plays` with `trend.earlier_half_plays` in plain words
    ("busier lately", "about the same"), and mention the busiest day from `daily` if one stands out.
-5. **Recently watched**: a short list, newest first: when, who, what, and (with Tautulli) device and
+6. **Recently watched**: a short list, newest first: when, who, what, and (with Tautulli) device and
    whether it was direct play or transcode.
-6. **Observations**: two or three takeaways the numbers support, e.g. "One user accounts for half of
+7. **Observations**: two or three takeaways the numbers support, e.g. "One user accounts for half of
    all watch time" or "Most plays are TV; movies are rarely rewatched".
 
 **About the source**:

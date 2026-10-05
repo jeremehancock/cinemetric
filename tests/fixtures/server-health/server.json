@@ -123,6 +123,7 @@
   "MediaContainer": {
    "Activity": [
     {
+     "uuid": "activity-uuid-for-tests",
      "type": "library.update.section",
      "title": "Scanning Movies",
      "subtitle": "Arrival",

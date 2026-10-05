@@ -22,7 +22,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.5.0"
+VERSION = "0.6.0"
 TIMEOUT_SECONDS = 30
 MAX_TITLE_LENGTH = 120
 
@@ -41,6 +41,10 @@ ALLOWED_PATHS = [
 
 # Maintenance tasks that keep the server healthy. Others are optional and often off by default.
 IMPORTANT_TASKS = {"BackupDatabase", "OptimizeDatabase", "CleanOldBundles", "CleanOldCacheFiles"}
+
+# DVR and Live TV tasks follow a recording in real time and wait while it runs, so they aren't
+# checked for being stuck.
+UNWATCHED_TASK_TYPES = ("provider.subscription.", "grabber.")
 
 # Server settings worth reporting. Everything else in /:/prefs is ignored.
 PREF_IDS = {
@@ -372,17 +376,76 @@ def live_activity(client):
 
 # ---------------------------------------------------------------- background work
 
-def running_activities(client):
-    data = client.get("/activities")
-    return [
-        {
-            "type": a.get("type"),
-            "title": clean(a.get("title")),
-            "detail": clean(a.get("subtitle")) or None,
-            "progress_pct": as_int(a.get("progress")) if a.get("progress") is not None else None,
-        }
-        for a in data.get("Activity", []) or []
-    ]
+def pause(seconds):
+    """Wait between the two task checks. A separate function so tests can skip the wait."""
+    time.sleep(seconds)
+
+
+def read_activities(client):
+    """Plex's raw list of running tasks, kept as-is so two checks can be compared."""
+    return client.get("/activities").get("Activity", []) or []
+
+
+def describe_activity(a):
+    return {
+        "type": a.get("type"),
+        "title": clean(a.get("title")),
+        "detail": clean(a.get("subtitle")) or None,
+        "progress_pct": as_int(a.get("progress")) if a.get("progress") is not None else None,
+    }
+
+
+def activity_key(a):
+    """Match a task across the two checks: by Plex's uuid, or by type and title without one."""
+    return a.get("uuid") or (a.get("type"), a.get("title"))
+
+
+def progress_value(a):
+    try:
+        return float(a.get("progress"))
+    except (TypeError, ValueError):
+        return None
+
+
+def watched(a):
+    """Whether a task can be checked for movement: it has progress and isn't a DVR task."""
+    return progress_value(a) is not None and not str(a.get("type") or "").startswith(UNWATCHED_TASK_TYPES)
+
+
+def progress_moved(client, first, wait, unavailable):
+    """For each task in the first check, whether it moved by the second check: True, False or None.
+
+    None means it wasn't checked: no progress value, a DVR or Live TV task, finished during the
+    wait, no unique match, or no second check (nothing to watch, check turned off, or the second request failed).
+    """
+    moved = [None] * len(first)
+    checked = [i for i, a in enumerate(first) if watched(a)]
+    if wait <= 0 or not checked:
+        return moved
+    pause(wait)
+    second = optional("stuck task check", lambda: read_activities(client), unavailable)
+    if second is None:
+        return moved
+    # Two tasks with the same key can't be told apart, so neither is compared.
+    first_keys = [activity_key(a) for a in first]
+    later = {}
+    for b in second:
+        later.setdefault(activity_key(b), []).append(b)
+    for i in checked:
+        key = first_keys[i]
+        matches = later.get(key, [])
+        if first_keys.count(key) != 1 or len(matches) != 1:
+            continue
+        a, b = first[i], matches[0]
+        moved[i] = progress_value(a) != progress_value(b) or a.get("subtitle") != b.get("subtitle")
+    return moved
+
+
+def running_activities(client, wait, unavailable):
+    """Tasks running now, each with whether its progress moved over `wait` seconds."""
+    first = read_activities(client)
+    moved = progress_moved(client, first, wait, unavailable)
+    return [dict(describe_activity(a), progress_moved=m) for a, m in zip(first, moved)]
 
 
 def task_label(task):
@@ -441,7 +504,7 @@ def library_scans(client, now):
 
 # ---------------------------------------------------------------- report
 
-def worth_a_look(report, stale_days):
+def worth_a_look(report, stale_days, stuck_wait=0):
     """Plain facts the user may want to act on. Claude explains them; the script just flags."""
     notes = []
     update = report["server"].get("update")
@@ -486,6 +549,15 @@ def worth_a_look(report, stale_days):
     if tasks.get("important_disabled"):
         notes.append({"kind": "important_maintenance_disabled", "tasks": tasks["important_disabled"]})
 
+    stuck = [
+        {"title": task["title"], "progress_pct": task["progress_pct"]}
+        for task in background.get("running_now") or []
+        if task.get("progress_moved") is False
+    ]
+    if stuck:
+        # Not moving over a short wait isn't proof of a problem; Claude words it as "possibly stuck".
+        notes.append({"kind": "task_not_progressing", "seconds_between_checks": stuck_wait, "tasks": stuck})
+
     usage = (report["server"].get("resource_use") or {}).get("average") or {}
     if (usage.get("host_cpu_pct") or 0) >= 85:
         notes.append({"kind": "high_cpu", "average_pct": usage["host_cpu_pct"]})
@@ -505,7 +577,9 @@ def build_report(client, args):
     server["resource_use"] = optional("CPU and memory", lambda: resource_use(client), unavailable)
 
     background = {
-        "running_now": optional("running tasks", lambda: running_activities(client), unavailable),
+        "running_now": optional(
+            "running tasks", lambda: running_activities(client, args.stuck_wait, unavailable), unavailable
+        ),
         "library_scans": optional(
             "library scans", lambda: library_scans(client, now), unavailable
         ),
@@ -522,7 +596,7 @@ def build_report(client, args):
         "live_activity": optional("live activity", lambda: live_activity(client), unavailable),
         "background": background,
     }
-    report["worth_a_look"] = worth_a_look(report, args.stale_days)
+    report["worth_a_look"] = worth_a_look(report, args.stale_days, args.stuck_wait)
     report["unavailable"] = unavailable
     return report
 
@@ -532,8 +606,11 @@ def main():
     parser.add_argument("--check", action="store_true", help="only test the connection and token")
     parser.add_argument("--stale-days", type=float, default=7.0,
                         help="flag libraries not scanned in this many days")
+    parser.add_argument("--stuck-wait", type=int, default=15,
+                        help="seconds to wait before checking running tasks again (0 turns it off)")
     args = parser.parse_args()
     args.stale_days = max(1.0, args.stale_days)
+    args.stuck_wait = min(300, max(0, args.stuck_wait))
 
     try:
         client = PlexClient(*load_config())

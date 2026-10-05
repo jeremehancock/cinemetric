@@ -119,11 +119,6 @@ Plans can change; feedback and ideas are welcome via GitHub issues. What the exi
 the rules every skill follows, are written down as specs in [openspec/specs/](openspec/specs/). New
 work starts as an OpenSpec change proposal (`/opsx:propose`) before any code is written.
 
-**Unfinished parts of existing skills**
-
-- [ ] **`server-health`: failed or stuck tasks.** Plex doesn't report task failures through its API, so
-      this needs another source (for example its logs) before it can be added.
-
 **Ideas for later**
 
 - [ ] **`quality-upgrades`**: titles only available in SD or 720p that may be worth replacing

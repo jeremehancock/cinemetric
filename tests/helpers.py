@@ -33,6 +33,7 @@ SCRIPTS = {
     "unwatched": "unwatched.py",
     "users-and-shares": "users_and_shares.py",
     "watch-activity": "watch_activity.py",
+    "what-to-watch": "what_to_watch.py",
 }
 
 # Settings a test must never pick up from the developer's own environment.

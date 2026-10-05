@@ -31,6 +31,7 @@ CSS and JavaScript with no build step, ready for any static host.
 | `watch-activity` | Who's watching right now, plays and watch time, most watched movies, shows and music, most active users and devices, daily trends, recent plays, the most streams at once, and titles started but never finished. Works for everyone or one person. Uses Tautulli if you have it, otherwise Plex's own history |
 | `users-and-shares` | Who your server is shared with (friends, Plex Home, managed users, pending invites), which libraries each person can see, who can download, and when each person last played something. Reads the share list from your plex.tv account; only the server owner can use it |
 | `unwatched` | Movies and shows nobody has finished in a while (added more than 6 months ago, no finished play by anyone since), largest first, with how much space they use and when each was last finished. Facts only: it never suggests deleting anything. Uses Tautulli if you have it, otherwise Plex's own history |
+| `what-to-watch` | Finds something to watch tonight in your own library: by genre, length, decade, rating or content rating, unwatched only, shuffled for fresh ideas each time. Suggests a few titles with a reason for each, or picks up where you left off. Only titles already on your server |
 | `dashboard` | One page with library, server, watch, unwatched and sharing stats and charts. Saved on your computer, as a private claude.ai page you can open anywhere, or both; each refresh updates the same file and link |
 
 More skills are planned, and ideas are welcome; see [Roadmap](#roadmap).
@@ -63,8 +64,8 @@ where you can revoke it at any time.
 
 Then try: *"Give me a Plex library report"*, *"What's been added to my Movies library recently?"*,
 *"How's my Plex server doing?"*, *"What's been watched on Plex this month?"*,
-*"Who have I shared my Plex server with?"*, *"What on my Plex server has nobody watched in months?"*
-or *"Build my Plex dashboard"*
+*"Who have I shared my Plex server with?"*, *"What on my Plex server has nobody watched in months?"*,
+*"Find me a comedy under 2 hours I haven't seen"* or *"Build my Plex dashboard"*
 
 ### Optional: add Tautulli
 
@@ -131,8 +132,6 @@ New skills:
 - [ ] **`playback-check`**: files likely to transcode on common devices (image-based subtitles, TrueHD
       or DTS audio, bitrates above your remote streaming limit), plus which devices transcode most when
       Tautulli is set up
-- [ ] **`what-to-watch`**: find something in your own library to watch tonight, by genre, length or
-      rating, or pick up where you left off
 - [ ] **`tv-completeness`**: gaps in episode numbers and seasons that are only partly there, using only
       what's on your server
 - [ ] **`year-in-review`**: a yearly recap page with top titles, total hours and busiest months, with

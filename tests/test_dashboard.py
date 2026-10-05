@@ -21,7 +21,7 @@ EVIL_ATTR = '" onmouseover="steal()'
 
 
 def sample_data():
-    """Reports in the shape the three scripts print, with hostile text wherever text can appear."""
+    """Reports in the shape the four scripts print, with hostile text wherever text can appear."""
     health = {
         "server": {"name": EVIL, "version": EVIL_ATTR,
                    "update": {"update_available": True, "available_version": EVIL},
@@ -55,7 +55,24 @@ def sample_data():
             "recently_added": [{"title": EVIL, "added": "2026-09-01" + EVIL}],
         }],
     }
-    return {"library": library, "health": health, "watch": watch}
+    sharing = {
+        "people": [
+            {"name": "sam-test" + EVIL, "kind": "home", "status": "accepted", "libraries": "all",
+             "last_played": "2026-09-30"},
+            {"name": "riley-test" + EVIL_ATTR, "kind": "friend", "status": "accepted", "libraries": [EVIL],
+             "last_played": None},
+            {"name": "casey-test", "kind": EVIL, "status": "pending", "libraries": None, "last_played": None},
+        ],
+        "libraries": [{"title": EVIL, "shared_with_count": 2}],
+        "totals": {"people": 3, "by_kind": {"home": 1, "friend": 2}},
+        "worth_a_look": [
+            {"kind": "inactive", "people": ["riley-test" + EVIL_ATTR], "days": 90},
+            {"kind": "downloads_allowed", "people": ["riley-test" + EVIL_ATTR]},
+            {"kind": "all_libraries", "people": ["sam-test" + EVIL]},
+            {"kind": "old_pending_invite", "people": ["casey-test"], "days": 30},
+        ],
+    }
+    return {"library": library, "health": health, "watch": watch, "sharing": sharing}
 
 
 def page(data, errors=None, hide_names=False):
@@ -70,9 +87,9 @@ class PageSafety(OfflineTestCase):
         self.assertIn("&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;", html)
 
     def test_error_reasons_are_escaped(self):
-        html = page({}, {"library": EVIL, "health": EVIL, "watch": EVIL})
+        html = page({}, {"library": EVIL, "health": EVIL, "watch": EVIL, "sharing": EVIL})
         self.assertNotIn("<script", html)
-        self.assertEqual(html.count("&lt;script&gt;"), 3)
+        self.assertEqual(html.count("&lt;script&gt;"), 4)
 
     def test_page_blocks_scripts_and_outside_requests(self):
         html = page(sample_data())
@@ -179,7 +196,7 @@ class Collecting(OfflineTestCase):
             self.assertEqual(db.run_source("watch")[2], "the watch-activity script is missing")
 
     def test_collect_keeps_going_when_one_source_fails(self):
-        results = {"library": {"totals": {}}, "health": None, "watch": {"totals": {}}}
+        results = {"library": {"totals": {}}, "health": None, "watch": {"totals": {}}, "sharing": {"people": []}}
         fake = lambda name: (name, results[name], "HTTP 500" if results[name] is None else None)
         with mock.patch.object(db, "run_source", fake):
             data, errors = db.collect()
@@ -264,3 +281,64 @@ class BuildingAndSaving(OfflineTestCase):
         result = self.build()
         self.assertIsNone(result["destination"])
         self.assertIsNone(result["online_page"])
+
+
+# ---------------------------------------------------------------- sharing section
+
+def sharing_report(people=3, worth=None):
+    rows = [{"name": f"person-{i:02d}", "kind": "friend", "status": "accepted", "libraries": ["Movies"],
+             "last_played": "2026-09-30"} for i in range(people)]
+    return {"people": rows, "libraries": [{"title": "Movies", "shared_with_count": people}],
+            "totals": {"people": people, "by_kind": {"friend": people}}, "worth_a_look": worth or []}
+
+
+def healthy():
+    return {"server": {"name": "Test", "version": "1.0", "update": {"update_available": False},
+                       "remote_access": {"state": "mapped"}}, "worth_a_look": []}
+
+
+class SharingSection(OfflineTestCase):
+    def test_section_is_built(self):
+        html = page({"sharing": sharing_report(3)})
+        self.assertIn("<h2>Sharing</h2>", html)
+        self.assertIn("person-00", html)
+        self.assertIn("People who can see it", html)
+
+    def test_owner_only_failure(self):
+        error = "OWNER_ONLY: only the server owner's Plex account can see who a server is shared with."
+        fake = lambda name: (name, None, error) if name == "sharing" else (name, {"totals": {}}, None)
+        with mock.patch.object(db, "run_source", fake):
+            data, errors = db.collect()
+        self.assertEqual(errors, {"sharing": error})
+        html = page(data, errors)
+        self.assertIn("only the server owner&#x27;s Plex account can see", html)
+        self.assertNotIn("OWNER_ONLY", html)
+
+    def test_downloads_item_keeps_the_page_healthy(self):
+        worth = [{"kind": "downloads_allowed", "people": ["person-00"]}]
+        html = page({"health": healthy(), "sharing": sharing_report(1, worth)})
+        self.assertIn("1 friend can download", html)
+        self.assertIn("Healthy", html)
+        self.assertNotIn("Mostly fine", html)
+
+    def test_names_hidden(self):
+        worth = [{"kind": "inactive", "people": ["person-00", "person-01", "person-02"], "days": 90}]
+        html = page({"sharing": sharing_report(3, worth)}, hide_names=True)
+        self.assertIn("3 people with no plays in 90+ days", html)
+        self.assertNotIn("person-0", html)
+        self.assertNotIn("Last played", html)
+
+    def test_sample_names_hidden_everywhere(self):
+        html = page(sample_data(), hide_names=True)
+        for name in ("sam-test", "riley-test", "casey-test", "alex-test"):
+            self.assertNotIn(name, html)
+
+    def test_long_share_list(self):
+        html = page({"sharing": sharing_report(26)})
+        self.assertIn("person-19", html)
+        self.assertNotIn("person-20", html)
+        self.assertIn("and 6 more people", html)
+
+    def test_nobody_shared(self):
+        html = page({"sharing": sharing_report(0)})
+        self.assertIn("isn't shared with anyone", html)

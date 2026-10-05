@@ -6,9 +6,7 @@ Connect Cinemetric to a Plex server with "Sign in with Plex", and optionally add
 the token or API key ever passing through the chat. Script: `skills/setup/scripts/setup.py`. Security
 rules that apply here (allowed destinations, private files, the local form) are in the `security`
 spec.
-
 ## Requirements
-
 ### Requirement: Sign in with Plex in separate steps
 Setup SHALL run as separate commands, because the user approves in their browser in between:
 `start` asks plex.tv for a sign-in PIN and returns a `sign_in_url` and `expires_in_minutes`; `finish`
@@ -28,12 +26,23 @@ in Plex's Authorized Devices as "Cinemetric", with its own client identifier.
 `finish` SHALL list only resources that provide a server, with each one's name, whether the user owns
 it, and how many addresses it has. Relay addresses SHALL be left out. `select N` SHALL try the
 server's addresses local first, then `https` first, and save the first one that answers `GET /` with
-the token. Servers shared with the user SHALL be saved with that server's own access token.
+the token. Each server SHALL be saved with its own access token from plex.tv. The account token SHALL
+be used only for a server the user owns that has no access token of its own. A server the user
+doesn't own and that has no access token of its own SHALL be left out of the list, so the account
+token is never sent to someone else's server.
 
 #### Scenario: No address works
 - **WHEN** none of the server's addresses answer from this computer
 - **THEN** `select` stops with an error naming the server and how many addresses were tried, and
   nothing is saved
+
+#### Scenario: Owned server without its own token
+- **WHEN** plex.tv lists a server the user owns without an `accessToken`
+- **THEN** `finish` lists it and saves it with the account token
+
+#### Scenario: Shared server without its own token
+- **WHEN** plex.tv lists a server the user doesn't own without an `accessToken`
+- **THEN** `finish` leaves it out of the list and never saves the account token for it
 
 ### Requirement: Don't overwrite without asking
 `select` SHALL refuse to overwrite an existing config unless `--replace` is given. Switching Plex
@@ -84,3 +93,4 @@ checking on.
 #### Scenario: Self-signed certificate
 - **WHEN** `tautulli-auto https://nas:8181` hits a certificate that can't be verified
 - **THEN** it returns `step: certificate_problem` and saves nothing
+

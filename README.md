@@ -28,7 +28,7 @@ CSS and JavaScript with no build step, ready for any static host.
 | `setup` | Connects Cinemetric to your server using **Sign in with Plex**; no copying tokens around |
 | `library-report` | Counts, storage, 4K/1080p and codec breakdown, 10-bit video, recently added, unavailable files, unmatched items, missing posters, very large files, duplicates |
 | `server-health` | Version and updates, remote access, CPU and memory, who's streaming now (direct play vs transcode, bandwidth), streaming settings (hardware transcoding, remote limits), running tasks, library scans, scheduled maintenance |
-| `watch-activity` | Who's watching right now, plays and watch time, most watched movies, shows and music, most active users and devices, daily trends, recent plays. Uses Tautulli if you have it, otherwise Plex's own history |
+| `watch-activity` | Who's watching right now, plays and watch time, most watched movies, shows and music, most active users and devices, daily trends, recent plays, the most streams at once, and titles started but never finished. Works for everyone or one person. Uses Tautulli if you have it, otherwise Plex's own history |
 | `users-and-shares` | Who your server is shared with (friends, Plex Home, managed users, pending invites), which libraries each person can see, who can download, and when each person last played something. Reads the share list from your plex.tv account; only the server owner can use it |
 | `dashboard` | One page with library, server, watch and sharing stats and charts. Saved on your computer, as a private claude.ai page you can open anywhere, or both; each refresh updates the same file and link |
 
@@ -144,8 +144,6 @@ Updates to existing skills:
 - [ ] **Snapshots and "what changed"**: save a small summary on your computer after each run, so
       reports and the dashboard can show what's new, what disappeared and how things trend over time.
       Could also power an optional weekly digest that only mentions changes.
-- [ ] **`watch-activity`**: what one person has watched lately, the most streams at once (useful for
-      planning upload bandwidth), and titles started but never finished
 - [ ] **`library-report`**: library growth by month, and fuller music details (lossless vs lossy,
       missing album art)
 - [ ] **`users-and-shares`**: shared libraries nobody has watched in a while

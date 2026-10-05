@@ -1,7 +1,11 @@
 """watch-activity (openspec/specs/watch-activity/spec.md) and its settings rules."""
 
 import argparse
+import contextlib
+import io
+import json
 import os
+import sys
 import time
 from unittest import mock
 
@@ -14,7 +18,7 @@ TAUTULLI = ("http://192.0.2.10:8181", FAKE_API_KEY, True)
 
 
 def args(**overrides):
-    values = {"days": 7, "top": 10, "recent": 15, "source": "auto"}
+    values = {"days": 7, "top": 10, "recent": 15, "source": "auto", "user": None}
     values.update(overrides)
     return argparse.Namespace(**values)
 
@@ -26,7 +30,10 @@ def config(plex=PLEX, tautulli=TAUTULLI, problem=None):
 # ---------------------------------------------------------------- fake servers
 
 def tautulli_route(data=None):
-    """Answer Tautulli API calls from tests/fixtures/watch-activity/tautulli.json."""
+    """Answer Tautulli API calls from tests/fixtures/watch-activity/tautulli.json.
+
+    History asked for one media type comes from "get_history:<type>", one page at a time.
+    """
     data = data or fixture("watch-activity", "tautulli.json")
 
     def answer(seen):
@@ -36,9 +43,15 @@ def tautulli_route(data=None):
             key += ":" + seen.query["stat_id"]
         elif seen.query.get("y_axis"):
             key += ":" + seen.query["y_axis"]
+        elif seen.query.get("media_type"):
+            key += ":" + seen.query["media_type"]
         if key not in data:
             return {"response": {"result": "error", "message": f"no sample for {key}"}}
-        return {"response": {"result": "success", "message": None, "data": data[key]}}
+        answer = data[key]
+        if seen.query.get("media_type"):
+            start, length = int(seen.query["start"]), int(seen.query["length"])
+            answer = dict(answer, data=answer["data"][start:start + length])
+        return {"response": {"result": "success", "message": None, "data": answer}}
     return answer
 
 
@@ -111,7 +124,8 @@ class SmallHelpers(OfflineTestCase):
 class TautulliReport(OfflineTestCase):
     def report(self, **options):
         Network(self, {"/api/v2": tautulli_route()})
-        return wa.tautulli_report(wa.TautulliClient(*TAUTULLI), args(**options))
+        report, _ = wa.tautulli_report(wa.TautulliClient(*TAUTULLI), args(**options))
+        return report
 
     def test_totals_leave_out_tautullis_own_total_series(self):
         report = self.report()
@@ -155,7 +169,8 @@ class TautulliReport(OfflineTestCase):
 class PlexReport(OfflineTestCase):
     def report(self, **options):
         network = Network(self, plex_routes())
-        return wa.plex_report(wa.PlexClient(*PLEX), args(**options)), network.server
+        report, _ = wa.plex_report(wa.PlexClient(*PLEX), args(**options))
+        return report, network.server
 
     def test_counts_only_plays_inside_the_period(self):
         report, _ = self.report()
@@ -184,6 +199,209 @@ class PlexReport(OfflineTestCase):
         self.assertEqual(report["totals"]["plays"], 4)
         pages = [s for s in server.requests if s.path == "/status/sessions/history/all"]
         self.assertEqual([s.headers["x-plex-container-start"] for s in pages], ["0", "2", "4"])
+
+
+# ---------------------------------------------------------------- busiest moment
+
+class BusiestMoment(OfflineTestCase):
+    def test_tautulli_gives_streams_and_transcodes(self):
+        Network(self, {"/api/v2": tautulli_route()})
+        report, _ = wa.tautulli_report(wa.TautulliClient(*TAUTULLI), args())
+        peak = report["most_concurrent_streams"]
+        self.assertEqual((peak["streams"], peak["transcodes"]), (3, 1))
+        self.assertEqual(peak["when"], wa.when(1700000000))
+        self.assertEqual(peak["transcodes_when"], wa.when(1699990000))
+        self.assertIsNone(report["most_concurrent_streams_unavailable"])
+
+    def test_transcodes_missing(self):
+        data = fixture("watch-activity", "tautulli.json")
+        for group in data["get_home_stats"]:
+            if group["stat_id"] == "most_concurrent":
+                group["rows"] = [r for r in group["rows"] if r["title"] == "Concurrent Streams"]
+        Network(self, {"/api/v2": tautulli_route(data)})
+        report, _ = wa.tautulli_report(wa.TautulliClient(*TAUTULLI), args())
+        peak = report["most_concurrent_streams"]
+        self.assertEqual(peak["streams"], 3)
+        self.assertIsNone(peak["transcodes"])
+        self.assertIsNone(peak["transcodes_when"])
+
+    def test_plex_explains_why_there_is_none(self):
+        Network(self, plex_routes())
+        report, _ = wa.plex_report(wa.PlexClient(*PLEX), args())
+        self.assertIsNone(report["most_concurrent_streams"])
+        self.assertIn("started and stopped", report["most_concurrent_streams_unavailable"])
+
+
+# ---------------------------------------------------------------- unfinished titles
+
+class UnfinishedTitles(OfflineTestCase):
+    def report(self, **options):
+        network = Network(self, {"/api/v2": tautulli_route()})
+        report, _ = wa.tautulli_report(wa.TautulliClient(*TAUTULLI), args(**options))
+        return report, network.server
+
+    def test_lists_only_titles_nobody_finished_newest_first(self):
+        report, _ = self.report()
+        self.assertEqual(report["unfinished"], [
+            {"user": "Samantha", "title": "The Show - Second", "type": "episode",
+             "furthest_pct": 5, "plays": 1, "last_played": wa.when(1700000700)},
+            {"user": "Samantha", "title": "The Show - Pilot", "type": "episode",
+             "furthest_pct": 50, "plays": 1, "last_played": wa.when(1700000600)},
+            {"user": "alex-test", "title": "Blade Runner", "type": "movie",
+             "furthest_pct": 35, "plays": 2, "last_played": wa.when(1700000200)},
+        ])
+        self.assertEqual(report["unfinished_count"], 3)
+        self.assertFalse(report["unfinished_capped"])
+        self.assertIsNone(report["unfinished_unavailable"])
+
+    def test_finished_on_a_later_try_is_left_out(self):
+        report, _ = self.report()
+        self.assertNotIn("Dune", [u["title"] for u in report["unfinished"]])
+
+    def test_live_tv_is_left_out(self):
+        report, _ = self.report()
+        self.assertNotIn("Live Thing", [u["title"] for u in report["unfinished"]])
+
+    def test_top_option_limits_the_list_not_the_count(self):
+        report, _ = self.report(top=1)
+        self.assertEqual([u["title"] for u in report["unfinished"]], ["The Show - Second"])
+        self.assertEqual(report["unfinished_count"], 3)
+
+    def test_reads_grouped_movie_and_episode_history_in_pages(self):
+        with mock.patch.object(wa, "TAUTULLI_PAGE_SIZE", 2):
+            report, server = self.report()
+        self.assertEqual(report["unfinished_count"], 3)
+        pages = [s.query for s in server.requests if s.query.get("media_type")]
+        self.assertEqual([(q["media_type"], q["start"]) for q in pages],
+                         [("movie", "0"), ("movie", "2"), ("movie", "4"), ("episode", "0"), ("episode", "2")])
+        self.assertTrue(all(q["grouping"] == "1" for q in pages))
+
+    def test_stops_at_the_row_limit(self):
+        with mock.patch.object(wa, "TAUTULLI_HISTORY_CAP", 4), mock.patch.object(wa, "TAUTULLI_PAGE_SIZE", 3):
+            report, server = self.report()
+        self.assertTrue(report["unfinished_capped"])
+        pages = [s.query for s in server.requests if s.query.get("media_type")]
+        self.assertEqual([(q["media_type"], q["length"]) for q in pages], [("movie", "3"), ("movie", "1")])
+
+    def test_plex_explains_why_there_is_none(self):
+        Network(self, plex_routes())
+        report, _ = wa.plex_report(wa.PlexClient(*PLEX), args())
+        self.assertIsNone(report["unfinished"])
+        self.assertIsNone(report["unfinished_count"])
+        self.assertIn("finished plays", report["unfinished_unavailable"])
+
+
+# ---------------------------------------------------------------- one person
+
+def person(name, *more, key=None):
+    return {"name": name, "names": [name, *more], "id": key or name}
+
+
+class PickingAPerson(OfflineTestCase):
+    people = [person("alex-test", "alex"), person("Samantha", "sam-test"), person("Sammy", "sammy")]
+
+    def test_exact_name_in_a_different_case(self):
+        self.assertEqual(wa.pick_person("ALEX-TEST", self.people, "Plex")["name"], "alex-test")
+
+    def test_any_of_a_persons_names(self):
+        self.assertEqual(wa.pick_person("sam-test", self.people, "Plex")["name"], "Samantha")
+
+    def test_part_of_a_name(self):
+        self.assertEqual(wa.pick_person("manth", self.people, "Plex")["name"], "Samantha")
+
+    def test_exact_name_wins_over_a_longer_one(self):
+        people = self.people + [person("Sam")]
+        self.assertEqual(wa.pick_person("sam", people, "Plex")["name"], "Sam")
+
+    def test_two_people_match(self):
+        with self.assertRaises(wa.PersonError) as caught:
+            wa.pick_person("sam", self.people, "Tautulli")
+        message = str(caught.exception)
+        self.assertTrue(message.startswith("USER_AMBIGUOUS"))
+        self.assertIn("Samantha", message)
+        self.assertIn("Sammy", message)
+
+    def test_nobody_matches_lists_known_names(self):
+        with self.assertRaises(wa.PersonError) as caught:
+            wa.pick_person("zed", self.people, "Tautulli")
+        message = str(caught.exception)
+        self.assertTrue(message.startswith("USER_NOT_FOUND"))
+        self.assertIn("alex-test, Samantha, Sammy", message)
+
+    def test_known_names_are_limited(self):
+        people = [person(f"user{n:02d}") for n in range(40)]
+        with self.assertRaises(wa.PersonError) as caught:
+            wa.pick_person("zed", people, "Plex")
+        self.assertIn("user29", str(caught.exception))
+        self.assertNotIn("user30", str(caught.exception))
+
+
+class OnePerson(OfflineTestCase):
+    def test_tautulli_sends_their_id_with_every_history_and_stats_request(self):
+        network = Network(self, {"/api/v2": tautulli_route()})
+        report, chosen = wa.tautulli_report(wa.TautulliClient(*TAUTULLI), args(user="sam-test"))
+        self.assertEqual(report["user"], "Samantha")
+        self.assertEqual(chosen["names"], ["Samantha", "sam-test"])
+        narrowed = [s.query for s in network.server.requests
+                    if s.query["cmd"] in ("get_home_stats", "get_plays_by_date", "get_history")]
+        self.assertGreater(len(narrowed), 5)
+        self.assertTrue(all(q.get("user_id") == "2" for q in narrowed))
+
+    def test_tautulli_leaves_out_the_server_wide_peak(self):
+        Network(self, {"/api/v2": tautulli_route()})
+        report, _ = wa.tautulli_report(wa.TautulliClient(*TAUTULLI), args(user="alex-test"))
+        self.assertIsNone(report["most_concurrent_streams"])
+        self.assertIn("whole server", report["most_concurrent_streams_unavailable"])
+
+    def test_plex_counts_only_their_plays(self):
+        Network(self, plex_routes())
+        report, _ = wa.plex_report(wa.PlexClient(*PLEX), args(user="alex-test"))
+        self.assertEqual(report["user"], "alex-test")
+        self.assertEqual(report["totals"], {"plays": 2, "watch_hours": None, "active_users": 1})
+        self.assertEqual(report["top_users"], [{"user": "alex-test", "plays": 2}])
+        self.assertEqual({p["user"] for p in report["recent_plays"]}, {"alex-test"})
+        self.assertEqual(sum(d["plays"] for d in report["daily"]), 2)
+
+    def test_everyone_without_a_name(self):
+        Network(self, both_working())
+        self.assertIsNone(wa.build_report(config(), args())["user"])
+
+    def test_plex_nobody_matches(self):
+        Network(self, plex_routes())
+        with self.assertRaises(wa.PersonError) as caught:
+            wa.build_report(config(tautulli=None), args(user="zed"))
+        self.assertTrue(str(caught.exception).startswith("USER_NOT_FOUND"))
+
+    def test_unknown_name_with_tautulli_does_not_fall_back_to_plex(self):
+        network = Network(self, both_working())
+        with self.assertRaises(wa.PersonError) as caught:
+            wa.build_report(config(), args(user="zed"))
+        self.assertTrue(str(caught.exception).startswith("USER_NOT_FOUND"))
+        self.assertNotIn("/status/sessions/history/all", [s.path for s in network.server.requests])
+
+    def test_a_name_containing_401_is_not_owner_only(self):
+        routes = plex_routes()
+        routes["/accounts"] = {"MediaContainer": {"Account": [{"id": 1, "name": "fan401"}]}}
+        Network(self, routes)
+        with self.assertRaises(wa.ReportError) as caught:
+            wa.build_report(config(tautulli=None), args(user="zed"))
+        self.assertTrue(str(caught.exception).startswith("USER_NOT_FOUND"))
+
+    def test_watching_now_keeps_only_their_session(self):
+        Network(self, both_working())
+        report = wa.build_report(config(), args(user="Samantha"))
+        self.assertEqual([s["user"] for s in report["now_watching"]], ["sam-test"])
+        report = wa.build_report(config(tautulli=None), args(user="alex-test"))
+        self.assertEqual([s["user"] for s in report["now_watching"]], ["alex-test"])
+
+    def test_check_ignores_the_name(self):
+        Network(self, both_working())
+        out = io.StringIO()
+        with mock.patch.object(wa, "load_config", return_value=config()), \
+                mock.patch.object(sys, "argv", ["watch_activity.py", "--check", "--user", "zed"]), \
+                contextlib.redirect_stdout(out):
+            self.assertEqual(wa.main(), 0)
+        self.assertTrue(json.loads(out.getvalue())["ok"])
 
 
 # ---------------------------------------------------------------- choosing a source

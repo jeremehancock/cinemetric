@@ -161,5 +161,133 @@
     "ip_address": "192.0.2.20"
    }
   ]
+ },
+ "get_users": [
+  {
+   "user_id": 1,
+   "friendly_name": "alex-test",
+   "username": "alex"
+  },
+  {
+   "user_id": 2,
+   "friendly_name": "Samantha",
+   "username": "sam-test"
+  },
+  {
+   "user_id": 3,
+   "friendly_name": "Sammy",
+   "username": "sammy"
+  },
+  {
+   "user_id": 4,
+   "friendly_name": "",
+   "username": ""
+  }
+ ],
+ "get_history:movie": {
+  "recordsFiltered": 5,
+  "data": [
+   {
+    "user_id": 2,
+    "friendly_name": "Samantha",
+    "rating_key": 12,
+    "full_title": "Live Thing",
+    "media_type": "movie",
+    "percent_complete": 10,
+    "watched_status": 0,
+    "date": 1700000700,
+    "stopped": 1700000800,
+    "live": 1
+   },
+   {
+    "user_id": 1,
+    "friendly_name": "alex-test",
+    "rating_key": 11,
+    "full_title": "Dune",
+    "media_type": "movie",
+    "percent_complete": 98,
+    "watched_status": 1,
+    "date": 1700000300,
+    "stopped": 1700000400,
+    "live": 0
+   },
+   {
+    "user_id": 1,
+    "friendly_name": "alex-test",
+    "rating_key": 11,
+    "full_title": "Dune",
+    "media_type": "movie",
+    "percent_complete": 40,
+    "watched_status": 0.5,
+    "date": 1700000200,
+    "stopped": 1700000300,
+    "live": 0
+   },
+   {
+    "user_id": 1,
+    "friendly_name": "alex-test",
+    "rating_key": 10,
+    "full_title": "Blade Runner",
+    "media_type": "movie",
+    "percent_complete": 35,
+    "watched_status": 0.5,
+    "date": 1700000100,
+    "stopped": 1700000200,
+    "live": 0
+   },
+   {
+    "user_id": 1,
+    "friendly_name": "alex-test",
+    "rating_key": 10,
+    "full_title": "Blade Runner",
+    "media_type": "movie",
+    "percent_complete": 20,
+    "watched_status": 0,
+    "date": 1700000000,
+    "stopped": 1700000100,
+    "live": 0
+   }
+  ]
+ },
+ "get_history:episode": {
+  "recordsFiltered": 3,
+  "data": [
+   {
+    "user_id": 2,
+    "friendly_name": "Samantha",
+    "rating_key": 21,
+    "full_title": "The Show - Second",
+    "media_type": "episode",
+    "percent_complete": 5,
+    "watched_status": 0,
+    "date": 1700000600,
+    "stopped": 1700000700,
+    "live": 0
+   },
+   {
+    "user_id": 2,
+    "friendly_name": "Samantha",
+    "rating_key": 20,
+    "full_title": "The Show - Pilot",
+    "media_type": "episode",
+    "percent_complete": 50,
+    "watched_status": 0.5,
+    "date": 1700000500,
+    "stopped": 1700000600,
+    "live": 0
+   },
+   {
+    "user_id": 1,
+    "friendly_name": "alex-test",
+    "rating_key": 20,
+    "full_title": "The Show - Pilot",
+    "media_type": "episode",
+    "percent_complete": 100,
+    "watched_status": 1,
+    "date": 1700000400,
+    "stopped": 1700000500,
+    "live": 0
+   }
+  ]
  }
 }

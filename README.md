@@ -1,8 +1,9 @@
 # Cinemetric
 
-> [!WARNING]
-> **Work in progress.** Cinemetric is in early development. Skills, setup steps and report formats may
-> change without notice. Feedback and bug reports are welcome via GitHub issues.
+> [!NOTE]
+> **Early days.** Cinemetric is still growing, so skills, setup steps and report formats may change
+> between versions. Ideas and bug reports are welcome via
+> [GitHub issues](https://github.com/jeremehancock/cinemetric/issues).
 
 **Claude skills for your Plex server.** Ask Claude Code about your media library and get a clear,
 plain-English report: what you have, how much space it uses, what quality it's in, what was just added,
@@ -123,6 +124,14 @@ work starts as an OpenSpec change proposal (`/opsx:propose`) before any code is 
 
 - [ ] **`quality-upgrades`**: titles only available in SD or 720p that may be worth replacing
 - [ ] **`users-and-shares`**: who has access to your server and which libraries are shared with whom
+
+## Support Development
+
+Cinemetric is free and open source, and it stays that way. If it has been useful to you and you'd like
+to help keep it maintained, you can support development at
+[cinemetric.dev/#support](https://cinemetric.dev/#support). Feedback and bug reports are just as welcome.
+
+[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://www.buymeacoffee.com/jeremehancock)
 
 ## License
 

@@ -357,6 +357,19 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
 .notice.caution { border-color: rgba(240, 180, 41, .3); background: linear-gradient(135deg, rgba(240, 180, 41, .07), transparent 60%), var(--bg-2); }
 .notice.caution h2 { color: var(--warn); }
 
+/* ---------- Support ---------- */
+.support-section { padding-top: 20px; }
+.support {
+  max-width: 720px; margin: 0 auto; text-align: center;
+  display: flex; flex-direction: column; align-items: center;
+  padding: clamp(30px, 5vw, 48px) clamp(20px, 5vw, 48px);
+  border: 1px solid var(--line); border-radius: 20px;
+  background: radial-gradient(520px 300px at 50% 0%, rgba(229, 160, 13, .12), transparent 70%), var(--panel);
+}
+.support-ico { width: 52px; height: 52px; padding: 13px; border-radius: 14px; color: var(--accent-hi); background: rgba(229, 160, 13, .14); margin-bottom: 18px; }
+.support h2 { font-size: clamp(1.5rem, 3vw, 1.9rem); margin-bottom: 12px; }
+.support p { color: var(--muted); max-width: 54ch; margin: 0 0 26px; }
+
 /* ---------- Footer ---------- */
 .site-footer { border-top: 1px solid var(--line); padding: 44px 0 36px; background: #0c0d0f; }
 .footer-inner { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 24px; margin-bottom: 26px; }

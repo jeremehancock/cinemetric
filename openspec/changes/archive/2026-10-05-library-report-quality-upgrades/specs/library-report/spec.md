@@ -1,18 +1,4 @@
-# library-report Specification
-
-## Purpose
-
-A read-only summary of what's in a Plex server's libraries: counts, storage, video quality and codecs,
-recent additions and housekeeping problems. Script: `skills/library-report/scripts/library_report.py`.
-How Claude presents it is in the skill's `SKILL.md`.
-## Requirements
-### Requirement: Plex paths used
-The script SHALL request only `/`, `/library/sections` and `/library/sections/{id}/all`, reading items
-in pages of 500.
-
-#### Scenario: Large library
-- **WHEN** a library has more than 500 items of a type
-- **THEN** the script fetches them page by page until it has them all
+## MODIFIED Requirements
 
 ### Requirement: Options
 The script SHALL accept `--library NAME` (repeatable, case-insensitive; error if nothing matches),
@@ -62,91 +48,7 @@ The report SHALL contain `cinemetric_version`, `generated_at`, `server` (name, v
 - **WHEN** a library is a music library
 - **THEN** its entry has no `duplicates` or `upgrades` section
 
-### Requirement: Media breakdown
-`media` SHALL include the number of files and their total size in GB, resolution split (4K, 2K,
-1080p, 720p, SD, or the raw value), video codecs, audio codecs, the number of 10-bit files, very
-large files (up to 15 examples, largest first, plus a total) and files Plex lists as unavailable (up
-to 15 examples plus a count). A file counts as 10-bit when its video profile contains "10"; the
-report SHALL NOT call these files HDR, because the library listing doesn't say which files are HDR.
-
-#### Scenario: A file Plex can't find
-- **WHEN** a media item has a `deletedAt` value
-- **THEN** it is counted in `unavailable_files` and listed in `unavailable_examples`
-
-### Requirement: Housekeeping
-`housekeeping` SHALL count items with no poster and items that are unmatched (no `guid`, or a
-`local://` one), each with up to 15 examples.
-
-#### Scenario: Unmatched movie
-- **WHEN** a movie's `guid` starts with `local://`
-- **THEN** it is counted in `unmatched_count`
-
-### Requirement: Duplicates within a library
-A copy SHALL be one of an item's media versions (a `Media` entry). A copy SHALL NOT be counted if
-it has a `deletedAt` value (Plex can't find it) or a `proxyType` value (a Plex optimized version).
-A copy's size SHALL be the total size of its parts, so a movie split across several files is one
-copy. An item with two or more counted copies is a duplicate; its extra space SHALL be the total
-size of all its copies except the largest one.
-
-Each movie and show library's `duplicates` section SHALL contain `titles` (items with two or more
-copies), `extra_copies` (copies beyond the first, summed over those items), `extra_gb` and
-`examples`, ordered by extra space, largest first, up to the `--duplicate-examples` limit:
-- movie: one example per movie with `title` (as in other movie labels), `extra_gb` and `copies`,
-  each copy giving `resolution` (same buckets as the media breakdown), `video_codec` and `gb`.
-- show: one example per show with `title` (the show), `episodes` (duplicated episodes in it) and
-  `extra_gb`.
-
-#### Scenario: Two versions of a movie
-- **WHEN** a movie has a 4K copy of 60 GB and a 1080p copy of 12 GB
-- **THEN** it counts as one title with one extra copy and 12 GB of extra space, and its example
-  lists both copies
-
-#### Scenario: A movie split into two files
-- **WHEN** a movie has one `Media` entry with two parts
-- **THEN** it is not a duplicate
-
-#### Scenario: A copy Plex can't find
-- **WHEN** a movie has two `Media` entries and one has a `deletedAt` value
-- **THEN** it is not a duplicate (the missing file is reported only as unavailable)
-
-#### Scenario: Optimized version
-- **WHEN** a movie has its original copy plus a `Media` entry with a `proxyType` value
-- **THEN** it is not a duplicate
-
-#### Scenario: A duplicated season
-- **WHEN** ten episodes of one show each have two copies
-- **THEN** the library's `titles` counts ten, and the examples list that show once with
-  `episodes` of 10
-
-### Requirement: Duplicates across libraries
-The script SHALL find movies, and episodes, whose `guid` appears in more than one of the libraries
-being reported (only those chosen with `--library`, when given). Items with no `guid` or a
-`local://` one SHALL be skipped. Each library's copy SHALL be that item's largest counted copy, so
-extra copies inside a single library are not counted twice. The extra space SHALL be the total of
-the libraries' copies except the largest one.
-
-`cross_library_duplicates` SHALL contain `titles`, `extra_gb` and `examples` (largest extra space
-first, up to the `--duplicate-examples` limit). A movie example SHALL give `title`, `extra_gb` and
-`libraries`, each with `library`, `resolution` and `gb`. Episodes SHALL be grouped by show and
-library set into one example with `title` (the show), `episodes`, `extra_gb` and `libraries` (the
-library names).
-
-#### Scenario: Same movie in two libraries
-- **WHEN** a movie with guid `plex://movie/abc` is in "Movies" at 10 GB and in "4K Movies" at 55 GB
-- **THEN** `cross_library_duplicates` counts it once with 10 GB of extra space, listing both
-  libraries
-
-#### Scenario: Unmatched items aren't compared
-- **WHEN** two libraries each contain an item whose guid starts with `local://`
-- **THEN** neither is counted as a cross-library duplicate
-
-#### Scenario: Limited to one library
-- **WHEN** the script runs with `--library Movies` only
-- **THEN** `cross_library_duplicates` has `titles` of 0 and no examples
-
-#### Scenario: No extra Plex requests
-- **WHEN** the report finds duplicates
-- **THEN** it has used only the Plex paths it already requests for the rest of the report
+## ADDED Requirements
 
 ### Requirement: Upgrade candidates
 Copies SHALL be counted as in "Duplicates within a library" (no `deletedAt`, no `proxyType`). An
@@ -204,4 +106,3 @@ Each movie and show library's `upgrades` section SHALL contain `titles` (candida
 #### Scenario: No extra Plex requests for upgrades
 - **WHEN** the report finds upgrade candidates
 - **THEN** it has used only the Plex paths it already requests for the rest of the report
-

@@ -25,7 +25,8 @@ def media(resolution="1080", codec="h264", gb=1.0, parts=1, **extra):
 
 
 def args(**overrides):
-    values = {"library": None, "recent": 10, "large_gb": 40.0, "duplicate_examples": 15}
+    values = {"library": None, "recent": 10, "large_gb": 40.0, "duplicate_examples": 15,
+              "upgrade_examples": 15}
     values.update(overrides)
     return argparse.Namespace(**values)
 
@@ -220,6 +221,89 @@ class DuplicatesAcrossLibraries(OfflineTestCase):
             {"title": "The Show", "episodes": 2, "libraries": ["Kids TV", "TV"], "extra_gb": 2.0}])
 
 
+# ---------------------------------------------------------------- upgrade candidates
+
+def upgrades(libraries, limit=15, by_show=False):
+    """Run the upgrade steps the way build_report does: every library first, then each one's section."""
+    ranks, pending = {}, []
+    for name, items in libraries.items():
+        label = lr.episode_label if by_show else lr.movie_label
+        pending.append((name, lr.upgrade_candidates(items, label, ranks, name)))
+    return {name: lr.library_upgrades(found, ranks, name, limit, by_show) for name, found in pending}
+
+
+class UpgradeCandidates(OfflineTestCase):
+    def test_best_copy_is_the_highest_resolution(self):
+        item = movie("Film", media=[media("720", gb=20), media("1080", gb=8), media("1080", gb=9),
+                                    media("4k", gb=60, deletedAt=1), media("8k", gb=90)])
+        best = lr.best_copy(item)
+        self.assertEqual((best["resolution"], best["bytes"]), ("1080p", 9 * GB))
+        self.assertIsNone(lr.best_copy(movie("Odd", media=[media(None), media("8k")])))
+
+    def test_old_sd_movie(self):
+        out = upgrades({"Movies": [movie("Old", year=1950, media=[media("480", "mpeg4", gb=1.4)]),
+                                   movie("New", media=[media("1080")])]})["Movies"]
+        self.assertEqual(out, {
+            "titles": 1,
+            "by_resolution": {"SD": 1, "720p": 0},
+            "covered_elsewhere": 0,
+            "examples": [{"title": "Old (1950)", "resolution": "SD", "video_codec": "mpeg4", "gb": 1.4}],
+        })
+
+    def test_better_copy_in_the_same_library(self):
+        out = upgrades({"Movies": [movie("Film", media=[media("720"), media("1080")])]})["Movies"]
+        self.assertEqual(out["titles"], 0)
+
+    def test_optimized_version_does_not_count_as_better(self):
+        out = upgrades({"Movies": [movie("Film", media=[media("720"), media("1080", proxyType=42)])]})["Movies"]
+        self.assertEqual(out["by_resolution"], {"SD": 0, "720p": 1})
+
+    def test_unknown_resolution_is_left_out(self):
+        out = upgrades({"Movies": [movie("Film", media=[media(None)])]})["Movies"]
+        self.assertEqual(out["titles"], 0)
+
+    def test_better_copy_in_another_library(self):
+        out = upgrades({
+            "Movies": [movie("Film", "plex://movie/abc", media=[media("720")]),
+                       movie("Home", "local://1", media=[media("720")])],
+            "4K Movies": [movie("Film", "plex://movie/abc", media=[media("4k")]),
+                          movie("Home", "local://1", media=[media("4k")])],
+        })
+        self.assertEqual(out["Movies"]["titles"], 1)  # the local:// item can't be matched
+        self.assertEqual(out["Movies"]["examples"][0]["title"], "Home")
+        self.assertEqual(out["Movies"]["covered_elsewhere"], 1)
+        self.assertEqual(out["4K Movies"]["titles"], 0)
+
+    def test_other_library_that_is_also_low_quality_does_not_cover(self):
+        out = upgrades({"Movies": [movie("Film", media=[media("720")])],
+                        "Kids Movies": [movie("Film", media=[media("480")])]})
+        self.assertEqual((out["Movies"]["titles"], out["Kids Movies"]["titles"]), (1, 1))
+
+    def test_movies_are_ordered_sd_first_then_by_title(self):
+        items = [movie(t, media=[media(r)]) for t, r in [("b", "720"), ("A", "720"), ("c", "sd"), ("D", "1080")]]
+        out = upgrades({"Movies": items})["Movies"]
+        self.assertEqual([e["title"] for e in out["examples"]], ["c", "A", "b"])
+
+    def test_series_is_grouped_by_show(self):
+        def episode(show, number, resolution):
+            return {"grandparentTitle": show, "grandparentRatingKey": show, "guid": f"{show}/{number}",
+                    "parentIndex": 1, "index": number, "Media": [media(resolution)]}
+        items = ([episode("Old Show", n, "720") for n in range(30)] + [episode("Old Show", 30 + n, "480") for n in range(2)]
+                 + [episode("Small Show", 1, "720"), episode("New Show", 1, "1080")])
+        out = upgrades({"TV": items}, by_show=True)["TV"]
+        self.assertEqual(out["titles"], 33)
+        self.assertEqual(out["examples"], [
+            {"title": "Old Show", "episodes": 32, "by_resolution": {"SD": 2, "720p": 30}},
+            {"title": "Small Show", "episodes": 1, "by_resolution": {"SD": 0, "720p": 1}},
+        ])
+
+    def test_example_limit(self):
+        items = [movie(f"Film {n}", media=[media("720")]) for n in range(5)]
+        self.assertEqual(len(upgrades({"Movies": items}, limit=2)["Movies"]["examples"]), 2)
+        out = upgrades({"Movies": items}, limit=0)["Movies"]
+        self.assertEqual((out["titles"], out["examples"]), (5, []))
+
+
 # ---------------------------------------------------------------- whole report
 
 def fake_plex(page_size=None):
@@ -284,6 +368,21 @@ class WholeReport(OfflineTestCase):
         self.assertEqual(tv["housekeeping"]["unmatched_examples"], ["Mystery Show"])
         self.assertEqual(tv["duplicates"]["examples"], [{"title": "The Show", "episodes": 1, "extra_gb": 1.0}])
         self.assertEqual(tv["recently_added"][0]["title"], "The Show S01E02")
+
+    def test_upgrades(self):
+        report = self.report(fake_plex())
+        movies, tv, kids = report["libraries"][:3]
+        self.assertEqual(movies["upgrades"]["examples"],
+                         [{"title": "Home Video", "resolution": "SD", "video_codec": "mpeg2video", "gb": 1.0}])
+        self.assertEqual(tv["upgrades"]["examples"],
+                         [{"title": "Mystery Show", "episodes": 1, "by_resolution": {"SD": 1, "720p": 0}}])
+        self.assertEqual(kids["upgrades"]["titles"], 0)
+
+    def test_music_library_has_no_duplicates_or_upgrades(self):
+        client = mock.Mock(get_all=lambda sid, kind: [], count=lambda sid, kind: 0)
+        music = lr.summarise_section(client, {"key": "9", "type": "artist", "title": "Music"}, args(), {}, {}, [])
+        self.assertNotIn("duplicates", music)
+        self.assertNotIn("upgrades", music)
 
     def test_photo_library_is_counted_only(self):
         photos = self.report(fake_plex())["libraries"][3]

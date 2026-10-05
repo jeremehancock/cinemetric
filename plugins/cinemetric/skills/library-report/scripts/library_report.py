@@ -20,7 +20,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.6.0"
+VERSION = "0.7.0"
 PAGE_SIZE = 500
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
@@ -396,6 +396,76 @@ def cross_library_duplicates(guids, limit):
     return {"titles": titles, "extra_gb": gb(extra), "examples": top_examples(rows.values(), limit)}
 
 
+# Resolutions in quality order. Anything else (unknown, 8k, ...) can't be judged and is left out.
+RESOLUTION_RANK = {"SD": 0, "720p": 1, "1080p": 2, "2K": 3, "4K": 4}
+UPGRADE_BELOW = RESOLUTION_RANK["1080p"]
+
+
+def best_copy(item):
+    """The copy with the highest known resolution (the largest, if several share it), or None."""
+    ranked = [c for c in copies(item) if c["resolution"] in RESOLUTION_RANK]
+    if not ranked:
+        return None
+    return max(ranked, key=lambda c: (RESOLUTION_RANK[c["resolution"]], c["bytes"]))
+
+
+def upgrade_candidates(items, label_fn, ranks, library):
+    """Items whose best copy is below 1080p. Also records each matched item's best rank by guid,
+    so build_report can drop candidates another library already has in better quality."""
+    found = []
+    for item in items:
+        best = best_copy(item)
+        if not best:
+            continue
+        rank = RESOLUTION_RANK[best["resolution"]]
+        guid = None if is_unmatched(item) else str(item.get("guid"))
+        if guid:
+            per_library = ranks.setdefault(guid, {})
+            per_library[library] = max(rank, per_library.get(library, -1))
+        if rank < UPGRADE_BELOW:
+            found.append({"guid": guid, "label": label_fn(item), "copy": best,
+                          "show": clean(item.get("grandparentTitle")),
+                          "show_key": item.get("grandparentRatingKey") or item.get("grandparentTitle")})
+    return found
+
+
+def library_upgrades(candidates, ranks, library, limit, by_show=False):
+    """Finish one library's upgrades section once every library has been read."""
+    titles = covered = 0
+    by_resolution = {"SD": 0, "720p": 0}
+    rows = {}
+    for cand in candidates:
+        elsewhere = ranks.get(cand["guid"], {}) if cand["guid"] else {}
+        if any(rank >= UPGRADE_BELOW for name, rank in elsewhere.items() if name != library):
+            covered += 1
+            continue
+        resolution = cand["copy"]["resolution"]
+        titles += 1
+        by_resolution[resolution] += 1
+        if by_show:
+            row = rows.setdefault(cand["show_key"], {
+                "title": cand["show"], "episodes": 0, "by_resolution": {"SD": 0, "720p": 0}})
+            row["episodes"] += 1
+            row["by_resolution"][resolution] += 1
+        else:
+            rows[len(rows)] = {
+                "title": cand["label"],
+                "resolution": resolution,
+                "video_codec": cand["copy"]["video_codec"],
+                "gb": gb(cand["copy"]["bytes"]),
+            }
+    if by_show:
+        order = lambda r: (-r["episodes"], r["title"].lower())
+    else:
+        order = lambda r: (RESOLUTION_RANK[r["resolution"]], r["title"].lower())
+    return {
+        "titles": titles,
+        "by_resolution": by_resolution,
+        "covered_elsewhere": covered,
+        "examples": sorted(rows.values(), key=order)[:limit],
+    }
+
+
 def movie_label(item):
     year = item.get("year")
     return clean(f"{item.get('title')} ({year})" if year else item.get("title"))
@@ -408,7 +478,7 @@ def episode_label(item):
     )
 
 
-def summarise_section(client, section, args, guids):
+def summarise_section(client, section, args, guids, ranks, pending):
     sid, kind = section.get("key"), section.get("type")
     out = {"name": clean(section.get("title")), "type": kind}
     large = int(args.large_gb * 1e9)
@@ -424,6 +494,8 @@ def summarise_section(client, section, args, guids):
         out["housekeeping"] = housekeeping(movies, movie_label)
         out["duplicates"] = library_duplicates(movies, movie_label, args.duplicate_examples)
         remember_guids(guids, movies, out["name"], movie_label)
+        out["upgrades"] = None  # finished in build_report, once every library has been read
+        pending.append((out, upgrade_candidates(movies, movie_label, ranks, out["name"]), False))
 
     elif kind == "show":
         shows = client.get_all(sid, TYPE_SHOW)
@@ -441,6 +513,8 @@ def summarise_section(client, section, args, guids):
         out["housekeeping"] = housekeeping(shows, lambda s: clean(s.get("title")))
         out["duplicates"] = library_duplicates(episodes, episode_label, args.duplicate_examples, by_show=True)
         remember_guids(guids, episodes, out["name"], episode_label, show=True)
+        out["upgrades"] = None  # finished in build_report, once every library has been read
+        pending.append((out, upgrade_candidates(episodes, episode_label, ranks, out["name"]), True))
 
     elif kind == "artist":
         tracks = client.get_all(sid, TYPE_TRACK)
@@ -475,10 +549,12 @@ def build_report(client, args):
         if not sections:
             raise ReportError("No library matched --library. Run without it to see all names.")
 
-    libraries, guids = [], {}
+    libraries, guids, ranks, pending = [], {}, {}, []
     for section in sections:
         print(f"reading library: {clean(section.get('title'))}", file=sys.stderr)
-        libraries.append(summarise_section(client, section, args, guids))
+        libraries.append(summarise_section(client, section, args, guids, ranks, pending))
+    for lib, candidates, by_show in pending:
+        lib["upgrades"] = library_upgrades(candidates, ranks, lib["name"], args.upgrade_examples, by_show)
 
     totals = {"libraries": len(libraries), "files": 0, "size_gb": 0.0}
     for lib in libraries:
@@ -507,9 +583,11 @@ def main():
     parser.add_argument("--recent", type=int, default=10, help="recently added items per library")
     parser.add_argument("--large-gb", type=float, default=40.0, help="flag files at least this many GB")
     parser.add_argument("--duplicate-examples", type=int, default=15, help="duplicate examples listed per section")
+    parser.add_argument("--upgrade-examples", type=int, default=15, help="upgrade examples listed per library")
     args = parser.parse_args()
     args.recent = max(0, min(args.recent, 100))
     args.duplicate_examples = max(0, min(args.duplicate_examples, 500))
+    args.upgrade_examples = max(0, min(args.upgrade_examples, 500))
 
     try:
         client = PlexClient(*load_config())

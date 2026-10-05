@@ -122,7 +122,6 @@ work starts as an OpenSpec change proposal (`/opsx:propose`) before any code is 
 
 **Ideas for later**
 
-- [ ] **`quality-upgrades`**: titles only available in SD or 720p that may be worth replacing
 - [ ] **`users-and-shares`**: who has access to your server and which libraries are shared with whom
 
 ## Support Development

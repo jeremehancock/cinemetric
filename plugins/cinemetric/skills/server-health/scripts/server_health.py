@@ -22,7 +22,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.10.1"
+VERSION = "0.11.0"
 TIMEOUT_SECONDS = 30
 MAX_TITLE_LENGTH = 120
 
@@ -46,14 +46,28 @@ IMPORTANT_TASKS = {"BackupDatabase", "OptimizeDatabase", "CleanOldBundles", "Cle
 # checked for being stuck.
 UNWATCHED_TASK_TYPES = ("provider.subscription.", "grabber.")
 
-# Server settings worth reporting. Everything else in /:/prefs is ignored.
-PREF_IDS = {
+# Server settings worth reporting. Everything else in /:/prefs is ignored, since it also holds
+# values that must never be printed.
+MAINTENANCE_PREFS = {
     "ButlerStartHour": "maintenance_start_hour",
     "ButlerEndHour": "maintenance_end_hour",
     "FSEventLibraryUpdatesEnabled": "scan_on_folder_change",
     "ScheduledLibraryUpdatesEnabled": "scheduled_scans_enabled",
     "ScheduledLibraryUpdateInterval": "scheduled_scan_interval_seconds",
+    "autoEmptyTrash": "empty_trash_after_scan",
 }
+STREAMING_PREFS = {
+    "HardwareAcceleratedCodecs": "hardware_acceleration",
+    "HardwareAcceleratedEncoders": "hardware_encoding",
+    "TranscoderCanOnlyRemuxVideo": "video_transcoding_disabled",
+    "WanPerStreamMaxUploadRate": "remote_stream_limit_kbps",
+    "WanTotalMaxUploadRate": "remote_total_upload_limit_kbps",
+    # Only whether a custom folder is set; the path itself is never kept.
+    "TranscoderTempDirectory": "custom_transcoder_temp_folder",
+}
+
+# Plex labels remote limits below 8 Mbps as 720p or lower, so remote viewers can't get 1080p.
+LOW_REMOTE_LIMIT_KBPS = 8000
 
 
 class ReportError(Exception):
@@ -211,13 +225,31 @@ def as_bool(value):
 
 
 def when(epoch):
+    # Plex uses 0 or -1 for "never" (for example an update check that hasn't run).
     epoch = as_int(epoch)
-    return time.strftime("%Y-%m-%d %H:%M", time.localtime(epoch)) if epoch else None
+    return time.strftime("%Y-%m-%d %H:%M", time.localtime(epoch)) if epoch > 0 else None
 
 
 def days_ago(epoch, now):
     epoch = as_int(epoch)
-    return round((now - epoch) / 86400, 1) if epoch else None
+    return round((now - epoch) / 86400, 1) if epoch > 0 else None
+
+
+def once(fn):
+    """Call fn the first time only, then hand back the same result (or raise the same error)."""
+    saved = []
+
+    def wrapper():
+        if not saved:
+            try:
+                saved.append((fn(), None))
+            except ReportError as exc:
+                saved.append((None, exc))
+        result, error = saved[0]
+        if error:
+            raise error
+        return result
+    return wrapper
 
 
 def optional(name, fn, unavailable):
@@ -471,17 +503,19 @@ def maintenance_tasks(client):
     return {"enabled": enabled, "disabled": disabled, "important_disabled": important_off}
 
 
-def maintenance_settings(client):
-    data = client.get("/:/prefs")
+def pick_settings(prefs, table):
+    """Keep only the settings in table, renamed and converted. Missing settings are left out."""
     found = {}
-    for setting in data.get("Setting", []) or []:
-        name = PREF_IDS.get(setting.get("id"))
+    for setting in prefs.get("Setting", []) or []:
+        name = table.get(setting.get("id"))
         if not name:
             continue
         value = setting.get("value")
-        if isinstance(value, bool) or setting.get("type") == "bool":
+        if name == "custom_transcoder_temp_folder":
+            value = bool(str(value or "").strip())
+        elif isinstance(value, bool) or setting.get("type") == "bool":
             value = as_bool(value)
-        elif name.endswith(("_hour", "_seconds")):
+        elif name.endswith(("_hour", "_seconds", "_kbps")):
             value = as_int(value, None)
         found[name] = value
     return found
@@ -515,6 +549,16 @@ def worth_a_look(report, stale_days, stuck_wait=0):
     if remote and remote.get("state") not in (None, "mapped"):
         notes.append({"kind": "remote_access_not_working", "state": remote.get("state"),
                       "error": remote.get("error_message") or remote.get("error")})
+
+    # Facts about how the server is set up; a setting the server didn't return is never flagged.
+    streaming = report["server"].get("streaming_settings") or {}
+    if streaming.get("hardware_acceleration") is False:
+        notes.append({"kind": "hardware_transcoding_off"})
+    if streaming.get("video_transcoding_disabled") is True:
+        notes.append({"kind": "video_transcoding_off"})
+    limit = streaming.get("remote_stream_limit_kbps")
+    if 0 < (limit or 0) < LOW_REMOTE_LIMIT_KBPS:
+        notes.append({"kind": "remote_stream_limit_low", "limit_kbps": limit})
 
     live = report.get("live_activity")
     if live:
@@ -570,11 +614,16 @@ def build_report(client, args):
     now = int(time.time())
     root = client.get("/")
     unavailable = []
+    # One /:/prefs request feeds both settings parts; if it fails, both are listed as unavailable.
+    prefs = once(lambda: client.get("/:/prefs"))
 
     server = server_basics(root)
     server["update"] = optional("update check", lambda: update_status(client), unavailable)
     server["remote_access"] = optional("remote access", lambda: remote_access(client), unavailable)
     server["resource_use"] = optional("CPU and memory", lambda: resource_use(client), unavailable)
+    server["streaming_settings"] = optional(
+        "streaming settings", lambda: pick_settings(prefs(), STREAMING_PREFS), unavailable
+    )
 
     background = {
         "running_now": optional(
@@ -585,7 +634,7 @@ def build_report(client, args):
         ),
         "maintenance_tasks": optional("maintenance tasks", lambda: maintenance_tasks(client), unavailable),
         "maintenance_settings": optional(
-            "maintenance settings", lambda: maintenance_settings(client), unavailable
+            "maintenance settings", lambda: pick_settings(prefs(), MAINTENANCE_PREFS), unavailable
         ),
     }
 

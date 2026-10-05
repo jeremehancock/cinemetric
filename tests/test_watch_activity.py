@@ -83,6 +83,11 @@ def both_working():
 # ---------------------------------------------------------------- small helpers
 
 class SmallHelpers(OfflineTestCase):
+    def test_never_is_not_a_date(self):
+        for never in (-1, 0, None, ""):
+            self.assertIsNone(wa.when(never))
+        self.assertIsNotNone(wa.when(1_700_000_000))
+
     def test_trend_compares_halves(self):
         daily = [{"plays": n} for n in (1, 2, 3, 4, 5)]
         self.assertEqual(wa.trend(daily), {"earlier_half_plays": 3, "recent_half_plays": 12})

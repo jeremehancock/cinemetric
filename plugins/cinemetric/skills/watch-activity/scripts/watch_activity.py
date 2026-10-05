@@ -21,7 +21,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.10.1"
+VERSION = "0.11.0"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 PLEX_PAGE_SIZE = 200
@@ -255,8 +255,9 @@ def hours(seconds):
 
 
 def when(epoch):
+    # Plex uses 0 or -1 for "never" (for example an update check that hasn't run).
     epoch = as_int(epoch)
-    return time.strftime("%Y-%m-%d %H:%M", time.localtime(epoch)) if epoch else None
+    return time.strftime("%Y-%m-%d %H:%M", time.localtime(epoch)) if epoch > 0 else None
 
 
 def trend(daily):

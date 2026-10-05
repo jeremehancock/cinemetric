@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MediaContainer friendlyName="myPlex" identifier="com.plexapp.plugins.myplex" machineIdentifier="plextv-machine-id" size="4">
+<Invite id="107" createdAt="DAYS:10" friend="1" home="0" server="1" username="frankie" email="frankie@example.com" thumb="https://plex.tv/users/gggg/avatar" friendlyName="frankie"/>
+<Invite id="108" createdAt="DAYS:60" friend="1" home="0" server="1" username="" email="someone@example.com" thumb="" friendlyName="someone@example.com"/>
+<Invite id="109" createdAt="DAYS:5" friend="1" home="0" server="0" username="gale" email="gale@example.com" thumb="" friendlyName="gale"/>
+<Invite id="105" createdAt="DAYS:45" friend="1" home="0" server="1" username="drew" email="drew@example.com" thumb="" friendlyName="drew"/>
+</MediaContainer>

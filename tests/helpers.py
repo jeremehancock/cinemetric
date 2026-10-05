@@ -30,6 +30,7 @@ SCRIPTS = {
     "library-report": "library_report.py",
     "server-health": "server_health.py",
     "setup": "setup.py",
+    "users-and-shares": "users_and_shares.py",
     "watch-activity": "watch_activity.py",
 }
 

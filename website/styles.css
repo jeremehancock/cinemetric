@@ -193,11 +193,12 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
 .shelf-section { padding-top: 40px; }
 .shelf {
   list-style: none; margin: 0; padding: 0;
-  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 20px;
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px;
 }
 .poster {
   position: relative; display: flex; flex-direction: column; justify-content: flex-end;
-  aspect-ratio: 2 / 3; padding: 18px; border-radius: var(--radius); overflow: hidden;
+  aspect-ratio: 2 / 3; padding: 16px 14px; border-radius: var(--radius); overflow: hidden;
+  container-type: inline-size;
   text-decoration: none; color: var(--text);
   background:
     radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--a) 45%, transparent), transparent 65%),
@@ -216,7 +217,11 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
 .poster-art { position: absolute; top: 22%; left: 50%; transform: translateX(-50%); width: 46%; color: var(--a); filter: drop-shadow(0 8px 24px color-mix(in srgb, var(--a) 60%, transparent)); transition: transform .4s var(--ease); }
 .poster:hover .poster-art { transform: translateX(-50%) scale(1.08); }
 .poster-art svg { width: 100%; height: auto; }
-.poster-title { font-family: var(--mono); font-weight: 700; font-size: .98rem; word-break: break-word; }
+.poster-title {
+  font-family: var(--mono); font-weight: 700; white-space: nowrap;
+  /* Shrink with the poster so the longest name ("users-and-shares", 16 characters) fits on one line. */
+  font-size: .8rem; font-size: clamp(.68rem, 10cqi, .98rem);
+}
 .poster-sub { color: var(--muted); font-size: .88rem; }
 
 /* ---------- Feature rows ---------- */
@@ -387,7 +392,7 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1000px) {
-  .shelf { grid-template-columns: repeat(5, minmax(150px, 1fr)); overflow-x: auto; scroll-snap-type: x mandatory; padding: 12px 4px 20px; margin: -12px -4px 0; scrollbar-width: thin; }
+  .shelf { grid-template-columns: repeat(6, minmax(170px, 1fr)); overflow-x: auto; scroll-snap-type: x mandatory; padding: 12px 4px 20px; margin: -12px -4px 0; scrollbar-width: thin; }
   .shelf li { scroll-snap-align: start; }
   .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

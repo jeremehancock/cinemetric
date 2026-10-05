@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MediaContainer friendlyName="myPlex" identifier="com.plexapp.plugins.myplex" machineIdentifier="plextv-machine-id" totalSize="7" size="7">
+<User id="101" title="alex" username="alex" email="alex@example.com" thumb="https://plex.tv/users/aaaa/avatar" home="0" restricted="0" protected="0" allowSync="1" filterAll="" filterMovies="" filterMusic="" filterPhotos="" filterTelevision="">
+  <Server id="1" serverId="1" machineIdentifier="abc123def456" name="Test Server" lastSeenAt="LASTSEEN" numLibraries="2" allLibraries="0" owned="1" pending="0"/>
+</User>
+<User id="102" title="blair" username="blair" email="blair@example.com" thumb="https://plex.tv/users/bbbb/avatar" home="0" restricted="0" allowSync="1" filterAll="" filterMovies="" filterMusic="" filterPhotos="" filterTelevision="">
+  <Server id="2" serverId="1" machineIdentifier="abc123def456" name="Test Server" lastSeenAt="LASTSEEN" numLibraries="4" allLibraries="1" owned="1" pending="0"/>
+</User>
+<User id="103" title="casey" username="casey" email="casey@example.com" thumb="https://plex.tv/users/cccc/avatar" home="1" restricted="0" allowSync="1" filterAll="" filterMovies="" filterMusic="" filterPhotos="" filterTelevision="">
+  <Server id="3" serverId="1" machineIdentifier="abc123def456" name="Test Server" lastSeenAt="LASTSEEN" numLibraries="3" allLibraries="0" owned="1" pending="0"/>
+</User>
+<User id="104" title="Kids" username="" email="" thumb="https://plex.tv/users/dddd/avatar" home="1" restricted="1" allowSync="0" filterAll="" filterMovies="contentRating=G|PG" filterMusic="" filterPhotos="" filterTelevision="">
+  <Server id="4" serverId="1" machineIdentifier="abc123def456" name="Test Server" lastSeenAt="LASTSEEN" numLibraries="1" allLibraries="0" owned="1" pending="0"/>
+</User>
+<User id="105" title="drew" username="drew" email="drew@example.com" thumb="https://plex.tv/users/eeee/avatar" home="0" restricted="0" allowSync="0" filterAll="" filterMovies="" filterMusic="" filterPhotos="" filterTelevision="">
+  <Server id="5" serverId="1" machineIdentifier="abc123def456" name="Test Server" lastSeenAt="LASTSEEN" numLibraries="1" allLibraries="0" owned="1" pending="1"/>
+</User>
+<User id="106" title="emery" username="emery" email="emery@example.com" thumb="https://plex.tv/users/ffff/avatar" home="0" restricted="0" allowSync="0" filterAll="" filterMovies="" filterMusic="" filterPhotos="" filterTelevision="">
+  <Server id="6" serverId="1" machineIdentifier="abc123def456" name="Test Server" lastSeenAt="LASTSEEN" numLibraries="1" allLibraries="0" owned="1" pending="0"/>
+</User>
+<User id="110" title="other" username="other" email="other@example.com" home="0" restricted="0" allowSync="0">
+  <Server id="7" serverId="9" machineIdentifier="someotherserver" name="Another Server" lastSeenAt="LASTSEEN" numLibraries="1" allLibraries="0" owned="1" pending="0"/>
+</User>
+</MediaContainer>

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Cinemetric dashboard: one HTML page combining the library report, server health and watch activity.
+"""Cinemetric dashboard: one HTML page combining the library report, server health, watch activity
+and who the server is shared with.
 
 It runs the other Cinemetric report scripts (so it has exactly their read-only behaviour and
 safety rules), then writes a self-contained HTML page: no scripts and no external requests (a
@@ -25,7 +26,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.8.0"
+VERSION = "0.9.0"
 SCRIPT_TIMEOUT_SECONDS = 1800
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -35,7 +36,10 @@ SOURCES = {
     # The dashboard doesn't show the stuck task check, so it skips the wait.
     "health": ("server-health", "server_health.py", ["--stuck-wait", "0"]),
     "watch": ("watch-activity", "watch_activity.py", ["--days", "30", "--top", "8", "--recent", "10"]),
+    "sharing": ("users-and-shares", "users_and_shares.py", []),
 }
+SHARING_PEOPLE_LIMIT = 20
+ERROR_CODE = re.compile(r"^[A-Z_]+: ")
 
 
 class DashboardError(Exception):
@@ -86,7 +90,7 @@ def run_source(name):
 
 
 def collect():
-    with ThreadPoolExecutor(max_workers=3) as pool:
+    with ThreadPoolExecutor(max_workers=len(SOURCES)) as pool:
         results = list(pool.map(run_source, SOURCES))
     data = {name: payload for name, payload, _ in results}
     errors = {name: err for name, _, err in results if err}
@@ -133,6 +137,10 @@ def hours(value):
 
 def plural(n, word):
     return f"{num(n)} {word}{'' if n == 1 else 's'}"
+
+
+def people_count(n):
+    return "1 person" if n == 1 else f"{num(n)} people"
 
 
 def short_date(iso):
@@ -438,6 +446,85 @@ def library_section(library, error):
     return card("Library", f'{table}<div class="lists two">{added_block}</div>', "wide")
 
 
+KIND_LABEL = {"home": "Plex Home", "managed": "Managed", "friend": "Friend"}
+
+
+def share_note(item, hide_names):
+    """One neutral sentence for a users-and-shares worth_a_look item, or None for unknown kinds."""
+    people = [p for p in item.get("people") or [] if p]
+    n = len(people)
+    if not n:
+        return None
+    days = item.get("days")
+    kind = item.get("kind")
+    if kind == "old_pending_invite":
+        text = f"{plural(n, 'invite')} still waiting after {num(days)}+ days"
+    elif kind == "inactive":
+        text = f"{people_count(n)} with no plays in {num(days)}+ days"
+    elif kind == "all_libraries":
+        text = (f"{people_count(n)} {'has' if n == 1 else 'have'} all libraries, "
+                "so new libraries are shared with them too")
+    elif kind == "downloads_allowed":
+        text = f"{plural(n, 'friend')} can download"
+    else:
+        return None
+    names = "" if hide_names else f'<span class="muted">: {e(", ".join(people))}</span>'
+    return f"<li>{e(text)}{names}</li>"
+
+
+def sharing_section(sharing, hide_names, error):
+    if not sharing:
+        reason = ERROR_CODE.sub("", error or "")
+        return card("Sharing", unavailable_note("who the server is shared with", reason), "wide")
+    people = sharing.get("people") or []
+    if not people:
+        return card("Sharing", '<p class="muted">Your server isn\'t shared with anyone.</p>', "wide")
+
+    by_kind = (sharing.get("totals") or {}).get("by_kind") or {}
+    pending = sum(1 for p in people if p.get("status") == "pending")
+    counts = [("People", len(people)), ("Plex Home", by_kind.get("home", 0)),
+              ("Managed", by_kind.get("managed", 0)), ("Friends", by_kind.get("friend", 0)),
+              ("Pending", pending)]
+    counts_html = "".join(f'<li><span class="share-n">{num(n)}</span><span class="muted">{e(label)}</span></li>'
+                          for label, n in counts)
+
+    lib_rows = "".join(
+        f'<tr><th scope="row">{e(lib.get("title"))}</th><td class="num">{num(lib.get("shared_with_count"))}</td></tr>'
+        for lib in sharing.get("libraries") or [])
+    lib_table = (f'<div class="table-wrap"><table><thead><tr><th scope="col">Library</th>'
+                 f'<th scope="col" class="num">People who can see it</th></tr></thead>'
+                 f'<tbody>{lib_rows}</tbody></table></div>') if lib_rows else ""
+
+    notes = [n for n in (share_note(w, hide_names) for w in sharing.get("worth_a_look") or []) if n]
+    notes_html = (f'<div class="ranked"><h3>Worth a look</h3><ul class="share-notes">{"".join(notes)}</ul></div>'
+                  if notes else '<div class="ranked"><h3>Worth a look</h3><p class="muted">Nothing stands out.</p></div>')
+
+    people_html = ""
+    if not hide_names:
+        rows = []
+        for p in people[:SHARING_PEOPLE_LIMIT]:
+            libs = p.get("libraries")
+            libs_text = "all" if libs == "all" else ("–" if libs is None else num(len(libs)))
+            if p.get("status") == "pending":
+                played = "pending"
+            elif p.get("last_played"):
+                played = short_date(p["last_played"])
+            else:
+                played = "no plays found"
+            kind = KIND_LABEL.get(p.get("kind"), p.get("kind"))
+            rows.append(f'<tr><th scope="row">{e(p.get("name"))}<span class="share-kind">{e(kind)}</span></th>'
+                        f'<td class="num">{e(libs_text)}</td><td class="num">{e(played)}</td></tr>')
+        more = len(people) - SHARING_PEOPLE_LIMIT
+        more_html = f'<p class="muted small">and {num(more)} more {"person" if more == 1 else "people"}</p>' if more > 0 else ""
+        people_html = (f'<div class="table-wrap"><table><thead><tr><th scope="col">Person</th>'
+                       f'<th scope="col" class="num">Libraries</th><th scope="col" class="num">Last played</th></tr></thead>'
+                       f'<tbody>{"".join(rows)}</tbody></table></div>{more_html}')
+
+    body = (f'<ul class="share-counts">{counts_html}</ul>'
+            f'<div class="lists two"><div class="ranked">{lib_table}</div>{notes_html}</div>{people_html}')
+    return card("Sharing", body, "wide")
+
+
 # ---------------------------------------------------------------- page
 
 CSS = """
@@ -564,6 +651,12 @@ tbody th { font-weight: 600; white-space: nowrap; }
 .seg { display: block; height: 100%; min-width: 2px; }
 .seg:first-child { border-radius: 3px 0 0 3px; } .seg:last-child { border-radius: 0 3px 3px 0; }
 .seg:only-child { border-radius: 3px; }
+.share-counts { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-bottom: 14px; }
+.share-counts li { display: grid; }
+.share-n { font-family: var(--font-display); font-size: 30px; font-weight: 700; line-height: 1.1; }
+.share-notes { display: grid; gap: 8px; font-size: 14px; }
+.share-notes li { padding-left: 12px; border-left: 3px solid var(--line); }
+.share-kind { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
 .foot { font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
 @media (max-width: 30rem) { .masthead h1 { font-size: 32px; } .tile-value { font-size: 32px; }
   .recent li { grid-template-columns: 1fr; gap: 0; } }
@@ -592,6 +685,7 @@ def render(data, errors, hide_names):
 {server_card(health, items, errors.get("health"))}
 {watch_section(watch, hide_names, errors.get("watch"))}
 {library_section(library, errors.get("library"))}
+{sharing_section(data.get("sharing"), hide_names, errors.get("sharing"))}
 <footer class="foot"><span>Read-only snapshot made by Cinemetric {e(VERSION)}{" · Plex " + e(version) if version else ""}.</span>
 <span>Numbers come from your server; written notes are rule-based, not AI.</span></footer>
 </main>"""

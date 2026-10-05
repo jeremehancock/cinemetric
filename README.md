@@ -30,7 +30,7 @@ CSS and JavaScript with no build step, ready for any static host.
 | `server-health` | Version and updates, remote access, CPU and memory, who's streaming now (direct play vs transcode, bandwidth), running tasks, library scans, scheduled maintenance |
 | `watch-activity` | Plays and watch time, most watched movies, shows and music, most active users and devices, daily trends, recent plays. Uses Tautulli if you have it, otherwise Plex's own history |
 | `users-and-shares` | Who your server is shared with (friends, Plex Home, managed users, pending invites), which libraries each person can see, who can download, and when each person last played something. Reads the share list from your plex.tv account; only the server owner can use it |
-| `dashboard` | One page with library, server and watch stats and charts. Saved on your computer, as a private claude.ai page you can open anywhere, or both; each refresh updates the same file and link |
+| `dashboard` | One page with library, server, watch and sharing stats and charts. Saved on your computer, as a private claude.ai page you can open anywhere, or both; each refresh updates the same file and link |
 
 Ideas for new skills are welcome; see [Roadmap](#roadmap).
 

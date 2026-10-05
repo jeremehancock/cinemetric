@@ -1,12 +1,5 @@
-# dashboard Specification
+## MODIFIED Requirements
 
-## Purpose
-
-One HTML page that combines the library report, server health, watch activity and who the server is
-shared with, saved on the user's computer, published by Claude as a private claude.ai page, or both, and refreshed in place
-each time the user runs the skill. Script: `skills/dashboard/scripts/dashboard.py`. How Claude
-offers, publishes and explains it is in the skill's `SKILL.md`.
-## Requirements
 ### Requirement: Built from the other report scripts
 The dashboard SHALL get its data by running `library_report.py`, `server_health.py` (with
 `--stuck-wait 0`, since the dashboard doesn't show the stuck task check and shouldn't wait for it),
@@ -57,67 +50,7 @@ applies to the local file and the online page alike.
 - **THEN** it contains no `http://` or `https://` links to stylesheets, fonts, images or scripts, and
   its `<head>` starts with a Content Security Policy of `default-src 'none'`
 
-### Requirement: Build output
-The page SHALL be written to `dashboard.html` in the data folder (or `--output PATH`), replacing it in
-one step, whatever destination was chosen: for an online-only dashboard this file is what gets
-published. The script SHALL print `output`, `server`, `sections_missing`, `names_hidden`,
-`destination` (`local`, `online`, `both`, or `null` if never chosen), `online_page` (the saved link,
-or `null`), `ask` (containing `destination` when none is saved) and `old_schedule_removed`.
-
-#### Scenario: First run
-- **WHEN** the dashboard is built and no destination has been saved
-- **THEN** the page is written, `destination` is `null` and `ask` contains `destination`
-
-#### Scenario: Later run
-- **WHEN** the dashboard is built after `both` was saved and an online page link was saved
-- **THEN** `destination` is `both`, `online_page` is the saved link and `ask` is empty
-
-### Requirement: Choosing where the dashboard goes
-`destination local|online|both` SHALL save the choice in `dashboard-state.json` and print it, along
-with the saved `online_page`. Choosing `local` SHALL keep any saved online page link (the page still
-exists on claude.ai until the user deletes it), so switching back to `online` or `both` updates the
-same page. The script itself SHALL never contact claude.ai: publishing is done by Claude.
-
-#### Scenario: Saving a choice
-- **WHEN** `destination both` runs
-- **THEN** the next build prints `destination: "both"` and `ask` no longer contains `destination`
-
-#### Scenario: Switching to local only
-- **WHEN** `destination local` runs while an online page link is saved
-- **THEN** `destination` is `local` and `online_page` still holds the saved link
-
-### Requirement: Remembering the online page
-`online-page --url URL` SHALL save the link of the published page so later runs update the same page.
-It SHALL accept only `https://claude.ai/` links whose path is an artifact link
-(`/artifact/<id>` or `/code/artifact/<id>`, with an id of letters, digits and `-`), and refuse anything
-else with an error, so the saved value can't point anywhere else. `online-page --forget` SHALL clear
-the saved link (for example after the page was deleted), so the next publish creates a new page.
-
-#### Scenario: Saving a link
-- **WHEN** `online-page --url https://claude.ai/code/artifact/0b8f2c1e-4d2a-4f7e-9a51-3c6d7e8f9a0b` runs
-- **THEN** later builds print that link as `online_page`
-
-#### Scenario: A link to somewhere else
-- **WHEN** `online-page --url https://example.com/page` runs
-- **THEN** the script exits with an error and the saved link is unchanged
-
-### Requirement: Cleaning up an old schedule
-When `dashboard-state.json` records automatic updates set up by an earlier version, a build SHALL
-remove that scheduled task (the crontab line tagged `# cinemetric-dashboard`, the launchd agent
-`com.cinemetric.dashboard`, or the Task Scheduler task "Cinemetric Dashboard"), delete the copied
-`scheduled` folder, `run-dashboard.cmd` and `dashboard.log`, forget the schedule, and print
-`old_schedule_removed: true`. If the task can't be removed, the build SHALL still finish, keep the
-record so it's tried again next time, and print the reason in `old_schedule_error`. Builds with no
-recorded schedule SHALL NOT run any scheduler command.
-
-#### Scenario: Upgrading with automatic updates on
-- **WHEN** the dashboard is built and the state records a daily cron schedule from an earlier version
-- **THEN** the tagged crontab line and the `scheduled` folder are gone, and the output has
-  `old_schedule_removed: true`
-
-#### Scenario: Never scheduled
-- **WHEN** the dashboard is built and the state has no schedule record
-- **THEN** no scheduler command runs and `old_schedule_removed` is `false`
+## ADDED Requirements
 
 ### Requirement: Sharing section
 The page SHALL have a Sharing section built from the `users-and-shares` report, showing:
@@ -150,4 +83,3 @@ overall status. When nobody else can reach the server, the section SHALL say so 
 #### Scenario: Not shared with anyone
 - **WHEN** the sharing report has no people
 - **THEN** the Sharing section says the server isn't shared with anyone
-

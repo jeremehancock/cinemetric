@@ -50,8 +50,9 @@ Errors that a skill needs to recognize SHALL start with a fixed code: `NOT_CONFI
 - **THEN** stdout contains only the JSON report, and any progress messages went to stderr
 
 ### Requirement: Connection check
-The `library-report`, `server-health` and `watch-activity` scripts SHALL accept `--check`, which only
-tests the configured connections and prints a short JSON result instead of building a report.
+The `library-report`, `server-health`, `watch-activity` and `users-and-shares` scripts SHALL accept
+`--check`, which only tests the configured connections and prints a short JSON result instead of
+building a report.
 
 #### Scenario: Testing the connection
 - **WHEN** a report script is run with `--check`
@@ -82,7 +83,8 @@ Every script's `VERSION` constant, `plugins/cinemetric/.claude-plugin/plugin.jso
 
 #### Scenario: Releasing a new version
 - **WHEN** the version is bumped
-- **THEN** all five scripts, `plugin.json` and `marketplace.json` show the new version
+- **THEN** every script under `plugins/cinemetric/skills/`, `plugin.json` and `marketplace.json`
+  show the new version
 
 ### Requirement: What every SKILL.md tells Claude
 Every `SKILL.md` SHALL instruct Claude to:

@@ -67,6 +67,8 @@ the specs leave open. At least the following SHALL be covered:
 - `watch-activity`: choosing a source and the report built from each source.
 - `dashboard`: HTML escaping of every value from a report, and handling a report source that failed.
 - `setup`: Tautulli address cleaning and private file permissions.
+- `users-and-shares`: the plex.tv address rules, the owner-only error, dropping emails and access
+  tokens, the people and libraries in the report, and the "things worth a look" flags.
 
 #### Scenario: A shared helper is fixed in one script only
 - **WHEN** a fix to `validate_url` or `clean` is applied to one script but not the others
@@ -76,6 +78,11 @@ the specs leave open. At least the following SHALL be covered:
 #### Scenario: A change breaks duplicate detection
 - **WHEN** a change to `library_report.py` stops two copies of the same movie from being reported as
   duplicates
+- **THEN** a test fails
+
+#### Scenario: A change leaks a friend's email
+- **WHEN** a change to `users_and_shares.py` lets an email address from a plex.tv fixture into the
+  output
 - **THEN** a test fails
 
 ### Requirement: Tests run on GitHub

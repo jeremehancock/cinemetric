@@ -2,7 +2,10 @@
 
 Cinemetric is designed so you can hand it your Plex token without worrying about what it will do with it.
 In short: every skill is read-only, talks only to Plex and (if you add it) Tautulli, and never shows
-your token or API key in the chat. Cinemetric's scripts never publish anything. If you choose to put
+your token or API key in the chat. The one exception to "only Plex and Tautulli" is plex.tv: setup uses
+it to sign you in, and `users-and-shares` reads your share list from it, because that list is only
+stored in your plex.tv account. `users-and-shares` sends read-only requests to three fixed plex.tv
+addresses and never shows the email addresses or access tokens of the people you share with. Cinemetric's scripts never publish anything. If you choose to put
 the dashboard online, Claude publishes it as a private claude.ai page that only you can see unless you
 share it.
 

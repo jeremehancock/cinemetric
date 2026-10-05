@@ -1,0 +1,5 @@
+{
+ "_comment": "Days since each account's last play. plex: the server's watch history. tautulli: get_users_table last_seen (null = no date).",
+ "plex": {"101": 2, "102": 200, "103": 1, "104": 5},
+ "tautulli": {"101": 1, "102": null, "103": 1, "104": 3, "106": null}
+}

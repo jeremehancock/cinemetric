@@ -16,19 +16,22 @@ library = load_script("library-report")
 health = load_script("server-health")
 watch = load_script("watch-activity")
 setup = load_script("setup")
+shares = load_script("users-and-shares")
 
 # (script name, address check, error it raises). Each check takes just the address.
 ADDRESS_CHECKS = [
     ("library-report", library.validate_url, library.ReportError),
     ("server-health", health.validate_url, health.ReportError),
     ("watch-activity", lambda url: watch.validate_url(url, "plex_url"), watch.ReportError),
+    ("users-and-shares", lambda url: shares.validate_url(url, "plex_url"), shares.ReportError),
     ("setup", setup.clean_tautulli_url, setup.SetupError),
 ]
-WARNS_ABOUT_PLAIN_HTTP = ADDRESS_CHECKS[:3]
+WARNS_ABOUT_PLAIN_HTTP = ADDRESS_CHECKS[:4]
 LOOKS_LOCAL = [("library-report", library.looks_local), ("server-health", health.looks_local),
-               ("watch-activity", watch.looks_local)]
+               ("watch-activity", watch.looks_local), ("users-and-shares", shares.looks_local)]
 CLEANERS = [("library-report", library.clean), ("server-health", health.clean),
-            ("watch-activity", watch.clean), ("setup", setup.clean)]
+            ("watch-activity", watch.clean), ("users-and-shares", shares.clean),
+            ("setup", setup.clean)]
 
 
 class AddressChecks(OfflineTestCase):
@@ -130,7 +133,7 @@ def plex_clients():
         return build
     return [(name, module, builder(module))
             for name, module in (("library-report", library), ("server-health", health),
-                                 ("watch-activity", watch))]
+                                 ("watch-activity", watch), ("users-and-shares", shares))]
 
 
 class PlexClientRules(OfflineTestCase):
@@ -207,43 +210,51 @@ def tautulli_ok(data):
 
 
 class WatchActivityTautulliClient(OfflineTestCase):
+    module = watch
+    allowed = "get_tautulli_info"
+
     def client(self, server):
-        client = watch.TautulliClient(TAUTULLI_URL, FAKE_API_KEY, True)
+        client = self.module.TautulliClient(TAUTULLI_URL, FAKE_API_KEY, True)
         server.attach(client._opener)
         return client
 
     def test_allowed_command_is_a_get(self):
         server = FakeServer({"/api/v2": tautulli_ok({"tautulli_version": "v2.0"})})
-        self.assertEqual(self.client(server).call("get_tautulli_info"), {"tautulli_version": "v2.0"})
+        self.assertEqual(self.client(server).call(self.allowed), {"tautulli_version": "v2.0"})
         [seen] = server.requests
         self.assertEqual(seen.method, "GET")
-        self.assertEqual(seen.query["cmd"], "get_tautulli_info")
+        self.assertEqual(seen.query["cmd"], self.allowed)
 
     def test_commands_outside_the_allowlist_are_blocked(self):
         for command in ("delete_all_history", "restart", "get_apikey"):
             with self.subTest(command=command):
                 server = FakeServer()
-                with self.assertRaises(watch.ReportError):
+                with self.assertRaises(self.module.ReportError):
                     self.client(server).call(command)
                 self.assertEqual(server.requests, [])
 
     def test_api_key_is_hidden_in_errors(self):
         server = FakeServer({"/api/v2": Unreachable(f"bad url ?apikey={FAKE_API_KEY}")})
-        with self.assertRaises(watch.ReportError) as caught:
-            self.client(server).call("get_history")
+        with self.assertRaises(self.module.ReportError) as caught:
+            self.client(server).call(self.allowed)
         self.assertNotIn(FAKE_API_KEY, str(caught.exception))
 
     def test_refusal_message_is_cleaned(self):
         server = FakeServer({"/api/v2": {"response": {"result": "error", "message": "Invalid\napikey"}}})
-        with self.assertRaises(watch.ReportError) as caught:
-            self.client(server).call("get_history")
+        with self.assertRaises(self.module.ReportError) as caught:
+            self.client(server).call(self.allowed)
         self.assertIn("Invalid apikey", str(caught.exception))
 
     def test_redirect_is_refused(self):
         server = FakeServer({"/api/v2": Reply("", status=301, headers={"Location": "http://elsewhere.test/"})})
-        with self.assertRaises(watch.ReportError):
-            self.client(server).call("get_history")
+        with self.assertRaises(self.module.ReportError):
+            self.client(server).call(self.allowed)
         self.assertEqual(len(server.requests), 1)
+
+
+class UsersAndSharesTautulliClient(WatchActivityTautulliClient):
+    module = shares
+    allowed = "get_users_table"
 
 
 class SetupNetworkRules(OfflineTestCase):

@@ -29,9 +29,10 @@ CSS and JavaScript with no build step, ready for any static host.
 | `library-report` | Counts, storage, 4K/1080p and codec breakdown, 10-bit video, recently added, unavailable files, unmatched items, missing posters, very large files, duplicates |
 | `server-health` | Version and updates, remote access, CPU and memory, who's streaming now (direct play vs transcode, bandwidth), running tasks, library scans, scheduled maintenance |
 | `watch-activity` | Plays and watch time, most watched movies, shows and music, most active users and devices, daily trends, recent plays. Uses Tautulli if you have it, otherwise Plex's own history |
+| `users-and-shares` | Who your server is shared with (friends, Plex Home, managed users, pending invites), which libraries each person can see, who can download, and when each person last played something. Reads the share list from your plex.tv account; only the server owner can use it |
 | `dashboard` | One page with library, server and watch stats and charts. Saved on your computer, as a private claude.ai page you can open anywhere, or both; each refresh updates the same file and link |
 
-More skills are planned; see [Roadmap](#roadmap).
+Ideas for new skills are welcome; see [Roadmap](#roadmap).
 
 Every Cinemetric skill is **read-only**: it never changes anything on your server. See [SECURITY.md](SECURITY.md).
 
@@ -60,8 +61,8 @@ It never appears in the chat. Cinemetric shows up in Plex under **Settings → A
 where you can revoke it at any time.
 
 Then try: *"Give me a Plex library report"*, *"What's been added to my Movies library recently?"*,
-*"How's my Plex server doing?"*, *"What's been watched on Plex this month?"* or
-*"Build my Plex dashboard"*
+*"How's my Plex server doing?"*, *"What's been watched on Plex this month?"*,
+*"Who have I shared my Plex server with?"* or *"Build my Plex dashboard"*
 
 ### Optional: add Tautulli
 
@@ -120,9 +121,7 @@ Plans can change; feedback and ideas are welcome via GitHub issues. What the exi
 the rules every skill follows, are written down as specs in [openspec/specs/](openspec/specs/). New
 work starts as an OpenSpec change proposal (`/opsx:propose`) before any code is written.
 
-**Ideas for later**
-
-- [ ] **`users-and-shares`**: who has access to your server and which libraries are shared with whom
+Nothing is planned right now.
 
 ## Support Development
 

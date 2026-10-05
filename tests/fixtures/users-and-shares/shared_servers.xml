@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MediaContainer friendlyName="myPlex" identifier="com.plexapp.plugins.myplex" machineIdentifier="abc123def456" size="6">
+<SharedServer id="901" username="alex" email="alex@example.com" userID="101" accessToken="friend-token-alex-SECRET" name="alex" acceptedAt="DAYS:399" invitedAt="DAYS:400" allowSync="1" allowCameraUpload="0" allowChannels="0" allowTuners="0" allowSubtitleAdmin="0" allLibraries="0" owned="1" filterAll="" filterMovies="" filterMusic="" filterPhotos="" filterTelevision="">
+  <Section id="501" key="1" title="Movies" type="movie" shared="1"/>
+  <Section id="502" key="2" title="TV Shows" type="show" shared="1"/>
+  <Section id="503" key="3" title="Music" type="artist" shared="0"/>
+  <Section id="504" key="4" title="Home Videos" type="movie" shared="0"/>
+  <Section id="599" key="99" title="Old Library" type="movie" shared="1"/>
+</SharedServer>
+<SharedServer id="902" username="blair" email="blair@example.com" userID="102" accessToken="friend-token-blair-SECRET" name="blair" acceptedAt="DAYS:500" invitedAt="DAYS:501" allowSync="1" allLibraries="1" owned="1" filterAll="" filterMovies="" filterMusic="" filterPhotos="" filterTelevision="">
+  <Section id="501" key="1" title="Movies" type="movie" shared="1"/>
+  <Section id="502" key="2" title="TV Shows" type="show" shared="1"/>
+  <Section id="503" key="3" title="Music" type="artist" shared="1"/>
+  <Section id="504" key="4" title="Home Videos" type="movie" shared="1"/>
+</SharedServer>
+<SharedServer id="903" username="casey" email="casey@example.com" userID="103" accessToken="friend-token-casey-SECRET" name="casey" acceptedAt="DAYS:700" invitedAt="DAYS:700" allowSync="1" allLibraries="0" owned="1" filterAll="" filterMovies="" filterMusic="" filterPhotos="" filterTelevision="">
+  <Section id="501" key="1" title="Movies" type="movie" shared="1"/>
+  <Section id="502" key="2" title="TV Shows" type="show" shared="1"/>
+  <Section id="503" key="3" title="Music" type="artist" shared="1"/>
+  <Section id="504" key="4" title="Home Videos" type="movie" shared="0"/>
+</SharedServer>
+<SharedServer id="904" username="" email="" userID="104" accessToken="friend-token-kids-SECRET" name="Kids" acceptedAt="DAYS:650" invitedAt="DAYS:650" allowSync="0" allLibraries="0" owned="1" filterAll="" filterMovies="contentRating=G|PG" filterMusic="" filterPhotos="" filterTelevision="">
+  <Section id="501" key="1" title="Movies" type="movie" shared="1"/>
+  <Section id="502" key="2" title="TV Shows" type="show" shared="0"/>
+</SharedServer>
+<SharedServer id="905" username="drew" email="drew@example.com" userID="105" accessToken="friend-token-drew-SECRET" name="drew" acceptedAt="" invitedAt="DAYS:45" allowSync="0" allLibraries="0" owned="1" filterAll="" filterMovies="" filterMusic="" filterPhotos="" filterTelevision="">
+  <Section id="502" key="2" title="TV Shows" type="show" shared="1"/>
+</SharedServer>
+<SharedServer id="906" username="emery" email="emery@example.com" userID="106" accessToken="friend-token-emery-SECRET" name="emery" acceptedAt="DAYS:299" invitedAt="DAYS:300" allowSync="0" allLibraries="0" owned="1" filterAll="" filterMovies="" filterMusic="" filterPhotos="" filterTelevision="">
+  <Section id="501" key="1" title="Movies" type="movie" shared="1"/>
+</SharedServer>
+</MediaContainer>

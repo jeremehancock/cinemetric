@@ -1,0 +1,9 @@
+{
+ "/": {"MediaContainer": {"friendlyName": "Test Server", "version": "1.41.0", "machineIdentifier": "abc123def456"}},
+ "/library/sections": {"MediaContainer": {"Directory": [
+  {"key": "1", "title": "Movies", "type": "movie"},
+  {"key": "2", "title": "TV Shows", "type": "show"},
+  {"key": "3", "title": "Music", "type": "artist"},
+  {"key": "4", "title": "Home Videos", "type": "movie"}
+ ]}}
+}

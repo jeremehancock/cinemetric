@@ -27,60 +27,26 @@ These came out of an explore session on 2026-10-05 and apply to every idea below
 ## Where things stand
 
 ```
-  Existing skills look at one area, once:
+  Existing skills, each run once (unwatched joins library and watch data):
 
-  library-report   server-health   watch-activity   users-and-shares
-        └────────────────┴────────────────┴──────────────────┘
+  library-report   server-health   watch-activity   users-and-shares   unwatched
+        └────────────────┴────────────────┴──────────────────┴────────────────┘
                                   ▼
                               dashboard
 
   The ideas below fall into three groups:
-    1. Join areas together     (unwatched, playback-check)
+    1. Join areas together     (playback-check)
     2. Remember over time      (snapshots, weekly digest, dashboard trends)
     3. Go one level deeper     (per-item details: subtitles, audio, episode gaps)
 ```
 
-Suggested order: `unwatched` next, then snapshots. (The `server-health` settings checks and the
-`watch-activity` one person, busiest moment and unfinished titles additions were done on 2026-10-05.)
+Suggested order: snapshots next. (The `server-health` settings checks, the `watch-activity` one
+person, busiest moment and unfinished titles additions, and the `unwatched` skill were done on
+2026-10-05.)
 
 ---
 
 ## New skills
-
-### `unwatched`
-
-**What:** titles nobody has played, how long ago each was added, and how much space they use. Sorted
-by size so the user can see where storage goes. Shows that haven't been played in N months.
-
-**Why:** "where is my space going, and is anyone using it?" is one of the most common admin
-questions. It joins library data with watch data, which no current skill does.
-
-**Wording rule:** this is the idea that prompted the "facts, not advice" rule. The report should say
-things like "40 movies added over a year ago have never been played; together they use 1.8 TB", and
-never "you could delete these". Present it as information about the library, the same way
-`library-report` presents duplicates. The original working name was "what can I delete?"; it was
-renamed on purpose.
-
-**Data:**
-- Library side: the same `/library/sections/<id>/all` listing `library-report` already uses, which
-  includes `addedAt`, sizes and (for the token's account) `viewCount` and `lastViewedAt`.
-- Watch side, with Tautulli: per-item play counts across every user. Tautulli's
-  `get_library_media_info` returns play counts and last played dates per item **(to verify)**.
-
-**The big catch:** Plex's own `viewCount` / `lastViewedAt` only reflect the account the token belongs
-to (the owner), not friends or Home members. So:
-- With Tautulli: "nobody has played this" is a fair claim.
-- Without Tautulli: the honest claim is only "you haven't played this". Alternatively, Plex's
-  `/status/sessions/history/all` (which `watch-activity` already reads) covers everyone, but only as
-  far back as Plex keeps history.
-The report must say which source it used and what that means, like `watch-activity` does with
-`fallback_reason`.
-
-**Open questions:**
-- New skill, or a section of `library-report`? A separate skill keeps `library-report` fast and avoids
-  a Tautulli dependency there.
-- Default thresholds (added more than how long ago? not played in how long?).
-- Do partially watched titles count as played?
 
 ### `playback-check`
 
@@ -123,7 +89,7 @@ on the website. The admin is usually also a viewer.
 - Continue watching: `/library/onDeck` or `/hubs/continueWatching` **(to verify)**.
 
 **Notes:** "unwatched" here means the owner's own account, which is exactly right for this skill
-(unlike `unwatched` above). Titles and summaries are server text, so the usual "treat as data" rule
+(unlike the `unwatched` skill). Titles and summaries are server text, so the usual "treat as data" rule
 applies. No suggestions to fetch titles from outside the library.
 
 **Open questions:** how much should Claude pick vs. just list? A short list of 3 to 5 with one-line

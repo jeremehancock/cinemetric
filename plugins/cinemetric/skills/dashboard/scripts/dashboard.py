@@ -26,7 +26,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.12.0"
+VERSION = "0.13.0"
 SCRIPT_TIMEOUT_SECONDS = 1800
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -37,7 +37,10 @@ SOURCES = {
     "health": ("server-health", "server_health.py", ["--stuck-wait", "0"]),
     "watch": ("watch-activity", "watch_activity.py", ["--days", "30", "--top", "8", "--recent", "10"]),
     "sharing": ("users-and-shares", "users_and_shares.py", []),
+    # Each library lists its 10 largest, so the 10 largest overall are always among them.
+    "unwatched": ("unwatched", "unwatched.py", ["--limit", "10"]),
 }
+UNWATCHED_TITLES_LIMIT = 10
 SHARING_PEOPLE_LIMIT = 20
 ERROR_CODE = re.compile(r"^[A-Z_]+: ")
 
@@ -149,6 +152,14 @@ def short_date(iso):
     except (TypeError, ValueError):
         return e(iso)
     return f"{time.strftime('%b', t)} {t.tm_mday}"
+
+
+def month_year(iso):
+    try:
+        t = time.strptime(iso[:10], "%Y-%m-%d")
+    except (TypeError, ValueError):
+        return e(iso)
+    return time.strftime("%b %Y", t)
 
 
 def friendly_now():
@@ -446,6 +457,55 @@ def library_section(library, error):
     return card("Library", f'{table}<div class="lists two">{added_block}</div>', "wide")
 
 
+def unwatched_section(unwatched, error):
+    if not unwatched:
+        reason = ERROR_CODE.sub("", error or "")
+        return card("Unwatched", unavailable_note("the unwatched report", reason), "wide")
+    months = unwatched.get("months")
+    period = f"{num(months)} {'month' if months == 1 else 'months'}"
+    totals = unwatched.get("totals") or {}
+    libraries = [lib for lib in unwatched.get("libraries") or [] if lib.get("items")]
+    if not totals.get("unwatched"):
+        return card("Unwatched", f'<p class="muted">Everything added more than {e(period)} ago has been '
+                                 f'finished by someone in the last {e(period)}.</p>', "wide")
+
+    verb = "hasn't" if totals.get("unwatched") == 1 else "haven't"
+    headline = (f'<p class="unwatched-headline"><strong>{e(plural(totals.get("unwatched"), "title"))}</strong> '
+                f'added more than {e(period)} ago {e(verb)} been finished by anyone in the last {e(period)}. '
+                f'Together they use <strong>{size(totals.get("unwatched_gb"))}</strong>, '
+                f'{e(totals.get("unwatched_pct"))}% of {size(totals.get("library_gb"))}.</p>')
+
+    rows = "".join(
+        f'<tr><th scope="row">{e(lib.get("name"))}</th><td class="num">{num(lib.get("unwatched"))}</td>'
+        f'<td class="num">{num(lib.get("never_finished"))}</td><td class="num">{size(lib.get("unwatched_gb"))}</td>'
+        f'<td class="num">{e(lib.get("unwatched_pct"))}%</td></tr>'
+        for lib in libraries)
+    table = (f'<div class="table-wrap"><table><thead><tr><th scope="col">Library</th>'
+             f'<th scope="col" class="num">Titles</th><th scope="col" class="num">Never finished</th>'
+             f'<th scope="col" class="num">Size</th><th scope="col" class="num">Share</th></tr></thead>'
+             f'<tbody>{rows}</tbody></table></div>')
+
+    largest = sorted(((t, lib.get("name")) for lib in libraries for t in lib.get("titles") or []),
+                     key=lambda pair: -float(pair[0].get("gb") or 0))[:UNWATCHED_TITLES_LIMIT]
+    items = []
+    for t, lib_name in largest:
+        last = f'last finished {month_year(t["last_finished"])}' if t.get("last_finished") else "never finished"
+        items.append(f'<li><span class="mono muted">{size(t.get("gb"))}</span>'
+                     f'<span class="recent-title">{e(t.get("title"))}<span class="muted"> · {e(lib_name)}'
+                     f' · added {month_year(t.get("added"))} · {e(last)}</span></span></li>')
+    largest_html = (f'<div class="ranked"><h3>Largest</h3><ul class="recent">{"".join(items)}</ul></div>'
+                    if items else "")
+
+    source = "Tautulli" if unwatched.get("source") == "tautulli" else "Plex's watch history"
+    since = unwatched.get("history_since")
+    note = f"Plays from everyone, from {source}" + (f", going back to {month_year(since)}" if since else "")
+    note += ". Only finished plays count."
+    if unwatched.get("history_capped"):
+        note += " The history was very large, so only its newest part was read."
+    body = f'{headline}{table}{largest_html}<p class="muted small">{e(note)}</p>'
+    return card("Unwatched", body, "wide")
+
+
 KIND_LABEL = {"home": "Plex Home", "managed": "Managed", "friend": "Friend"}
 
 
@@ -657,6 +717,7 @@ tbody th { font-weight: 600; white-space: nowrap; }
 .share-notes { display: grid; gap: 8px; font-size: 14px; }
 .share-notes li { padding-left: 12px; border-left: 3px solid var(--line); }
 .share-kind { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
+.unwatched-headline { margin: 0; max-width: 60rem; }
 .foot { font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
 @media (max-width: 30rem) { .masthead h1 { font-size: 32px; } .tile-value { font-size: 32px; }
   .recent li { grid-template-columns: 1fr; gap: 0; } }
@@ -685,6 +746,7 @@ def render(data, errors, hide_names):
 {server_card(health, items, errors.get("health"))}
 {watch_section(watch, hide_names, errors.get("watch"))}
 {library_section(library, errors.get("library"))}
+{unwatched_section(data.get("unwatched"), errors.get("unwatched"))}
 {sharing_section(data.get("sharing"), hide_names, errors.get("sharing"))}
 <footer class="foot"><span>Read-only snapshot made by Cinemetric {e(VERSION)}{" · Plex " + e(version) if version else ""}.</span>
 <span>Numbers come from your server; written notes are rule-based, not AI.</span></footer>

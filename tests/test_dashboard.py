@@ -72,7 +72,18 @@ def sample_data():
             {"kind": "old_pending_invite", "people": ["casey-test"], "days": 30},
         ],
     }
-    return {"library": library, "health": health, "watch": watch, "sharing": sharing}
+    unwatched = {
+        "months": 6, "source": "tautulli", "history_since": "2021-12-19" + EVIL, "history_capped": True,
+        "totals": {"unwatched": 2, "unwatched_gb": 80.0, "library_gb": 100.0, "unwatched_pct": EVIL,
+                   "never_finished": 1, "never_finished_gb": 72.0},
+        "libraries": [{
+            "name": EVIL, "type": "movie", "items": 3, "unwatched": 2, "unwatched_gb": 80.0,
+            "unwatched_pct": EVIL_ATTR, "never_finished": 1,
+            "titles": [{"title": EVIL, "added": "2024-01-01" + EVIL, "gb": 72.0, "last_finished": None},
+                       {"title": EVIL_ATTR, "added": "2023-01-01", "gb": 8.0, "last_finished": "2025-01-01" + EVIL}],
+        }],
+    }
+    return {"library": library, "health": health, "watch": watch, "sharing": sharing, "unwatched": unwatched}
 
 
 def page(data, errors=None, hide_names=False):
@@ -87,9 +98,9 @@ class PageSafety(OfflineTestCase):
         self.assertIn("&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;", html)
 
     def test_error_reasons_are_escaped(self):
-        html = page({}, {"library": EVIL, "health": EVIL, "watch": EVIL, "sharing": EVIL})
+        html = page({}, {"library": EVIL, "health": EVIL, "watch": EVIL, "sharing": EVIL, "unwatched": EVIL})
         self.assertNotIn("<script", html)
-        self.assertEqual(html.count("&lt;script&gt;"), 4)
+        self.assertEqual(html.count("&lt;script&gt;"), 5)
 
     def test_page_blocks_scripts_and_outside_requests(self):
         html = page(sample_data())
@@ -196,7 +207,8 @@ class Collecting(OfflineTestCase):
             self.assertEqual(db.run_source("watch")[2], "the watch-activity script is missing")
 
     def test_collect_keeps_going_when_one_source_fails(self):
-        results = {"library": {"totals": {}}, "health": None, "watch": {"totals": {}}, "sharing": {"people": []}}
+        results = {"library": {"totals": {}}, "health": None, "watch": {"totals": {}}, "sharing": {"people": []},
+                   "unwatched": {"totals": {}}}
         fake = lambda name: (name, results[name], "HTTP 500" if results[name] is None else None)
         with mock.patch.object(db, "run_source", fake):
             data, errors = db.collect()
@@ -342,3 +354,76 @@ class SharingSection(OfflineTestCase):
     def test_nobody_shared(self):
         html = page({"sharing": sharing_report(0)})
         self.assertIn("isn't shared with anyone", html)
+
+
+# ---------------------------------------------------------------- unwatched section
+
+def unwatched_report(count=50, gb=600.0, titles=12):
+    rows = [{"title": f"Movie {i:02d}", "added": "2024-03-01", "gb": float(100 - i),
+             "last_finished": None if i % 2 else "2025-02-01"} for i in range(titles)]
+    return {
+        "months": 6, "source": "plex", "history_since": "2021-12-19", "history_capped": False,
+        "totals": {"unwatched": count, "unwatched_gb": gb, "library_gb": 4000.0, "unwatched_pct": 15.0,
+                   "never_finished": count // 2, "never_finished_gb": gb / 2},
+        "libraries": [
+            {"name": "Movies", "type": "movie", "items": 400, "unwatched": count, "unwatched_gb": gb,
+             "unwatched_pct": 15.0, "never_finished": count // 2, "titles": rows},
+            {"name": "DVR", "type": "movie", "items": 0, "unwatched": 0, "unwatched_gb": 0.0,
+             "unwatched_pct": 0.0, "never_finished": 0, "titles": []},
+        ],
+    }
+
+
+class UnwatchedSection(OfflineTestCase):
+    def test_unwatched_runs_with_a_limit_of_ten(self):
+        self.assertEqual(db.SOURCES["unwatched"], ("unwatched", "unwatched.py", ["--limit", "10"]))
+
+    def test_section_is_built(self):
+        html = page({"unwatched": unwatched_report()})
+        self.assertIn("<h2>Unwatched</h2>", html)
+        self.assertIn("50 titles</strong> added more than 6 months ago haven&#x27;t been finished", html)
+        self.assertIn("600 GB", html)
+        self.assertIn("15.0% of 4.0 TB", html)
+        self.assertIn("Plex&#x27;s watch history, going back to Dec 2021", html)
+        self.assertNotIn("DVR", html)
+
+    def test_ten_largest_titles(self):
+        html = page({"unwatched": unwatched_report()})
+        self.assertIn("Movie 09", html)
+        self.assertNotIn("Movie 10", html)
+        self.assertIn("never finished", html)
+        self.assertIn("last finished Feb 2025", html)
+        self.assertIn("added Mar 2024", html)
+
+    def test_page_stays_healthy(self):
+        html = page({"health": healthy(), "unwatched": unwatched_report()})
+        self.assertIn("Healthy", html)
+        self.assertNotIn("Mostly fine", html)
+
+    def test_no_deletion_advice(self):
+        html = page({"unwatched": unwatched_report()}).lower()
+        for word in ("delete", "remove", "free up"):
+            self.assertNotIn(word, html)
+
+    def test_nothing_unwatched(self):
+        html = page({"unwatched": unwatched_report(count=0, gb=0.0, titles=0)})
+        self.assertIn("Everything added more than 6 months ago has been finished", html)
+
+    def test_capped_history_is_mentioned(self):
+        report = unwatched_report()
+        report["history_capped"] = True
+        self.assertIn("only its newest part was read", page({"unwatched": report}))
+
+    def test_failure(self):
+        fake = lambda name: (name, None, "OWNER_ONLY: only the owner") if name == "unwatched" \
+            else (name, {"totals": {}}, None)
+        with mock.patch.object(db, "run_source", fake):
+            data, errors = db.collect()
+        self.assertEqual(list(errors), ["unwatched"])
+        html = page(data, errors)
+        self.assertIn("Couldn't load the unwatched report: only the owner", html)
+        self.assertNotIn("OWNER_ONLY", html)
+
+    def test_hiding_names_keeps_the_section(self):
+        html = page({"unwatched": unwatched_report()}, hide_names=True)
+        self.assertIn("Movie 00", html)

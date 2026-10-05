@@ -1,0 +1,13 @@
+{
+ "_note": "Made-up data. daysAgo becomes Tautulli's date and stopped when the tests load this file.",
+ "get_tautulli_info": {"tautulli_version": "v2.18.2"},
+ "get_history:movie": [
+  {"rating_key": 102, "watched_status": 1, "live": 0, "user": "friend-alex", "friendly_name": "Alex Friend", "user_id": 22, "daysAgo": 30},
+  {"rating_key": 108, "watched_status": 0.5, "live": 0, "user": "friend-sam", "friendly_name": "Sam Friend", "user_id": 23, "daysAgo": 20},
+  {"rating_key": 101, "watched_status": 1, "live": 1, "user": "friend-sam", "friendly_name": "Sam Friend", "user_id": 23, "daysAgo": 10},
+  {"rating_key": 103, "watched_status": 1, "live": 0, "user": "owner-pat", "friendly_name": "Pat Owner", "user_id": 1, "daysAgo": 365}
+ ],
+ "get_history:episode": [
+  {"rating_key": 2032, "grandparent_rating_key": 203, "watched_status": 1, "live": 0, "user": "friend-alex", "friendly_name": "Alex Friend", "user_id": 22, "daysAgo": 31}
+ ]
+}

@@ -17,6 +17,7 @@ health = load_script("server-health")
 watch = load_script("watch-activity")
 setup = load_script("setup")
 shares = load_script("users-and-shares")
+unwatched = load_script("unwatched")
 
 # (script name, address check, error it raises). Each check takes just the address.
 ADDRESS_CHECKS = [
@@ -24,14 +25,16 @@ ADDRESS_CHECKS = [
     ("server-health", health.validate_url, health.ReportError),
     ("watch-activity", lambda url: watch.validate_url(url, "plex_url"), watch.ReportError),
     ("users-and-shares", lambda url: shares.validate_url(url, "plex_url"), shares.ReportError),
+    ("unwatched", lambda url: unwatched.validate_url(url, "plex_url"), unwatched.ReportError),
     ("setup", setup.clean_tautulli_url, setup.SetupError),
 ]
-WARNS_ABOUT_PLAIN_HTTP = ADDRESS_CHECKS[:4]
+WARNS_ABOUT_PLAIN_HTTP = ADDRESS_CHECKS[:5]
 LOOKS_LOCAL = [("library-report", library.looks_local), ("server-health", health.looks_local),
-               ("watch-activity", watch.looks_local), ("users-and-shares", shares.looks_local)]
+               ("watch-activity", watch.looks_local), ("users-and-shares", shares.looks_local),
+               ("unwatched", unwatched.looks_local)]
 CLEANERS = [("library-report", library.clean), ("server-health", health.clean),
             ("watch-activity", watch.clean), ("users-and-shares", shares.clean),
-            ("setup", setup.clean)]
+            ("unwatched", unwatched.clean), ("setup", setup.clean)]
 
 
 class AddressChecks(OfflineTestCase):
@@ -133,7 +136,8 @@ def plex_clients():
         return build
     return [(name, module, builder(module))
             for name, module in (("library-report", library), ("server-health", health),
-                                 ("watch-activity", watch), ("users-and-shares", shares))]
+                                 ("watch-activity", watch), ("users-and-shares", shares),
+                                 ("unwatched", unwatched))]
 
 
 class PlexClientRules(OfflineTestCase):
@@ -255,6 +259,11 @@ class WatchActivityTautulliClient(OfflineTestCase):
 class UsersAndSharesTautulliClient(WatchActivityTautulliClient):
     module = shares
     allowed = "get_users_table"
+
+
+class UnwatchedTautulliClient(WatchActivityTautulliClient):
+    module = unwatched
+    allowed = "get_history"
 
 
 class SetupNetworkRules(OfflineTestCase):

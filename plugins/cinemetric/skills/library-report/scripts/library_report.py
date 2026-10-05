@@ -20,7 +20,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.13.0"
+VERSION = "0.14.0"
 PAGE_SIZE = 500
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
@@ -278,6 +278,38 @@ def recent(items, n, label_fn):
     ]
 
 
+def month_keys(n, now=None):
+    """The last n calendar months as YYYY-MM in local time, oldest first, ending with this month."""
+    t = time.localtime(now)
+    year, month, keys = t.tm_year, t.tm_mon, []
+    for _ in range(n):
+        keys.append(f"{year:04d}-{month:02d}")
+        year, month = (year - 1, 12) if month == 1 else (year, month - 1)
+    return keys[::-1]
+
+
+def growth_counts(items, keys):
+    """Items added, and the bytes of all their files now, per month in keys. Undated items are skipped."""
+    counts = {k: [0, 0] for k in keys}
+    for item in items:
+        if not item.get("addedAt"):
+            continue
+        key = time.strftime("%Y-%m", time.localtime(int(item["addedAt"])))
+        if key in counts:
+            counts[key][0] += 1
+            counts[key][1] += sum(int(p.get("size") or 0)
+                                  for m in item.get("Media", []) or [] for p in m.get("Part", []) or [])
+    return counts
+
+
+def growth_section(counts, keys):
+    return {
+        "added": sum(counts[k][0] for k in keys),
+        "gb": gb(sum(counts[k][1] for k in keys)),
+        "months": [{"month": k, "added": counts[k][0], "gb": gb(counts[k][1])} for k in keys],
+    }
+
+
 def housekeeping(items, label_fn, poster_field="thumb"):
     missing = [label_fn(i) for i in items if not i.get(poster_field)]
     unmatched = [label_fn(i) for i in items if is_unmatched(i)]
@@ -478,7 +510,7 @@ def episode_label(item):
     )
 
 
-def summarise_section(client, section, args, guids, ranks, pending):
+def summarise_section(client, section, args, guids, ranks, pending, keys, growths):
     sid, kind = section.get("key"), section.get("type")
     out = {"name": clean(section.get("title")), "type": kind}
     large = int(args.large_gb * 1e9)
@@ -491,6 +523,8 @@ def summarise_section(client, section, args, guids, ranks, pending):
         out["counts"] = {"movies": len(movies)}
         out["media"] = tally.as_dict()
         out["recently_added"] = recent(movies, args.recent, movie_label)
+        growths.append(growth_counts(movies, keys))
+        out["growth"] = growth_section(growths[-1], keys)
         out["housekeeping"] = housekeeping(movies, movie_label)
         out["duplicates"] = library_duplicates(movies, movie_label, args.duplicate_examples)
         remember_guids(guids, movies, out["name"], movie_label)
@@ -510,6 +544,8 @@ def summarise_section(client, section, args, guids, ranks, pending):
         }
         out["media"] = tally.as_dict()
         out["recently_added"] = recent(episodes, args.recent, episode_label)
+        growths.append(growth_counts(episodes, keys))
+        out["growth"] = growth_section(growths[-1], keys)
         out["housekeeping"] = housekeeping(shows, lambda s: clean(s.get("title")))
         out["duplicates"] = library_duplicates(episodes, episode_label, args.duplicate_examples, by_show=True)
         remember_guids(guids, episodes, out["name"], episode_label, show=True)
@@ -530,6 +566,8 @@ def summarise_section(client, section, args, guids, ranks, pending):
         out["media"] = tally.as_dict(video=False)
         album_label = lambda a: clean(f"{a.get('parentTitle')} - {a.get('title')}")
         out["recently_added"] = recent(albums, args.recent, album_label)
+        growths.append(growth_counts(tracks, keys))
+        out["growth"] = growth_section(growths[-1], keys)
         out["housekeeping"] = housekeeping(albums, album_label)
 
     elif kind == "photo":
@@ -549,10 +587,11 @@ def build_report(client, args):
         if not sections:
             raise ReportError("No library matched --library. Run without it to see all names.")
 
-    libraries, guids, ranks, pending = [], {}, {}, []
+    libraries, guids, ranks, pending, growths = [], {}, {}, [], []
+    keys = month_keys(args.growth_months)
     for section in sections:
         print(f"reading library: {clean(section.get('title'))}", file=sys.stderr)
-        libraries.append(summarise_section(client, section, args, guids, ranks, pending))
+        libraries.append(summarise_section(client, section, args, guids, ranks, pending, keys, growths))
     for lib, candidates, by_show in pending:
         lib["upgrades"] = library_upgrades(candidates, ranks, lib["name"], args.upgrade_examples, by_show)
 
@@ -561,6 +600,8 @@ def build_report(client, args):
         media = lib.get("media", {})
         totals["files"] += media.get("files", 0)
         totals["size_gb"] = round(totals["size_gb"] + media.get("size_gb", 0), 1)
+    # Sum bytes across libraries before rounding, so the combined figures don't drift.
+    combined = {k: [sum(g[k][0] for g in growths), sum(g[k][1] for g in growths)] for k in keys}
 
     return {
         "cinemetric_version": VERSION,
@@ -571,6 +612,7 @@ def build_report(client, args):
             "platform": root.get("platform"),
         },
         "totals": totals,
+        "growth": growth_section(combined, keys),
         "cross_library_duplicates": cross_library_duplicates(guids, args.duplicate_examples),
         "libraries": libraries,
     }
@@ -584,10 +626,12 @@ def main():
     parser.add_argument("--large-gb", type=float, default=40.0, help="flag files at least this many GB")
     parser.add_argument("--duplicate-examples", type=int, default=15, help="duplicate examples listed per section")
     parser.add_argument("--upgrade-examples", type=int, default=15, help="upgrade examples listed per library")
+    parser.add_argument("--growth-months", type=int, default=12, help="months covered by growth by month")
     args = parser.parse_args()
     args.recent = max(0, min(args.recent, 100))
     args.duplicate_examples = max(0, min(args.duplicate_examples, 500))
     args.upgrade_examples = max(0, min(args.upgrade_examples, 500))
+    args.growth_months = max(0, min(args.growth_months, 120))
 
     try:
         client = PlexClient(*load_config())

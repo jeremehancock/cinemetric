@@ -45,6 +45,8 @@ Script: `python3 ${CLAUDE_SKILL_DIR}/scripts/dashboard.py` (prints JSON; errors 
    (titles added more than 6 months ago that nobody has finished in that time) can get one line of
    facts, such as how many titles and how much space. Never suggest deleting anything; it doesn't
    affect the overall status either.
+   The Library section has a "Storage added per month" chart for the last 12 months; one of the
+   highlights can be how much was added in that time or which month was busiest.
 
 ## Publishing online
 
@@ -54,14 +56,23 @@ Script: `python3 ${CLAUDE_SKILL_DIR}/scripts/dashboard.py` (prints JSON; errors 
    `--hide-names` if they want that).
 2. Read the whole `output` file. It's a finished, self-contained page: publish it exactly as it is,
    without editing it.
-3. Publish it with the `Artifact` tool, `file_path` set to `output`:
+3. If `online_page` is set, first read the live page with the `Artifact` tool (`action: "read"`,
+   `url` set to `online_page`). The tool won't update a page this conversation hasn't seen, and each
+   dashboard run is usually a new conversation. Check that it's just an earlier dashboard build: its
+   footer says "Read-only snapshot made by Cinemetric" and it has the same kind of sections. Each
+   build replaces the whole page by design, so there's nothing to merge. If it contains anything else
+   (for example text someone added on claude.ai), don't overwrite it: tell the user what's there and
+   ask before publishing.
+4. Publish it with the `Artifact` tool, `file_path` set to `output`:
    - If `online_page` is set, pass it as `url` so the same page is updated and the link stays the same.
+     If the tool still refuses because it wants the live version merged, and step 3 found only an
+     earlier build, publish `output` again unchanged (the refusal says when that's allowed).
    - Otherwise this creates a new private page: pass `icon: "chart"`. Then save its link with
      `online-page --url <link>` so later runs update the same page.
-4. If updating the saved page fails because it was deleted or the user can no longer edit it, run
+5. If updating the saved page fails because it was deleted or the user can no longer edit it, run
    `online-page --forget`, explain what happened, and ask before publishing a new page (then save the
    new link). Never publish a replacement page without asking.
-5. If the `Artifact` tool isn't available in this session, deliver the local copy if the destination
+6. If the `Artifact` tool isn't available in this session, deliver the local copy if the destination
    includes it, and explain that the online page wasn't updated this time. Don't change the saved
    destination.
 

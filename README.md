@@ -32,7 +32,7 @@ CSS and JavaScript with no build step, ready for any static host.
 | `users-and-shares` | Who your server is shared with (friends, Plex Home, managed users, pending invites), which libraries each person can see, who can download, and when each person last played something. Reads the share list from your plex.tv account; only the server owner can use it |
 | `dashboard` | One page with library, server, watch and sharing stats and charts. Saved on your computer, as a private claude.ai page you can open anywhere, or both; each refresh updates the same file and link |
 
-Ideas for new skills are welcome; see [Roadmap](#roadmap).
+More skills are planned, and ideas are welcome; see [Roadmap](#roadmap).
 
 Every Cinemetric skill is **read-only**: it never changes anything on your server. See [SECURITY.md](SECURITY.md).
 
@@ -119,9 +119,39 @@ manual setup and think a token leaked, use "sign out of all devices" in your Ple
 
 Plans can change; feedback and ideas are welcome via GitHub issues. What the existing skills do, and
 the rules every skill follows, are written down as specs in [openspec/specs/](openspec/specs/). New
-work starts as an OpenSpec change proposal (`/opsx:propose`) before any code is written.
+work starts as an OpenSpec change proposal (`/opsx:propose`) before any code is written. Notes on how
+each idea below might be built are in [openspec/ideas.md](openspec/ideas.md).
 
-Nothing is planned right now.
+**Ideas for later**
+
+New skills:
+
+- [ ] **`unwatched`**: titles nobody has played, how long ago each was added, and how much space they
+      use, so you can see where your storage goes. Facts only: it never suggests deleting anything.
+      Most accurate with Tautulli, since Plex on its own only knows what your own account has watched.
+- [ ] **`playback-check`**: files likely to transcode on common devices (image-based subtitles, TrueHD
+      or DTS audio, bitrates above your remote streaming limit), plus which devices transcode most when
+      Tautulli is set up
+- [ ] **`what-to-watch`**: find something in your own library to watch tonight, by genre, length or
+      rating, or pick up where you left off
+- [ ] **`tv-completeness`**: gaps in episode numbers and seasons that are only partly there, using only
+      what's on your server
+- [ ] **`year-in-review`**: a yearly recap page with top titles, total hours and busiest months, with
+      care taken around other people's viewing details
+
+Updates to existing skills:
+
+- [ ] **Snapshots and "what changed"**: save a small summary on your computer after each run, so
+      reports and the dashboard can show what's new, what disappeared and how things trend over time.
+      Could also power an optional weekly digest that only mentions changes.
+- [ ] **`watch-activity`**: what one person has watched lately, the most streams at once (useful for
+      planning upload bandwidth), and titles started but never finished
+- [ ] **`server-health`**: more settings checks, such as hardware transcoding being off or a low remote
+      streaming limit
+- [ ] **`library-report`**: library growth by month, and fuller music details (lossless vs lossy,
+      missing album art)
+- [ ] **`users-and-shares`**: shared libraries nobody has watched in a while
+- [ ] **`setup`**: remember more than one server and switch between them
 
 ## Support Development
 

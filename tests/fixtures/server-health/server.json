@@ -180,6 +180,41 @@
      "type": "int"
     },
     {
+     "id": "autoEmptyTrash",
+     "value": false,
+     "type": "bool"
+    },
+    {
+     "id": "HardwareAcceleratedCodecs",
+     "value": true,
+     "type": "bool"
+    },
+    {
+     "id": "HardwareAcceleratedEncoders",
+     "value": true,
+     "type": "bool"
+    },
+    {
+     "id": "TranscoderCanOnlyRemuxVideo",
+     "value": false,
+     "type": "bool"
+    },
+    {
+     "id": "WanPerStreamMaxUploadRate",
+     "value": 0,
+     "type": "int"
+    },
+    {
+     "id": "WanTotalMaxUploadRate",
+     "value": "600000",
+     "type": "int"
+    },
+    {
+     "id": "TranscoderTempDirectory",
+     "value": "/mnt/private-transcode-path-for-tests",
+     "type": "text"
+    },
+    {
      "id": "PlexOnlineToken",
      "value": "secret-in-prefs-for-tests",
      "type": "text"

@@ -40,8 +40,8 @@ These came out of an explore session on 2026-10-05 and apply to every idea below
     3. Go one level deeper     (per-item details: subtitles, audio, episode gaps)
 ```
 
-Suggested order: the quick wins first (`server-health` settings checks, `watch-activity` single
-person), then `unwatched`, then snapshots.
+Suggested order: the remaining quick win first (`watch-activity` single person), then `unwatched`,
+then snapshots. (The `server-health` settings checks were done on 2026-10-05.)
 
 ---
 
@@ -212,19 +212,6 @@ change), so check what scheduled runs can do before promising a digest that publ
 
 Any new Tautulli command means updating `TAUTULLI_COMMANDS` and the "Sources used" requirement in the
 watch-activity spec.
-
-### `server-health`
-
-**Settings checks:** the script already reads `/:/prefs` but keeps only five maintenance settings
-(the `PREF_IDS` table in `server_health.py`). Keeping a few more would allow checks like:
-- hardware-accelerated transcoding turned off
-- a low remote streaming limit
-- "empty trash automatically after every scan" setting
-- transcoder temporary folder settings.
-
-Low effort since the request already happens. The "Only maintenance settings are kept" requirement in
-the server-health spec would need widening, and the setting ids need checking on a real server.
-Wording: describe what each setting does and what it's set to; don't tell the user to change it.
 
 ### `library-report`
 

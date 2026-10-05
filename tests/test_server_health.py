@@ -62,6 +62,39 @@ class WorthALook(OfflineTestCase):
         self.assertEqual(kinds(with_stream({"speed": None, "throttled": False})), [])
         self.assertEqual(kinds(with_stream(None)), [])
 
+    def test_hardware_transcoding_off(self):
+        report = healthy()
+        report["server"]["streaming_settings"] = {"hardware_acceleration": False}
+        self.assertEqual(sh.worth_a_look(report, 7), [{"kind": "hardware_transcoding_off"}])
+        report["server"]["streaming_settings"] = {"hardware_acceleration": True}
+        self.assertEqual(kinds(report), [])
+
+    def test_video_transcoding_off(self):
+        report = healthy()
+        report["server"]["streaming_settings"] = {"video_transcoding_disabled": True}
+        self.assertEqual(sh.worth_a_look(report, 7), [{"kind": "video_transcoding_off"}])
+        report["server"]["streaming_settings"] = {"video_transcoding_disabled": False}
+        self.assertEqual(kinds(report), [])
+
+    def test_remote_stream_limit_low(self):
+        def with_limit(kbps):
+            report = healthy()
+            report["server"]["streaming_settings"] = {"remote_stream_limit_kbps": kbps}
+            return report
+        self.assertEqual(sh.worth_a_look(with_limit(4000), 7),
+                         [{"kind": "remote_stream_limit_low", "limit_kbps": 4000}])
+        # 8 Mbps is the lowest choice Plex labels as 1080p; 0 means no limit.
+        self.assertEqual(kinds(with_limit(8000)), [])
+        self.assertEqual(kinds(with_limit(0)), [])
+        self.assertEqual(kinds(with_limit(None)), [])
+
+    def test_missing_streaming_settings_are_not_flagged(self):
+        report = healthy()
+        report["server"]["streaming_settings"] = {}
+        self.assertEqual(kinds(report), [])
+        report["server"]["streaming_settings"] = None
+        self.assertEqual(kinds(report), [])
+
     def test_scheduled_scans_not_running(self):
         report = healthy()
         report["background"]["library_scans"] = [
@@ -106,6 +139,19 @@ class WorthALook(OfflineTestCase):
 
 
 class SmallHelpers(OfflineTestCase):
+    def test_never_is_not_a_date(self):
+        # Plex sends -1 (or 0) for "never", for example an update check that hasn't run.
+        for never in (-1, 0, None, ""):
+            self.assertIsNone(sh.when(never))
+            self.assertIsNone(sh.days_ago(never, 1_000_000))
+        self.assertIsNotNone(sh.when(1_700_000_000))
+        self.assertEqual(sh.days_ago(1_000_000 - 86400, 1_000_000), 1.0)
+
+    def test_update_never_checked(self):
+        client = mock.Mock()
+        client.get.return_value = {"checkedAt": -1, "canInstall": "0"}
+        self.assertIsNone(sh.update_status(client)["last_checked"])
+
     def test_playback_method(self):
         self.assertEqual(sh.playback_method({}), "direct play")
         self.assertEqual(sh.playback_method({"TranscodeSession": {"videoDecision": "copy",
@@ -212,12 +258,50 @@ class WholeReport(ReportTestCase):
         self.assertIn("Optimize Database", background["maintenance_tasks"]["enabled"])
         self.assertEqual([lib["name"] for lib in background["library_scans"]], ["Movies", "TV", "Music"])
 
-    def test_only_maintenance_settings_are_kept(self):
-        settings = self.report(sample_server())["background"]["maintenance_settings"]
-        self.assertEqual(settings, {
+    def test_only_selected_settings_are_kept(self):
+        report = self.report(sample_server())
+        self.assertEqual(report["background"]["maintenance_settings"], {
             "maintenance_start_hour": 2, "maintenance_end_hour": 5, "scan_on_folder_change": True,
             "scheduled_scans_enabled": True, "scheduled_scan_interval_seconds": 86400,
+            "empty_trash_after_scan": False,
         })
+        self.assertEqual(report["server"]["streaming_settings"], {
+            "hardware_acceleration": True, "hardware_encoding": True, "video_transcoding_disabled": False,
+            "remote_stream_limit_kbps": 0, "remote_total_upload_limit_kbps": 600000,
+            "custom_transcoder_temp_folder": True,
+        })
+
+    def test_transcoder_folder_path_is_never_kept(self):
+        self.assertNotIn("private-transcode-path-for-tests", str(self.report(sample_server())))
+
+    def test_empty_transcoder_folder_is_not_custom(self):
+        prefs = fixture("server-health", "server.json")["/:/prefs"]
+        for setting in prefs["MediaContainer"]["Setting"]:
+            if setting["id"] == "TranscoderTempDirectory":
+                setting["value"] = ""
+        report = self.report(sample_server(**{"/:/prefs": prefs}))
+        self.assertIs(report["server"]["streaming_settings"]["custom_transcoder_temp_folder"], False)
+
+    def test_missing_setting_is_left_out(self):
+        prefs = {"Setting": [{"id": "HardwareAcceleratedEncoders", "value": "1", "type": "bool"}]}
+        self.assertEqual(sh.pick_settings(prefs, sh.STREAMING_PREFS), {"hardware_encoding": True})
+
+    def test_settings_are_requested_once(self):
+        server = sample_server()
+        self.report(server)
+        self.assertEqual([seen.path for seen in server.requests].count("/:/prefs"), 1)
+
+    def test_settings_unavailable_empties_both_parts(self):
+        server = sample_server(**{"/:/prefs": Reply("", status=403)})
+        report = self.report(server)
+        self.assertIsNone(report["server"]["streaming_settings"])
+        self.assertIsNone(report["background"]["maintenance_settings"])
+        owner_only = "only available to the server owner's account"
+        self.assertEqual(report["unavailable"], [
+            {"part": "streaming settings", "reason": owner_only},
+            {"part": "maintenance settings", "reason": owner_only}])
+        self.assertEqual([seen.path for seen in server.requests].count("/:/prefs"), 1)
+        self.assertIsNotNone(report["live_activity"])
 
     def test_worth_a_look(self):
         report = self.report(sample_server())

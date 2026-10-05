@@ -40,7 +40,8 @@ server another way (curl, SSH, etc.).
 
 ## 3. Write the report
 
-The JSON contains `server` (basics, `update`, `remote_access`, `resource_use`), `live_activity`
+The JSON contains `server` (basics, `update`, `remote_access`, `resource_use`,
+`streaming_settings`), `live_activity`
 (`totals` and `streams`), `background` (`running_now`, `library_scans`, `maintenance_tasks`,
 `maintenance_settings`), `worth_a_look`, and `unavailable`. Each task in `running_now` has
 `progress_moved`: `true` (it moved during the wait), `false` (no visible progress) or `null` (not
@@ -62,12 +63,19 @@ Present, in this order:
 3. **Right now**: number of streams with the direct play / direct stream / transcode split and total
    bandwidth (show Mbps: kbps ÷ 1000). Then a short list: user, what they're watching, device, method,
    progress (for `live_tv` streams, say it's Live TV instead of a progress figure). If nothing is
-   playing, say so in one line.
+   playing, say so in one line. Then one short line on how the server is set up for streaming, from
+   `streaming_settings`: hardware acceleration on or off, the limit per remote stream (in Mbps, or
+   "no limit" when it's 0) and the total remote upload limit (same). Leave out any setting that's
+   missing. Don't mention `hardware_encoding` or `custom_transcoder_temp_folder` unless the user asks
+   about transcoding settings.
 4. **Background**: tasks running now (with progress), each library's last scan, whether scanning on
    folder changes or scheduled scans are on, and the nightly maintenance window (start/end hour,
    24-hour clock). Only mention disabled maintenance tasks if the user asks; many are off by default.
    If only folder-change scanning is on, an old "last scanned" date is normal: those small scans
-   don't update it.
+   don't update it. If `empty_trash_after_scan` is `false`, mention it as a fact: files that are
+   removed from disk stay in the library, marked unavailable, until the trash is emptied in Plex.
+   Both choices are reasonable (keeping it off protects the library if a drive drops out for a
+   moment), so don't call it a problem.
 5. **Worth a look**: each `worth_a_look` item, with a plain explanation of why it matters:
    - `update_available`: newer Plex version; updates bring fixes and security patches.
    - `remote_access_not_working`: people outside the home network can't reach the server directly
@@ -81,6 +89,16 @@ Present, in this order:
      appear after a manual scan. Fine if that's deliberate.
    - `important_maintenance_disabled`: database backups, database optimization or cache cleanup are
      off. These keep the server's database safe and its disk use in check.
+   - `hardware_transcoding_off`: "Use hardware acceleration when available" is off, so any
+     transcoding is done by the processor alone, which is slower and works the machine harder.
+     Hardware transcoding needs a Plex Pass and a supported graphics chip. (The setting being on
+     doesn't prove a GPU is used; a live transcode's `hardware` field shows that.)
+   - `video_transcoding_off`: "Disable video stream transcoding" is on, so the server never converts
+     video. Devices that can't play a file as-is may fail to play it instead of getting a converted
+     version.
+   - `remote_stream_limit_low`: the limit per remote stream is set to `limit_kbps` (show it in Mbps),
+     which Plex itself labels as 720p or lower. Viewers outside the home network get video converted
+     down to that quality, even if their connection could handle more.
    - `high_cpu` / `high_memory`: the machine was busy during the sample, often from transcoding.
    - `task_not_progressing`: these tasks showed no progress over `seconds_between_checks` seconds,
      so they may be stuck. Say "possibly stuck", never "failed": the task may just be slow (a big
@@ -104,4 +122,8 @@ Keep it readable: plain English, no raw JSON, no file paths.
   Plex under **Settings → Troubleshooting** or the logs.
 - This skill is read-only. Never offer to stop streams, start scans, change settings or install
   updates as part of this skill; tell the user to do that in Plex itself.
+- Settings are facts, not advice: say what a setting does and what it's set to. Don't tell the user
+  to change it; the owner may have chosen it on purpose. If they ask where a setting lives, it's in
+  Plex under **Settings → Transcoder** (hardware acceleration, video transcoding), **Settings →
+  Remote Access** (remote limits) or **Settings → Library** (emptying trash).
 - Never display, echo, or ask for the Plex token.

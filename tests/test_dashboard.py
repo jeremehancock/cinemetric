@@ -54,6 +54,8 @@ def sample_data():
             "housekeeping": {"unmatched_count": 2},
             "recently_added": [{"title": EVIL, "added": "2026-09-01" + EVIL}],
         }],
+        "growth": {"added": EVIL, "gb": EVIL, "months": [{"month": EVIL, "added": 2, "gb": 4.0},
+                                                         {"month": EVIL_ATTR, "added": 1, "gb": 1.0}]},
     }
     sharing = {
         "people": [
@@ -427,3 +429,76 @@ class UnwatchedSection(OfflineTestCase):
     def test_hiding_names_keeps_the_section(self):
         html = page({"unwatched": unwatched_report()}, hide_names=True)
         self.assertIn("Movie 00", html)
+
+
+# ---------------------------------------------------------------- library growth chart
+
+def growth_library(sizes, start=(2025, 11)):
+    """A library report whose growth.months has one month per size, starting at start (year, month)."""
+    year, month, months = start[0], start[1], []
+    for gb in sizes:
+        months.append({"month": f"{year:04d}-{month:02d}", "added": 3 if gb else 0, "gb": gb})
+        year, month = (year + 1, 1) if month == 12 else (year, month + 1)
+    return {"libraries": [], "growth": {"added": sum(m["added"] for m in months),
+                                        "gb": round(sum(sizes), 1), "months": months}}
+
+
+class LibraryGrowthChart(OfflineTestCase):
+    def test_plays_chart_is_unchanged(self):
+        chart = db.daily_chart([{"date": "2026-09-01", "plays": 4, "hours": 2.0},
+                                {"date": "2026-09-02", "plays": 0}, {"date": "2026-09-03", "plays": 2}])
+        self.assertIn('aria-label="Plays per day over the last 3 days"', chart)
+        self.assertEqual(chart.count('class="bar bar-peak"'), 2)  # tallest bar, in the wide and narrow chart
+        self.assertEqual(chart.count('class="bar"'), 2)
+        self.assertIn("<title>Sep 1: 4 plays, 2 h</title>", chart)
+        self.assertIn("<title>Sep 2: 0 plays</title>", chart)
+        self.assertIn('text-anchor="end">4</text>', chart)  # round axis ticks from nice_step
+
+    def test_a_year_of_additions(self):
+        sizes = [10, 20, 30, 40, 50, 400, 60, 70, 80, 90, 100, 5.5]
+        html = page({"library": growth_library(sizes)})
+        self.assertIn("Storage added per month", html)
+        self.assertIn("956 GB, 36 items in the last 12 months", html)
+        wide = html[html.index('<svg class="chart chart-wide" viewBox="0 0 720 200" role="img" '
+                               'aria-label="Storage added per month'):]
+        wide = wide[:wide.index("</svg>")]
+        self.assertEqual(wide.count('class="bar'), 12)
+        self.assertEqual(wide.count("bar-peak"), 1)
+        self.assertIn("<title>Apr 2026: 400 GB, 3 items</title></path>", wide.replace('"bar bar-peak"', ""))
+        self.assertIn("Nov '25</text>", wide)  # first bar shows the year
+        self.assertIn("Jan '26</text>", wide)  # and so does January
+        self.assertIn(">Feb</text>", wide)
+        self.assertIn("<title>Oct 2026 so far: 5.5 GB, 3 items</title>", wide)
+        self.assertIn(">400 GB</text>", wide)  # axis ticks in GB or TB
+        narrow = html[html.index('<svg class="chart chart-narrow" viewBox="0 0 360 180" role="img" '
+                                 'aria-label="Storage added per month'):]
+        narrow = narrow[:narrow.index("</svg>")]
+        # The narrow chart skips January's label, so the year goes on the first label shown in 2026.
+        self.assertNotIn("Jan", narrow.split("<title>")[0])
+        self.assertIn("Feb '26</text>", narrow)
+
+    def test_axis_in_terabytes(self):
+        self.assertIn(">1.6 TB</text>", page({"library": growth_library([3000, 100])}))
+
+    def test_nothing_added(self):
+        html = page({"library": growth_library([0] * 12)})
+        self.assertIn("Nothing was added in the last 12 months.", html)
+        self.assertNotIn("Storage added per month", html)
+
+    def test_report_without_growth(self):
+        html = page({"library": {"libraries": []}})
+        self.assertIn("Library", html)
+        self.assertNotIn("Storage added per month", html)
+        self.assertNotIn("Nothing was added", html)
+
+    def test_no_months(self):
+        html = page({"library": {"libraries": [], "growth": {"added": 0, "gb": 0.0, "months": []}}})
+        self.assertNotIn("Storage added per month", html)
+        self.assertNotIn("Nothing was added", html)
+
+    def test_page_stays_healthy_and_names_dont_matter(self):
+        data = {"health": healthy(), "library": growth_library([5, 50, 500])}
+        html = page(data)
+        self.assertIn("Healthy", html)
+        self.assertNotIn("Mostly fine", html)
+        self.assertEqual(html, page(data, hide_names=True))

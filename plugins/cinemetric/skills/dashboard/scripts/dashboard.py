@@ -26,7 +26,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.13.0"
+VERSION = "0.14.0"
 SCRIPT_TIMEOUT_SECONDS = 1800
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -289,51 +289,97 @@ def nice_step(peak, ticks=4):
 def daily_chart(daily):
     if not daily:
         return ""
+    bars = []
+    for d in daily:
+        plays = d.get("plays", 0)
+        tip = f"{short_date(d.get('date'))}: {plural(plays, 'play')}"
+        if d.get("hours") is not None and plays:
+            tip += f", {hours(d['hours'])}"
+        bars.append({"value": plays, "label": short_date(d.get("date")), "tip": tip})
+    aria = f"Plays per day over the last {len(daily)} days"
     # Static SVG text scales with the drawing, so draw a wide and a narrow version and let CSS
     # pick one; labels then stay a readable size on both desktop and phone.
-    return (svg_chart(daily, 720, 200, 6, "chart chart-wide")
-            + svg_chart(daily, 360, 180, 3, "chart chart-narrow"))
+    return (bar_chart(bars, 720, 200, 6, "chart chart-wide", aria)
+            + bar_chart(bars, 360, 180, 3, "chart chart-narrow", aria))
 
 
-def svg_chart(daily, w, h, label_count, css_class):
-    left, bottom, top = 36, 24, 10
+def month_label(key, fmt):
+    """'2026-03' formatted with fmt, e.g. '%b' -> 'Mar'."""
+    try:
+        t = time.strptime(f"{key}-01", "%Y-%m-%d")
+    except (TypeError, ValueError):
+        return e(key)
+    return time.strftime(fmt, t)
+
+
+def added_size(gb):
+    """Like size(), but keeps a decimal for small amounts so a quiet month doesn't read as 0 GB."""
+    try:
+        return f"{float(gb):.1f} GB" if float(gb) < 10 else size(gb)
+    except (TypeError, ValueError):
+        return "–"
+
+
+def growth_chart(months):
+    bars = []
+    for i, m in enumerate(months):
+        key = str(m.get("month") or "")
+        added = m.get("added", 0)
+        when = month_label(key, "%b %Y")
+        if i == len(months) - 1:
+            when += " so far"
+        bars.append({"value": m.get("gb", 0), "label": month_label(key, "%b"), "year": key[:4],
+                     "year_label": month_label(key, "%b '%y"),
+                     "tip": f"{when}: {added_size(m.get('gb'))}, {plural(added, 'item')}"})
+    aria = f"Storage added per month over the last {len(months)} months"
+    return (bar_chart(bars, 720, 200, len(bars), "chart chart-wide", aria, tick=size, left=52)
+            + bar_chart(bars, 360, 180, 4, "chart chart-narrow", aria, tick=size, left=52))
+
+
+def bar_chart(bars, w, h, label_count, css_class, aria, tick=num, left=36):
+    """An inline SVG bar chart. Each bar has a value, an axis label (already safe HTML) and a tooltip.
+
+    The tallest bar is highlighted, and tick values are shown with tick(). Bars may also carry a
+    "year" and a "year_label": the first label drawn in each new year then uses year_label, so the
+    year shows up even when the label for January is skipped on a narrow chart.
+    """
+    bottom, top = 24, 10
     plot_w, plot_h = w - left - 8, h - bottom - top
-    peak = max(d.get("plays", 0) for d in daily)
+    peak = max(b["value"] for b in bars)
     step = nice_step(peak)
     ymax = step * 4
-    n = len(daily)
+    n = len(bars)
     slot = plot_w / n
     bar_w = max(slot - 2, 1)
-    parts = [f'<svg class="{css_class}" viewBox="0 0 {w} {h}" role="img" '
-             f'aria-label="Plays per day over the last {n} days">']
+    parts = [f'<svg class="{css_class}" viewBox="0 0 {w} {h}" role="img" aria-label="{e(aria)}">']
     for i in range(5):
         value = step * i
         y = top + plot_h - plot_h * i / 4
         cls = "baseline" if i == 0 else "grid"
         parts.append(f'<line class="{cls}" x1="{left}" x2="{w - 8}" y1="{y:.1f}" y2="{y:.1f}"/>')
-        parts.append(f'<text class="tick" x="{left - 6}" y="{y + 4:.1f}" text-anchor="end">{num(value)}</text>')
+        parts.append(f'<text class="tick" x="{left - 6}" y="{y + 4:.1f}" text-anchor="end">{tick(value)}</text>')
     label_every = max(1, round(n / label_count))
-    for i, d in enumerate(daily):
-        plays = d.get("plays", 0)
+    shown_year = None
+    for i, b in enumerate(bars):
         x = left + i * slot + 1
-        bh = plot_h * plays / ymax
+        bh = plot_h * b["value"] / ymax
         y = top + plot_h - bh
-        tip = f"{short_date(d.get('date'))}: {plural(plays, 'play')}"
-        if d.get("hours") is not None and plays:
-            tip += f", {hours(d['hours'])}"
         if bh > 0:
             r = min(4, bar_w / 2, bh)
             path = (f"M{x:.1f},{top + plot_h:.1f} V{y + r:.1f} Q{x:.1f},{y:.1f} {x + r:.1f},{y:.1f} "
                     f"H{x + bar_w - r:.1f} Q{x + bar_w:.1f},{y:.1f} {x + bar_w:.1f},{y + r:.1f} "
                     f"V{top + plot_h:.1f} Z")
-            peak_cls = " bar-peak" if plays == peak else ""
-            parts.append(f'<path class="bar{peak_cls}" d="{path}"><title>{e(tip)}</title></path>')
-        # A full-height, invisible hit area so thin or empty days still show their tooltip.
+            peak_cls = " bar-peak" if b["value"] == peak else ""
+            parts.append(f'<path class="bar{peak_cls}" d="{path}"><title>{e(b["tip"])}</title></path>')
+        # A full-height, invisible hit area so thin or empty bars still show their tooltip.
         parts.append(f'<rect class="hit" x="{x - 1:.1f}" y="{top}" width="{slot:.1f}" height="{plot_h}">'
-                     f'<title>{e(tip)}</title></rect>')
+                     f'<title>{e(b["tip"])}</title></rect>')
         if i % label_every == 0 and (n - 1 - i) >= label_every / 2 or i == n - 1:
+            label = b["label"]
+            if b.get("year") and b["year"] != shown_year:
+                label, shown_year = b["year_label"], b["year"]
             parts.append(f'<text class="tick" x="{x + bar_w / 2:.1f}" y="{h - 6}" text-anchor="middle">'
-                         f'{short_date(d.get("date"))}</text>')
+                         f'{label}</text>')
     parts.append("</svg>")
     return "".join(parts)
 
@@ -454,7 +500,20 @@ def library_section(library, error):
                          f'</span></li>' for a in added[:10])
     added_block = (f'<div class="ranked"><h3>Recently added</h3><ul class="recent">{added_html}</ul></div>'
                    if added_html else "")
-    return card("Library", f'{table}<div class="lists two">{added_block}</div>', "wide")
+    return card("Library", f'{table}{growth_block(library.get("growth"))}<div class="lists two">{added_block}</div>',
+                "wide")
+
+
+def growth_block(growth):
+    months = (growth or {}).get("months") or []
+    if not months:
+        return ""
+    period = f"the last {plural(len(months), 'month')}" if len(months) > 1 else "this month"
+    if not any(m.get("added") for m in months):
+        return f'<p class="muted">Nothing was added in {period}.</p>'
+    total = f"{added_size(growth.get('gb'))}, {plural(growth.get('added', 0), 'item')} in {period}"
+    return (f'<div class="chart-block"><div class="chart-head"><h3>Storage added per month</h3>'
+            f'<span class="muted">{e(total)}</span></div>{growth_chart(months)}</div>')
 
 
 def unwatched_section(unwatched, error):

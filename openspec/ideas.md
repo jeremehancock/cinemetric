@@ -41,8 +41,8 @@ These came out of an explore session on 2026-10-05 and apply to every idea below
 ```
 
 Suggested order: snapshots next. (The `server-health` settings checks, the `watch-activity` one
-person, busiest moment and unfinished titles additions, and the `unwatched` skill were done on
-2026-10-05.)
+person, busiest moment and unfinished titles additions, the `unwatched` skill, and `library-report`
+growth by month with its dashboard chart were done on 2026-10-05.)
 
 ---
 
@@ -172,8 +172,6 @@ change), so check what scheduled runs can do before promising a digest that publ
 
 ### `library-report`
 
-- **Growth by month:** count items and size added per month from `addedAt`, which is already fetched.
-  Low effort. Snapshots would add *removed* items too.
 - **Music:** lossless vs lossy (FLAC/ALAC vs MP3/AAC), albums missing artwork. Check what the track
   listing already includes before adding requests.
 

@@ -1,6 +1,6 @@
 ---
 name: library-report
-description: "Report on what's in a Plex Media Server's libraries: item counts, storage used, 4K/1080p and codec breakdowns, 10-bit video, recently added, and housekeeping issues (missing posters, unmatched items, unavailable files, very large files, duplicate copies and the space they use), plus titles only available in SD or 720p that may be worth upgrading. Read-only. Use when the user asks for a Plex library report, library stats, how big their Plex library is, what was recently added to Plex, which Plex items are unmatched or missing artwork, or whether they have duplicate movies or episodes, multiple versions of a title, or the same title in more than one library, or which titles are low quality, only in SD or 720p, or worth upgrading."
+description: "Report on what's in a Plex Media Server's libraries: item counts, storage used, 4K/1080p and codec breakdowns, 10-bit video, recently added, and housekeeping issues (missing posters, unmatched items, unavailable files, very large files, duplicate copies and the space they use), titles only available in SD or 720p that may be worth upgrading, and how much was added each month. Read-only. Use when the user asks for a Plex library report, library stats, how big their Plex library is, what was recently added to Plex, how fast their Plex library is growing or how much they added in a month or year, which Plex items are unmatched or missing artwork, or whether they have duplicate movies or episodes, multiple versions of a title, or the same title in more than one library, or which titles are low quality, only in SD or 720p, or worth upgrading."
 argument-hint: "[library name] [--recent N]"
 allowed-tools: Read, Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/library_report.py *), Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/library_report.py), Bash(python ${CLAUDE_SKILL_DIR}/scripts/library_report.py *), Bash(python ${CLAUDE_SKILL_DIR}/scripts/library_report.py)
 ---
@@ -12,7 +12,7 @@ Produce a clear, friendly report about the user's Plex libraries using the bundl
 ## 1. Run the script
 
 ```
-python3 ${CLAUDE_SKILL_DIR}/scripts/library_report.py [--library "Name"]... [--recent N] [--large-gb N] [--duplicate-examples N] [--upgrade-examples N]
+python3 ${CLAUDE_SKILL_DIR}/scripts/library_report.py [--library "Name"]... [--recent N] [--large-gb N] [--duplicate-examples N] [--upgrade-examples N] [--growth-months N]
 ```
 
 - If the user named a library (e.g. "my Movies library"), pass `--library "Movies"`. Repeat it for several.
@@ -22,6 +22,8 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/library_report.py [--library "Name"]... [--r
   libraries (default 15, up to 500). Use a high number when the user wants the full list to clean up.
 - `--upgrade-examples N` sets how many upgrade candidates are listed per library (default 15, up to
   500). Use a high number when the user wants the full list.
+- `--growth-months N` sets how many months the growth by month covers (default 12, up to 120). Use
+  it when the user asks about a longer or shorter period, e.g. `--growth-months 24` for two years.
 - Large libraries can take a minute; progress lines go to stderr and the JSON report goes to stdout.
 - Use `--check` alone to test the connection without building a report.
 
@@ -41,9 +43,10 @@ server another way (curl, SSH, etc.).
 
 ## 3. Write the report
 
-The JSON contains `server`, `totals`, `cross_library_duplicates`, and one entry per library with
-`counts`, `media` (files, size_gb, resolution, video_codec, ten_bit_files, audio_codec, large_files,
-unavailable_files), `recently_added`, `housekeeping`, and (movie and TV libraries only) `duplicates`
+The JSON contains `server`, `totals`, `growth`, `cross_library_duplicates`, and one entry per
+library with `counts`, `media` (files, size_gb, resolution, video_codec, ten_bit_files, audio_codec,
+large_files, unavailable_files), `recently_added`, `growth` (movie, TV and music libraries),
+`housekeeping`, and (movie and TV libraries only) `duplicates`
 and `upgrades`.
 
 `duplicates` has `titles`, `extra_copies`, `extra_gb` and `examples`: for movies, each copy's
@@ -60,7 +63,19 @@ the report, is not listed; the ones skipped because of another library are count
 `covered_elsewhere`. Titles whose resolution Plex doesn't know (often files Plex hasn't analysed yet)
 are not listed either.
 
-If the user only asked about duplicates, or only about what's worth upgrading, lead with that, then
+`growth` has `added`, `gb` and `months`: one row per month, oldest first, with `month` (YYYY-MM),
+`added` and `gb`. The top-level `growth` adds up every library in the report. When presenting it:
+- Movie libraries count movies, TV libraries count episodes, and music libraries count tracks (not
+  albums), so say "episodes" or "tracks" where that applies.
+- `gb` is the space those items take up today, not when they were added. A file replaced later with
+  a bigger copy counts at its new size in the month it was first added.
+- The last month is the current one and is still in progress.
+- Plex can only count what's still there: items added and later deleted aren't in any month.
+- If one month is far above the rest, a library re-scan or moving files to a new drive is a common
+  reason, since Plex can then treat existing items as newly added. Mention it as a possibility, not a
+  certainty.
+
+If the user only asked about duplicates, only about what's worth upgrading, or only about growth, lead with that, then
 mention anything else important in a sentence or two instead of the full report. If the report was
 limited with `--library`, say that other libraries weren't checked, so a title listed as an upgrade
 candidate may already exist in better quality elsewhere.
@@ -72,7 +87,9 @@ Present, in this order:
 2. **Per library**: a short table or bullets with counts and size; the resolution split as
    percentages (e.g. "38% 4K, 55% 1080p"); top video codecs; 10-bit count. Do not call 10-bit files
    HDR: Plex's library listing does not say which files are HDR, and many 10-bit files are not.
-3. **Recently added**: a few highlights across libraries, newest first.
+3. **Recently added**: a few highlights across libraries, newest first, then one or two lines on
+   growth: how much was added over the period (items and storage), the busiest month, and anything
+   notable, such as a library growing much faster than the others.
 4. **Worth a look**: unavailable files, unmatched items, missing posters, and very large files, with
    counts and a few examples. Briefly say why each matters (unavailable files are ones Plex can no
    longer find on disk, often from a moved/deleted file or an unmounted drive; unmatched items have no

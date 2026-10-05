@@ -40,8 +40,8 @@ These came out of an explore session on 2026-10-05 and apply to every idea below
     3. Go one level deeper     (per-item details: subtitles, audio, episode gaps)
 ```
 
-Suggested order: the remaining quick win first (`watch-activity` single person), then `unwatched`,
-then snapshots. (The `server-health` settings checks were done on 2026-10-05.)
+Suggested order: `unwatched` next, then snapshots. (The `server-health` settings checks and the
+`watch-activity` one person, busiest moment and unfinished titles additions were done on 2026-10-05.)
 
 ---
 
@@ -200,18 +200,9 @@ change), so check what scheduled runs can do before promising a digest that publ
 
 ### `watch-activity`
 
-- **One person:** "what has Sam watched lately?" Filter history to one user. Tautulli's `get_history`
-  accepts a user filter **(to verify the parameter name)**; for Plex history, filter by account in the
-  script. Low effort, common question.
-- **Most streams at once:** the peak number of simultaneous streams over the period. Useful for
-  judging upload bandwidth. Tautulli has concurrent-stream data **(to verify the command; it would
-  need adding to `TAUTULLI_COMMANDS`)**. Without Tautulli, it could be worked out from history start
-  and stop times if Plex provides both **(to verify)**.
-- **Started but never finished:** titles people began and abandoned. Tautulli history includes how
-  much of each play was watched.
-
-Any new Tautulli command means updating `TAUTULLI_COMMANDS` and the "Sources used" requirement in the
-watch-activity spec.
+- **Busiest moment for one person:** Tautulli's `most_concurrent` stat ignores `user_id` (checked on
+  v2.18.2), so with `--user` the report leaves it out. It could be worked out from that person's
+  history `started` / `stopped` times instead. Only worth it if someone asks.
 
 ### `library-report`
 

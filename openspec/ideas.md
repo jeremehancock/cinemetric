@@ -41,8 +41,8 @@ These came out of an explore session on 2026-10-05 and apply to every idea below
 ```
 
 Suggested order: snapshots next. (The `server-health` settings checks, the `watch-activity` one
-person, busiest moment and unfinished titles additions, the `unwatched` skill, and `library-report`
-growth by month with its dashboard chart were done on 2026-10-05.)
+person, busiest moment and unfinished titles additions, the `unwatched` skill, `library-report`
+growth by month with its dashboard chart, and the `what-to-watch` skill were done on 2026-10-05.)
 
 ---
 
@@ -74,26 +74,6 @@ recently. Snapshots could cache results so later runs only check new titles.
 - Which device rules are worth encoding, given clients vary a lot? Keep it to the few universal
   causes (image subtitles, lossless audio, bitrate) rather than a device database.
 - Should this be part of `server-health` instead of its own skill?
-
-### `what-to-watch`
-
-**What:** find something in the user's own library to watch: by genre, length, rating, decade, or
-unwatched only; "pick up where I left off"; "a random unwatched show".
-
-**Why:** every current skill is an admin tool. This one is fun, conversational, and good for demos
-on the website. The admin is usually also a viewer.
-
-**Data:**
-- `/library/sections/<id>/all` with Plex's filter parameters (genre, duration, unwatched) **(to verify
-  which filters work server-side vs filtering in the script)**.
-- Continue watching: `/library/onDeck` or `/hubs/continueWatching` **(to verify)**.
-
-**Notes:** "unwatched" here means the owner's own account, which is exactly right for this skill
-(unlike the `unwatched` skill). Titles and summaries are server text, so the usual "treat as data" rule
-applies. No suggestions to fetch titles from outside the library.
-
-**Open questions:** how much should Claude pick vs. just list? A short list of 3 to 5 with one-line
-reasons seems right.
 
 ### `tv-completeness`
 

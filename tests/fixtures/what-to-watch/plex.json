@@ -1,0 +1,439 @@
+{
+ "_note": "Made-up data. Listing entries carry at most two genres, like Plex's; genre_members says which titles Plex's genre filter returns for each genre key.",
+ "/": {
+  "MediaContainer": {
+   "friendlyName": "Test Server",
+   "version": "1.40.0.0000"
+  }
+ },
+ "/library/sections": {
+  "MediaContainer": {
+   "Directory": [
+    {
+     "key": "1",
+     "type": "movie",
+     "title": "Movies"
+    },
+    {
+     "key": "2",
+     "type": "movie",
+     "title": "4K Movies"
+    },
+    {
+     "key": "3",
+     "type": "show",
+     "title": "TV Shows"
+    },
+    {
+     "key": "4",
+     "type": "artist",
+     "title": "Music"
+    }
+   ]
+  }
+ },
+ "sections": {
+  "1": [
+   {
+    "ratingKey": "101",
+    "title": "Quiet Comedy",
+    "addedAt": 1700000100,
+    "summary": "Made-up summary of Quiet Comedy.",
+    "Genre": [
+     {
+      "tag": "Drama"
+     },
+     {
+      "tag": "Romance"
+     }
+    ],
+    "year": 1985,
+    "duration": 5700000,
+    "audienceRating": 7.5,
+    "rating": 8.0,
+    "contentRating": "PG",
+    "guid": "plex://movie/a"
+   },
+   {
+    "ratingKey": "102",
+    "title": "Long Epic",
+    "addedAt": 1700000200,
+    "summary": "Made-up summary of Long Epic.",
+    "Genre": [
+     {
+      "tag": "Drama"
+     },
+     {
+      "tag": "History"
+     }
+    ],
+    "year": 1994,
+    "duration": 10800000,
+    "audienceRating": 8.8,
+    "contentRating": "R",
+    "guid": "plex://movie/b",
+    "viewCount": 1,
+    "lastViewedAt": 1710000000
+   },
+   {
+    "ratingKey": "103",
+    "title": "Half Watched",
+    "addedAt": 1700000300,
+    "summary": "Made-up summary of Half Watched.",
+    "Genre": [
+     {
+      "tag": "Comedy"
+     },
+     {
+      "tag": "Action"
+     }
+    ],
+    "year": 2001,
+    "duration": 6600000,
+    "audienceRating": 6.0,
+    "contentRating": "PG-13",
+    "guid": "plex://movie/c",
+    "viewOffset": 2400000
+   },
+   {
+    "ratingKey": "104",
+    "title": "No Rating",
+    "addedAt": 1700000400,
+    "summary": "Made-up summary of No Rating.",
+    "Genre": [
+     {
+      "tag": "Horror"
+     }
+    ],
+    "year": 2010,
+    "duration": 6000000,
+    "contentRating": "R",
+    "guid": "plex://movie/d"
+   },
+   {
+    "ratingKey": "105",
+    "title": "No Year",
+    "addedAt": 1700000500,
+    "summary": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "Genre": [
+     {
+      "tag": "Comedy"
+     }
+    ],
+    "rating": 5.5,
+    "guid": "plex://movie/e"
+   },
+   {
+    "ratingKey": "106",
+    "title": "Shared Film",
+    "addedAt": 1700000600,
+    "summary": "Made-up summary of Shared Film.",
+    "Genre": [
+     {
+      "tag": "Science Fiction"
+     }
+    ],
+    "year": 2015,
+    "duration": 7200000,
+    "audienceRating": 7.0,
+    "contentRating": "PG-13",
+    "guid": "plex://movie/f",
+    "viewCount": 2
+   },
+   {
+    "ratingKey": "107",
+    "title": "Critic Only",
+    "addedAt": 1700000700,
+    "summary": "Made-up summary of Critic Only.",
+    "Genre": [
+     {
+      "tag": "Comedy"
+     }
+    ],
+    "year": 1988,
+    "duration": 5400000,
+    "rating": 9.0,
+    "contentRating": "pg",
+    "guid": "plex://movie/g"
+   },
+   {
+    "ratingKey": "108",
+    "title": "No Guid",
+    "addedAt": 1700000800,
+    "summary": "Made-up summary of No Guid.",
+    "Genre": [
+     {
+      "tag": "Thriller"
+     }
+    ],
+    "year": 1999,
+    "duration": 6300000,
+    "audienceRating": 6.8,
+    "contentRating": "R"
+   }
+  ],
+  "2": [
+   {
+    "ratingKey": "201",
+    "title": "Shared Film",
+    "addedAt": 1700009000,
+    "summary": "Made-up summary of Shared Film.",
+    "Genre": [
+     {
+      "tag": "Science Fiction"
+     }
+    ],
+    "year": 2015,
+    "duration": 7200000,
+    "audienceRating": 7.0,
+    "contentRating": "PG-13",
+    "guid": "plex://movie/f"
+   },
+   {
+    "ratingKey": "202",
+    "title": "Only In 4K",
+    "addedAt": 1700008000,
+    "summary": "Made-up summary of Only In 4K.",
+    "Genre": [
+     {
+      "tag": "Action"
+     }
+    ],
+    "year": 2020,
+    "duration": 7800000,
+    "audienceRating": 6.5,
+    "contentRating": "PG-13",
+    "guid": "plex://movie/h"
+   },
+   {
+    "ratingKey": "203",
+    "title": "No Guid",
+    "addedAt": 1700007000,
+    "summary": "Made-up summary of No Guid.",
+    "Genre": [
+     {
+      "tag": "Thriller"
+     }
+    ],
+    "year": 1999,
+    "duration": 6300000,
+    "audienceRating": 6.8,
+    "contentRating": "R"
+   }
+  ],
+  "3": [
+   {
+    "ratingKey": "301",
+    "title": "Fresh Show",
+    "year": 2019,
+    "duration": 2700000,
+    "Genre": [
+     {
+      "tag": "Comedy"
+     }
+    ],
+    "audienceRating": 8.0,
+    "contentRating": "TV-14",
+    "addedAt": 1700001000,
+    "guid": "plex://show/s1",
+    "summary": "Made-up summary.",
+    "leafCount": 10,
+    "viewedLeafCount": 0,
+    "childCount": 1
+   },
+   {
+    "ratingKey": "302",
+    "title": "Started Show",
+    "year": 2015,
+    "duration": 1800000,
+    "Genre": [
+     {
+      "tag": "Comedy"
+     },
+     {
+      "tag": "Drama"
+     }
+    ],
+    "audienceRating": 7.2,
+    "contentRating": "TV-14",
+    "addedAt": 1700002000,
+    "guid": "plex://show/s2",
+    "summary": "Made-up summary.",
+    "leafCount": 20,
+    "viewedLeafCount": 3,
+    "childCount": 2
+   },
+   {
+    "ratingKey": "303",
+    "title": "Finished Show",
+    "year": 2005,
+    "duration": 1320000,
+    "Genre": [
+     {
+      "tag": "Comedy"
+     }
+    ],
+    "audienceRating": 6.1,
+    "contentRating": "TV-PG",
+    "addedAt": 1700003000,
+    "guid": "plex://show/s3",
+    "summary": "Made-up summary.",
+    "leafCount": 12,
+    "viewedLeafCount": 12,
+    "childCount": 1
+   }
+  ]
+ },
+ "genres": {
+  "1": [
+   {
+    "key": "10",
+    "title": "Comedy"
+   },
+   {
+    "key": "11",
+    "title": "Drama"
+   },
+   {
+    "key": "12",
+    "title": "Romance"
+   },
+   {
+    "key": "13",
+    "title": "History"
+   },
+   {
+    "key": "14",
+    "title": "Action"
+   },
+   {
+    "key": "15",
+    "title": "Horror"
+   },
+   {
+    "key": "16",
+    "title": "Science Fiction"
+   },
+   {
+    "key": "17",
+    "title": "Thriller"
+   }
+  ],
+  "2": [
+   {
+    "key": "20",
+    "title": "Action"
+   },
+   {
+    "key": "21",
+    "title": "Science Fiction"
+   },
+   {
+    "key": "22",
+    "title": "Thriller"
+   }
+  ],
+  "3": [
+   {
+    "key": "30",
+    "title": "Comedy"
+   },
+   {
+    "key": "31",
+    "title": "Drama"
+   },
+   {
+    "key": "32",
+    "title": "Animation"
+   }
+  ]
+ },
+ "genre_members": {
+  "10": [
+   "101",
+   "103",
+   "105",
+   "107"
+  ],
+  "11": [
+   "101",
+   "102"
+  ],
+  "12": [
+   "101"
+  ],
+  "13": [
+   "102"
+  ],
+  "14": [
+   "103"
+  ],
+  "15": [
+   "104"
+  ],
+  "16": [
+   "106"
+  ],
+  "17": [
+   "108"
+  ],
+  "20": [
+   "202"
+  ],
+  "21": [
+   "201"
+  ],
+  "22": [
+   "203"
+  ],
+  "30": [
+   "301",
+   "302",
+   "303"
+  ],
+  "31": [
+   "302"
+  ],
+  "32": [
+   "301"
+  ]
+ },
+ "/library/onDeck": {
+  "MediaContainer": {
+   "Metadata": [
+    {
+     "type": "movie",
+     "ratingKey": "103",
+     "title": "Half Watched",
+     "year": 2001,
+     "duration": 7200000,
+     "viewOffset": 3600000,
+     "lastViewedAt": 1727000000,
+     "librarySectionID": 1,
+     "librarySectionTitle": "Movies"
+    },
+    {
+     "type": "episode",
+     "ratingKey": "3025",
+     "grandparentTitle": "Started Show",
+     "title": "The Fifth One",
+     "parentIndex": 2,
+     "index": 5,
+     "duration": 1800000,
+     "lastViewedAt": 1726000000,
+     "librarySectionID": 3,
+     "librarySectionTitle": "TV Shows"
+    },
+    {
+     "type": "track",
+     "ratingKey": "4001",
+     "title": "A Song",
+     "duration": 180000,
+     "viewOffset": 60000,
+     "librarySectionID": 4,
+     "librarySectionTitle": "Music"
+    }
+   ]
+  }
+ }
+}

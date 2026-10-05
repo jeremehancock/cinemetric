@@ -71,6 +71,8 @@ the specs leave open. At least the following SHALL be covered:
   tokens, the people and libraries in the report, and the "things worth a look" flags.
 - `unwatched`: choosing a source, which plays count (finished only, every account), which titles are
   listed (cutoff, show added dates), sizes, and the report totals.
+- `what-to-watch`: watched status for movies and shows, each filter, merging the same title across
+  libraries, sorting and the limit, and continue watching.
 
 #### Scenario: A shared helper is fixed in one script only
 - **WHEN** a fix to `validate_url` or `clean` is applied to one script but not the others
@@ -89,6 +91,10 @@ the specs leave open. At least the following SHALL be covered:
 
 #### Scenario: A partly watched title counts as played
 - **WHEN** a change to `unwatched.py` treats a Tautulli play with `watched_status` 0.5 as finished
+- **THEN** a test fails
+
+#### Scenario: A started show counts as unwatched
+- **WHEN** a change to `what_to_watch.py` lets a show with some episodes watched match `--unwatched`
 - **THEN** a test fails
 
 ### Requirement: Tests run on GitHub

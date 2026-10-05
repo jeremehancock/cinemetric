@@ -18,6 +18,7 @@ watch = load_script("watch-activity")
 setup = load_script("setup")
 shares = load_script("users-and-shares")
 unwatched = load_script("unwatched")
+picker = load_script("what-to-watch")
 
 # (script name, address check, error it raises). Each check takes just the address.
 ADDRESS_CHECKS = [
@@ -26,15 +27,16 @@ ADDRESS_CHECKS = [
     ("watch-activity", lambda url: watch.validate_url(url, "plex_url"), watch.ReportError),
     ("users-and-shares", lambda url: shares.validate_url(url, "plex_url"), shares.ReportError),
     ("unwatched", lambda url: unwatched.validate_url(url, "plex_url"), unwatched.ReportError),
+    ("what-to-watch", lambda url: picker.validate_url(url, "plex_url"), picker.ReportError),
     ("setup", setup.clean_tautulli_url, setup.SetupError),
 ]
-WARNS_ABOUT_PLAIN_HTTP = ADDRESS_CHECKS[:5]
+WARNS_ABOUT_PLAIN_HTTP = ADDRESS_CHECKS[:6]
 LOOKS_LOCAL = [("library-report", library.looks_local), ("server-health", health.looks_local),
                ("watch-activity", watch.looks_local), ("users-and-shares", shares.looks_local),
-               ("unwatched", unwatched.looks_local)]
+               ("unwatched", unwatched.looks_local), ("what-to-watch", picker.looks_local)]
 CLEANERS = [("library-report", library.clean), ("server-health", health.clean),
             ("watch-activity", watch.clean), ("users-and-shares", shares.clean),
-            ("unwatched", unwatched.clean), ("setup", setup.clean)]
+            ("unwatched", unwatched.clean), ("what-to-watch", picker.clean), ("setup", setup.clean)]
 
 
 class AddressChecks(OfflineTestCase):
@@ -137,7 +139,7 @@ def plex_clients():
     return [(name, module, builder(module))
             for name, module in (("library-report", library), ("server-health", health),
                                  ("watch-activity", watch), ("users-and-shares", shares),
-                                 ("unwatched", unwatched))]
+                                 ("unwatched", unwatched), ("what-to-watch", picker))]
 
 
 class PlexClientRules(OfflineTestCase):

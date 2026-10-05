@@ -262,7 +262,92 @@ class ChoosingASource(OfflineTestCase):
         self.assertIn("401", str(caught.exception))
 
 
+# ---------------------------------------------------------------- watching now
+
+class WatchingNow(OfflineTestCase):
+    def test_two_people_watching(self):
+        Network(self, both_working())
+        report = wa.build_report(config(tautulli=None), args())
+        self.assertIsNone(report["now_watching_unavailable"])
+        self.assertEqual(report["now_watching"], [
+            {"user": "alex-test", "title": "Severance S02E03", "type": "episode",
+             "player": "Living Room TV", "platform": "Roku", "state": "playing",
+             "progress_pct": 50, "live_tv": False},
+            {"user": "sam-test", "title": "Arrival (2016)", "type": "movie",
+             "player": "Plex Web", "platform": "Chrome", "state": "paused",
+             "progress_pct": 10, "live_tv": False},
+        ])
+
+    def test_leaves_technical_details_to_server_health(self):
+        Network(self, both_working())
+        for session in wa.build_report(config(tautulli=None), args())["now_watching"]:
+            for field in ("method", "bandwidth_kbps", "source_quality", "transcode", "location"):
+                self.assertNotIn(field, session)
+
+    def test_nothing_playing(self):
+        routes = plex_routes()
+        routes["/status/sessions"] = {"MediaContainer": {"size": 0}}
+        Network(self, routes)
+        report = wa.build_report(config(tautulli=None), args())
+        self.assertEqual(report["now_watching"], [])
+        self.assertIsNone(report["now_watching_unavailable"])
+
+    def test_tautulli_source_reads_sessions_from_plex(self):
+        network = Network(self, both_working())
+        report = wa.build_report(config(), args())
+        self.assertEqual(report["source"], "tautulli")
+        self.assertEqual(len(report["now_watching"]), 2)
+        self.assertIn("/status/sessions", [s.path for s in network.server.requests])
+        self.assertNotIn("get_activity", [s.query.get("cmd") for s in network.server.requests])
+
+    def test_shared_server_with_tautulli(self):
+        routes = both_working()
+        routes["/status/sessions"] = Reply("", status=403)
+        Network(self, routes)
+        report = wa.build_report(config(), args())
+        self.assertEqual(report["source"], "tautulli")
+        self.assertIsNone(report["now_watching"])
+        self.assertEqual(report["now_watching_unavailable"], "only available to the server owner's account")
+
+    def test_tautulli_only_no_plex(self):
+        Network(self, {"/api/v2": tautulli_route()})
+        report = wa.build_report(config(plex=None), args())
+        self.assertEqual(report["source"], "tautulli")
+        self.assertIsNone(report["now_watching"])
+        self.assertEqual(report["now_watching_unavailable"], "Plex is not set up")
+
+    def test_sessions_error_keeps_the_history_report(self):
+        routes = plex_routes()
+        routes["/status/sessions"] = Reply("", status=500)
+        Network(self, routes)
+        report = wa.build_report(config(tautulli=None), args())
+        self.assertEqual(report["totals"]["plays"], 4)
+        self.assertIsNone(report["now_watching"])
+        self.assertIn("500", report["now_watching_unavailable"])
+
+    def test_unexpected_session_shape_keeps_the_history_report(self):
+        routes = plex_routes()
+        routes["/status/sessions"] = {"MediaContainer": {"Metadata": ["not a session"]}}
+        Network(self, routes)
+        report = wa.build_report(config(tautulli=None), args())
+        self.assertIsNone(report["now_watching"])
+        self.assertIn("didn't expect", report["now_watching_unavailable"])
+
+    def test_refused_sessions_are_not_owner_only(self):
+        routes = plex_routes()
+        routes["/status/sessions"] = Reply("", status=401)
+        Network(self, routes)
+        report = wa.build_report(config(tautulli=None), args())
+        self.assertEqual(report["source"], "plex")
+        self.assertEqual(report["now_watching_unavailable"], "only available to the server owner's account")
+
+
 class ConnectionCheck(OfflineTestCase):
+    def test_does_not_read_current_sessions(self):
+        network = Network(self, both_working())
+        wa.check(config())
+        self.assertNotIn("/status/sessions", [s.path for s in network.server.requests])
+
     def test_reports_both_connections(self):
         Network(self, both_working())
         self.assertEqual(wa.check(config()), {

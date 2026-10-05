@@ -56,5 +56,61 @@
    "accountID": 1,
    "viewedDaysAgo": 30
   }
- ]
+ ],
+ "/status/sessions": {
+  "MediaContainer": {
+   "Metadata": [
+    {
+     "type": "episode",
+     "grandparentTitle": "Severance",
+     "parentIndex": 2,
+     "index": 3,
+     "title": "Who Is Alive?",
+     "duration": 3000000,
+     "viewOffset": 1500000,
+     "User": {
+      "title": "alex-test"
+     },
+     "Player": {
+      "title": "Living Room TV",
+      "platform": "Roku",
+      "state": "playing"
+     },
+     "Session": {
+      "bandwidth": 12000,
+      "location": "lan"
+     },
+     "Media": [
+      {
+       "videoResolution": "1080"
+      }
+     ]
+    },
+    {
+     "type": "movie",
+     "title": "Arrival",
+     "year": 2016,
+     "duration": 6960000,
+     "viewOffset": 696000,
+     "User": {
+      "title": "sam-test"
+     },
+     "Player": {
+      "product": "Plex Web",
+      "platform": "Chrome",
+      "state": "paused"
+     },
+     "TranscodeSession": {
+      "videoDecision": "transcode",
+      "audioDecision": "copy"
+     },
+     "Media": [
+      {
+       "videoResolution": "4k"
+      }
+     ]
+    }
+   ]
+  }
+ }
 }

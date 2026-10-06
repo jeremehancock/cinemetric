@@ -102,7 +102,17 @@ def sample_data():
                                      libraries_changed=[{"name": "riley-test", "gained": [EVIL], "lost": []}],
                                      downloads_changed=[{"name": "riley-test" + EVIL, "to": True}],
                                      email_invites_change=1)
-    return {"library": library, "health": health, "watch": watch, "sharing": sharing, "unwatched": unwatched}
+    episode_gaps = {
+        "limits": EVIL, "totals": {"shows": 3, "shows_with_gaps": 1, "missing_episodes": 2,
+                                   "unavailable_episodes": 1, "missing_seasons": 1},
+        "libraries": [{"name": EVIL_ATTR, "shows": 3, "shows_with_gaps": 1, "missing_episodes": 2,
+                       "unavailable_episodes": 1, "missing_seasons": 1, "listed": [
+                           {"title": EVIL, "year": EVIL_ATTR, "missing_seasons": [3], "missing_episodes": 2,
+                            "unavailable_episodes": 1, "seasons": [
+                                {"season": EVIL, "missing": [[EVIL, EVIL_ATTR]], "unavailable": [EVIL]}]}]}],
+    }
+    return {"library": library, "health": health, "watch": watch, "sharing": sharing, "unwatched": unwatched,
+            "episode_gaps": episode_gaps}
 
 
 def page(data, errors=None, hide_names=False, snapshot_saved=None):
@@ -117,9 +127,10 @@ class PageSafety(OfflineTestCase):
         self.assertIn("&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;", html)
 
     def test_error_reasons_are_escaped(self):
-        html = page({}, {"library": EVIL, "health": EVIL, "watch": EVIL, "sharing": EVIL, "unwatched": EVIL})
+        html = page({}, {"library": EVIL, "health": EVIL, "watch": EVIL, "sharing": EVIL, "unwatched": EVIL,
+                         "episode_gaps": EVIL})
         self.assertNotIn("<script", html)
-        self.assertEqual(html.count("&lt;script&gt;"), 5)
+        self.assertEqual(html.count("&lt;script&gt;"), 6)
 
     def test_page_blocks_scripts_and_outside_requests(self):
         html = page(sample_data())
@@ -227,7 +238,7 @@ class Collecting(OfflineTestCase):
 
     def test_collect_keeps_going_when_one_source_fails(self):
         results = {"library": {"totals": {}}, "health": None, "watch": {"totals": {}}, "sharing": {"people": []},
-                   "unwatched": {"totals": {}}}
+                   "unwatched": {"totals": {}}, "episode_gaps": {"totals": {}}}
         fake = lambda name: (name, results[name], "HTTP 500" if results[name] is None else None)
         with mock.patch.object(db, "run_source", fake):
             data, errors = db.collect()
@@ -461,6 +472,115 @@ class UnwatchedSection(OfflineTestCase):
     def test_hiding_names_keeps_the_section(self):
         html = page({"unwatched": unwatched_report()}, hide_names=True)
         self.assertIn("Movie 00", html)
+
+
+# ---------------------------------------------------------------- episode gaps section
+
+def gap_show(title, missing=(), unavailable=(), seasons_missing=(), year=2010, season=2):
+    count = sum(b - a + 1 for a, b in missing)
+    return {"title": title, "year": year, "first_season": 1, "missing_seasons": list(seasons_missing),
+            "missing_episodes": count, "unavailable_episodes": len(unavailable), "unnumbered": 0,
+            "seasons": [{"season": season, "episodes": 5, "highest": 12, "missing": [list(r) for r in missing],
+                         "unavailable": list(unavailable), "continues_numbering": False}]}
+
+
+def gaps_report(shows=12, listed=10):
+    rows = [gap_show(f"Show {i:02d}", missing=[(3, 3)] * (20 - i)) for i in range(listed)]
+    library = {"name": "TV Shows", "shows": 417, "episodes": 19008, "shows_with_gaps": shows,
+               "missing_episodes": 90, "unavailable_episodes": 0, "missing_seasons": 11,
+               "shows_starting_later": 3, "seasons_not_checked": 16, "unnumbered": 0,
+               "listed": rows, "more_shows": shows - listed}
+    totals = {k: library[k] for k in ("shows", "episodes", "shows_with_gaps", "missing_episodes",
+                                      "unavailable_episodes", "missing_seasons", "shows_starting_later")}
+    return {"limits": "Only gaps between the episodes on the server can be found.",
+            "libraries": [library], "totals": totals, "skipped_libraries": []}
+
+
+class EpisodeGapsSection(OfflineTestCase):
+    def test_runs_with_a_limit_of_ten(self):
+        self.assertEqual(db.SOURCES["episode_gaps"], ("episode-gaps", "episode_gaps.py", ["--limit", "10"]))
+
+    def test_not_part_of_the_snapshot(self):
+        self.assertNotIn("episode_gaps", db.SNAPSHOT_AREAS)
+
+    def test_section_is_built(self):
+        html = page({"episode_gaps": gaps_report()})
+        self.assertIn("<h2>Episode gaps</h2>", html)
+        self.assertIn("<strong>12</strong> of 417 shows have gaps: 90 missing episodes, 11 missing seasons.", html)
+        self.assertIn("Only gaps between the episodes on the server can be found.", html)
+        self.assertIn("Show 09 (2010)", html)
+        self.assertIn("2 more shows with gaps.", html)
+
+    def test_shows_are_sorted_and_limited_across_libraries(self):
+        report = gaps_report(shows=5, listed=5)
+        second = dict(report["libraries"][0], name="Kids TV",
+                      listed=[gap_show(f"Kid Show {i}", missing=[(1, 30 + i)]) for i in range(8)])
+        report["libraries"].append(second)
+        html = page({"episode_gaps": report})
+        for i in range(8):
+            self.assertIn(f"Kid Show {i}", html)
+        self.assertIn("Show 00", html)
+        self.assertIn("Show 01", html)
+        self.assertNotIn("Show 02 ", html)
+
+    def test_gaps_are_written_as_episodes(self):
+        show = gap_show("Ranges", missing=[(3, 3), (5, 7)], unavailable=[9], seasons_missing=[3, 4, 5, 8])
+        report = gaps_report(shows=1, listed=0)
+        report["libraries"][0]["listed"] = [show]
+        html = page({"episode_gaps": report})
+        self.assertIn("seasons 3 to 5, season 8, S02E03, S02E05 to E07, S02E09 (file not found)", html)
+
+    def test_unavailable_episodes_in_a_row(self):
+        show = gap_show("Gone", unavailable=[5, 6, 7, 8, 10])
+        report = gaps_report(shows=1, listed=0)
+        report["libraries"][0]["listed"] = [show]
+        html = page({"episode_gaps": report})
+        self.assertIn("S02E05 to E08 (file not found), S02E10 (file not found)", html)
+
+    def test_a_show_with_many_gaps(self):
+        show = gap_show("Holes", missing=[(n, n) for n in range(1, 18, 2)])
+        report = gaps_report(shows=1, listed=0)
+        report["libraries"][0]["listed"] = [show]
+        html = page({"episode_gaps": report})
+        self.assertIn("S02E01, S02E03, S02E05, S02E07, S02E09, and 4 more", html)
+
+    def test_unavailable_episodes_in_the_headline(self):
+        report = gaps_report()
+        report["totals"]["unavailable_episodes"] = 3
+        self.assertIn("3 episodes whose file Plex can&#x27;t find", page({"episode_gaps": report}))
+
+    def test_page_stays_healthy(self):
+        html = page({"health": healthy(), "episode_gaps": gaps_report()})
+        self.assertIn("Healthy", html)
+        self.assertNotIn("Mostly fine", html)
+
+    def test_no_advice(self):
+        html = page({"episode_gaps": gaps_report()}).lower()
+        section = html.split("<h2>episode gaps</h2>")[1].split("</section>")[0]
+        for word in ("download", "delete", "replace"):
+            self.assertNotIn(word, section)
+
+    def test_no_gaps_found(self):
+        report = gaps_report(shows=0, listed=0)
+        html = page({"episode_gaps": report})
+        self.assertIn("No gaps were found between the episodes on the server.", html)
+        self.assertIn("Only gaps between the episodes on the server can be found.", html)
+
+    def test_no_tv_library(self):
+        report = gaps_report()
+        report["libraries"] = []
+        self.assertIn("This server has no TV library.", page({"episode_gaps": report}))
+
+    def test_failure(self):
+        fake = lambda name: (name, None, "could not reach the server") if name == "episode_gaps" \
+            else (name, {"totals": {}}, None)
+        with mock.patch.object(db, "run_source", fake):
+            data, errors = db.collect()
+        self.assertEqual(list(errors), ["episode_gaps"])
+        self.assertIn("Couldn't load the episode gaps report: could not reach the server", page(data, errors))
+
+    def test_hiding_names_keeps_the_section(self):
+        self.assertIn("Show 00", page({"episode_gaps": gaps_report()}, hide_names=True))
 
 
 # ---------------------------------------------------------------- library growth chart

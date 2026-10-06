@@ -180,6 +180,37 @@ unwatched = {
 }
 
 
+def gap_show(name, year, seasons, missing_seasons=()):
+    """seasons: [(season, [(first, last), ...], [unavailable, ...]), ...]."""
+    return {"title": name, "year": year, "first_season": 1, "missing_seasons": list(missing_seasons),
+            "missing_episodes": sum(b - a + 1 for _, ranges, _ in seasons for a, b in ranges),
+            "unavailable_episodes": sum(len(u) for _, _, u in seasons), "unnumbered": 0,
+            "seasons": [{"season": s, "episodes": 10, "highest": 12, "missing": [list(r) for r in ranges],
+                         "unavailable": list(u), "continues_numbering": False} for s, ranges, u in seasons]}
+
+
+episode_gaps = {
+    "show_filter": None,
+    "limits": ("Only gaps between the episodes on the server can be found. Episodes after the last one on "
+               "the server, and seasons after the last season, can't be seen, because Cinemetric doesn't "
+               "ask any online service how many episodes a show should have."),
+    "libraries": [
+        {"name": "TV Shows", "shows": 212, "episodes": 8640, "shows_with_gaps": 6, "missing_episodes": 19,
+         "unavailable_episodes": 4, "missing_seasons": 1, "shows_starting_later": 2, "seasons_not_checked": 0,
+         "unnumbered": 0, "more_shows": 0, "listed": [
+             gap_show("Northern Static", 2019, [(2, [(4, 9)], []), (3, [(1, 2)], [])]),
+             gap_show("Low Tide", 2021, [(1, [], [5, 6, 7, 8])]),
+             gap_show("Copper Coast", 2015, [(1, [(1, 3)], [])]),
+             gap_show("Lanterns", 2012, [(4, [(11, 11)], []), (6, [(2, 3)], [])], missing_seasons=[5]),
+             gap_show("The Night Ferry", 2020, [(1, [(7, 8)], [])]),
+             gap_show("Field Notes", 2017, [(2, [(3, 3)], [])])]},
+    ],
+    "skipped_libraries": [{"name": "Movies", "type": "movie"}, {"name": "Music", "type": "artist"}],
+    "totals": {"shows": 212, "episodes": 8640, "shows_with_gaps": 6, "missing_episodes": 19,
+               "unavailable_episodes": 4, "missing_seasons": 1, "shows_starting_later": 2},
+}
+
+
 # ---------------------------------------------------------------- page and screenshot
 
 def load_dashboard():
@@ -192,7 +223,8 @@ def load_dashboard():
 def render_page(path):
     db = load_dashboard()
     db.friendly_now = lambda: "Sun Oct 4, 2026 at 7:30 PM"
-    data = {"library": library, "health": health, "watch": watch, "sharing": sharing, "unwatched": unwatched}
+    data = {"library": library, "health": health, "watch": watch, "sharing": sharing, "unwatched": unwatched,
+            "episode_gaps": episode_gaps}
     title, body = db.render(data, {}, hide_names=False)
     page = db.full_page(title, body).replace('<html lang="en">', '<html lang="en" data-theme="dark">')
     with open(path, "w", encoding="utf-8") as f:

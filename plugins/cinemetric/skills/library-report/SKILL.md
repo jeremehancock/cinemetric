@@ -170,6 +170,8 @@ Keep it readable: plain English, no raw JSON, no file paths.
   deleted) or the Duplicates filter in a library's filter list.
 - For which titles nobody watches (titles that take up space and haven't been finished by anyone in
   months), suggest the `cinemetric:unwatched` skill; this report doesn't look at watch history.
+- For missing episodes or incomplete seasons (gaps in a show's episode numbers), suggest the
+  `cinemetric:episode-gaps` skill; this report doesn't check episode numbering.
 - For upgrade candidates and lossy or mixed albums, only list them. Never search for, suggest sources
   for, download, re-rip, convert, or replace files.
 - Never display, echo, or ask for the Plex token.

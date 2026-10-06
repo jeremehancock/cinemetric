@@ -26,7 +26,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.18.0"
+VERSION = "0.19.0"
 SCRIPT_TIMEOUT_SECONDS = 1800
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -39,12 +39,16 @@ SOURCES = {
     "sharing": ("users-and-shares", "users_and_shares.py", ["--snapshot-items"]),
     # Each library lists its 10 largest, so the 10 largest overall are always among them.
     "unwatched": ("unwatched", "unwatched.py", ["--limit", "10"]),
+    # Same reasoning: each library lists its 10 shows with the most gaps.
+    "episode_gaps": ("episode-gaps", "episode_gaps.py", ["--limit", "10"]),
 }
 # Reports whose snapshot blocks are saved, and whose since_snapshot feeds the "Since" section.
 SNAPSHOT_AREAS = ("library", "health", "sharing")
 CHANGES_SCRIPT = os.path.join(SKILLS_DIR, "changes", "scripts", "changes.py")
 CHANGE_EXAMPLES = 5
 UNWATCHED_TITLES_LIMIT = 10
+GAP_SHOWS_LIMIT = 10
+GAPS_PER_SHOW = 5
 SHARING_PEOPLE_LIMIT = 20
 ERROR_CODE = re.compile(r"^[A-Z_]+: ")
 
@@ -589,6 +593,95 @@ def unwatched_section(unwatched, error):
     return card("Unwatched", body, "wide")
 
 
+def number_ranges(numbers):
+    """[3, 4, 5, 9] -> [[3, 5], [9, 9]]. Anything that isn't a whole number is left out."""
+    groups = []
+    for n in sorted(n for n in numbers if isinstance(n, int)):
+        if groups and n == groups[-1][1] + 1:
+            groups[-1][1] = n
+        else:
+            groups.append([n, n])
+    return groups
+
+
+def season_ranges(numbers):
+    """[3, 4, 5, 9] -> ["seasons 3 to 5", "season 9"]."""
+    return [f"season {a}" if a == b else f"seasons {a} to {b}" for a, b in number_ranges(numbers)]
+
+
+def two(n):
+    """Season or episode number with at least two digits; anything that isn't a number as text."""
+    try:
+        return f"{int(n):02d}"
+    except (TypeError, ValueError):
+        return str(n)
+
+
+def show_gaps(show):
+    """What one show is missing, as short phrases: "S02E03", "S02E05 to E07", "season 3"."""
+    phrases = season_ranges(show.get("missing_seasons") or [])
+    for season in show.get("seasons") or []:
+        s = two(season.get("season"))
+        for first, last in season.get("missing") or []:
+            phrases.append(f"S{s}E{two(first)}" if first == last else f"S{s}E{two(first)} to E{two(last)}")
+        for first, last in number_ranges(season.get("unavailable") or []):
+            episodes = f"S{s}E{two(first)}" if first == last else f"S{s}E{two(first)} to E{two(last)}"
+            phrases.append(f"{episodes} (file not found)")
+    return phrases
+
+
+def episode_gaps_section(gaps, error):
+    if not gaps:
+        reason = ERROR_CODE.sub("", error or "")
+        return card("Episode gaps", unavailable_note("the episode gaps report", reason), "wide")
+    limits = f'<p class="muted small">{e(gaps.get("limits"))}</p>' if gaps.get("limits") else ""
+    libraries = gaps.get("libraries") or []
+    if not libraries:
+        return card("Episode gaps", '<p class="muted">This server has no TV library.</p>', "wide")
+    totals = gaps.get("totals") or {}
+    if not totals.get("shows_with_gaps"):
+        return card("Episode gaps", f'<p class="muted">No gaps were found between the episodes on the '
+                                    f'server.</p>{limits}', "wide")
+
+    parts = [plural(totals.get("missing_episodes", 0), "missing episode")]
+    if totals.get("unavailable_episodes"):
+        parts.append(f'{plural(totals["unavailable_episodes"], "episode")} whose file Plex can\'t find')
+    if totals.get("missing_seasons"):
+        parts.append(plural(totals["missing_seasons"], "missing season"))
+    have = "has" if totals.get("shows_with_gaps") == 1 else "have"
+    headline = (f'<p class="unwatched-headline"><strong>{e(num(totals.get("shows_with_gaps")))}</strong> of '
+                f'{e(plural(totals.get("shows"), "show"))} {have} gaps: {e(", ".join(parts))}.</p>')
+
+    rows = "".join(
+        f'<tr><th scope="row">{e(lib.get("name"))}</th><td class="num">{num(lib.get("shows"))}</td>'
+        f'<td class="num">{num(lib.get("shows_with_gaps"))}</td><td class="num">{num(lib.get("missing_episodes"))}</td>'
+        f'<td class="num">{num(lib.get("unavailable_episodes"))}</td><td class="num">{num(lib.get("missing_seasons"))}</td></tr>'
+        for lib in libraries)
+    table = (f'<div class="table-wrap"><table><thead><tr><th scope="col">Library</th>'
+             f'<th scope="col" class="num">Shows</th><th scope="col" class="num">With gaps</th>'
+             f'<th scope="col" class="num">Missing episodes</th><th scope="col" class="num">File not found</th>'
+             f'<th scope="col" class="num">Missing seasons</th></tr></thead><tbody>{rows}</tbody></table></div>')
+
+    shows = sorted(((s, lib.get("name")) for lib in libraries for s in lib.get("listed") or []),
+                   key=lambda pair: (-((pair[0].get("missing_episodes") or 0) + (pair[0].get("unavailable_episodes") or 0)),
+                                     -len(pair[0].get("missing_seasons") or []), str(pair[0].get("title")).lower()))
+    items = []
+    for show, lib_name in shows[:GAP_SHOWS_LIMIT]:
+        name = show.get("title") or ""
+        if show.get("year"):
+            name += f" ({show['year']})"
+        phrases = show_gaps(show)
+        listed = ", ".join(phrases[:GAPS_PER_SHOW])
+        if len(phrases) > GAPS_PER_SHOW:
+            listed += f", and {len(phrases) - GAPS_PER_SHOW} more"
+        items.append(f'<li><span class="recent-title">{e(name)}<span class="muted"> · {e(lib_name)}</span>'
+                     f'<span class="gap-list">{e(listed)}</span></span></li>')
+    more = sum(lib.get("shows_with_gaps") or 0 for lib in libraries) - min(len(shows), GAP_SHOWS_LIMIT)
+    more_html = f'<p class="muted small">{e(plural(more, "more show"))} with gaps.</p>' if more > 0 else ""
+    shows_html = f'<div class="ranked"><h3>Most gaps</h3><ul class="recent gaps">{"".join(items)}</ul>{more_html}</div>'
+    return card("Episode gaps", f"{headline}{table}{shows_html}{limits}", "wide")
+
+
 KIND_LABEL = {"home": "Plex Home", "managed": "Managed", "friend": "Friend"}
 
 
@@ -939,6 +1032,8 @@ tbody th { font-weight: 600; white-space: nowrap; }
 .share-notes li { padding-left: 12px; border-left: 3px solid var(--line); }
 .share-kind { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
 .unwatched-headline { margin: 0; max-width: 60rem; }
+.recent.gaps li { grid-template-columns: 1fr; }
+.gap-list { display: block; font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
 .foot { font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
 @media (max-width: 30rem) { .masthead h1 { font-size: 32px; } .tile-value { font-size: 32px; }
   .recent li { grid-template-columns: 1fr; gap: 0; } }
@@ -969,6 +1064,7 @@ def render(data, errors, hide_names, snapshot_saved=None):
 {watch_section(watch, hide_names, errors.get("watch"))}
 {library_section(library, errors.get("library"))}
 {unwatched_section(data.get("unwatched"), errors.get("unwatched"))}
+{episode_gaps_section(data.get("episode_gaps"), errors.get("episode_gaps"))}
 {sharing_section(data.get("sharing"), hide_names, errors.get("sharing"))}
 <footer class="foot"><span>Read-only snapshot made by Cinemetric {e(VERSION)}{" · Plex " + e(version) if version else ""}.</span>
 <span>Numbers come from your server; written notes are rule-based, not AI.</span></footer>

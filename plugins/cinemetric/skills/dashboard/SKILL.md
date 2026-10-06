@@ -1,6 +1,6 @@
 ---
 name: dashboard
-description: "Build or refresh the Plex dashboard: one HTML page combining library stats, server health, watch activity, titles nobody has finished in a while, and who the server is shared with, with charts. Saved on this computer, as a private claude.ai page, or both, and updated in place each time. Read-only. Use when the user asks for a Plex dashboard or overview page, to update or refresh it, or to change where it's saved or published."
+description: "Build or refresh the Plex dashboard: one HTML page combining library stats, server health, watch activity, titles nobody has finished in a while, gaps in TV episodes, and who the server is shared with, with charts. Saved on this computer, as a private claude.ai page, or both, and updated in place each time. Read-only. Use when the user asks for a Plex dashboard or overview page, to update or refresh it, or to change where it's saved or published."
 argument-hint: "[--hide-names | --show-names]"
 allowed-tools: Read, Artifact, Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/dashboard.py *), Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/dashboard.py), Bash(python ${CLAUDE_SKILL_DIR}/scripts/dashboard.py *), Bash(python ${CLAUDE_SKILL_DIR}/scripts/dashboard.py)
 ---
@@ -47,6 +47,10 @@ Script: `python3 ${CLAUDE_SKILL_DIR}/scripts/dashboard.py` (prints JSON; errors 
    (titles added more than 6 months ago that nobody has finished in that time) can get one line of
    facts, such as how many titles and how much space. Never suggest deleting anything; it doesn't
    affect the overall status either.
+   The Episode gaps section lists TV episode numbers missing between ones on the server (and seasons
+   missing between others); it can get one line of facts, such as how many shows have gaps. It can't
+   see episodes after the last one on the server, so never call a show complete, and never suggest
+   downloading or replacing anything. It doesn't affect the overall status.
    Near the top, a "Since <date>" section shows what changed since a snapshot from an earlier day
    (titles added and removed, files Plex can't find now, Plex updates, people added or removed). One
    highlight can come from it. On the first build it says the first snapshot was saved; changes show
@@ -101,9 +105,8 @@ what the reason says.
 
 - **`NOT_CONFIGURED`**: Cinemetric isn't connected yet. Use the `cinemetric:setup` skill first.
 - A missing section means one report failed; explain its reason in plain words (same errors as the
-  `library-report`, `server-health`, `watch-activity`, `users-and-shares` and `unwatched` skills). The
-  rest of the
-  dashboard still works.
+  `library-report`, `server-health`, `watch-activity`, `users-and-shares`, `unwatched` and
+  `episode-gaps` skills). The rest of the dashboard still works.
 - **`sections_missing.sharing` starting with `OWNER_ONLY`**: they're connected to a server someone
   shared with them. Only the owner can see who a server is shared with, so that section will always be
   empty for them. Nothing is broken.

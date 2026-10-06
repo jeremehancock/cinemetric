@@ -52,9 +52,9 @@ Errors that a skill needs to recognize SHALL start with a fixed code: `NOT_CONFI
 - **THEN** stdout contains only the JSON report, and any progress messages went to stderr
 
 ### Requirement: Connection check
-The `library-report`, `server-health`, `watch-activity`, `users-and-shares`, `unwatched` and
-`what-to-watch` scripts SHALL accept `--check`, which only tests the configured connections and prints
-a short JSON result instead of building a report.
+The `library-report`, `server-health`, `watch-activity`, `users-and-shares`, `unwatched`,
+`what-to-watch` and `episode-gaps` scripts SHALL accept `--check`, which only tests the configured
+connections and prints a short JSON result instead of building a report.
 
 #### Scenario: Testing the connection
 - **WHEN** a report script is run with `--check`

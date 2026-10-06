@@ -1,0 +1,1267 @@
+{
+ "/": {
+  "MediaContainer": {
+   "friendlyName": "Test Server",
+   "version": "1.41.0.0000"
+  }
+ },
+ "/library/sections": {
+  "MediaContainer": {
+   "Directory": [
+    {
+     "key": "1",
+     "title": "TV Shows",
+     "type": "show"
+    },
+    {
+     "key": "2",
+     "title": "Movies",
+     "type": "movie"
+    },
+    {
+     "key": "3",
+     "title": "Music",
+     "type": "artist"
+    }
+   ]
+  }
+ },
+ "listings": {
+  "1": {
+   "2": [
+    {
+     "ratingKey": "100",
+     "title": "Middle Gap",
+     "year": 2010,
+     "type": "show"
+    },
+    {
+     "ratingKey": "101",
+     "title": "Late Start",
+     "year": 2011,
+     "type": "show"
+    },
+    {
+     "ratingKey": "102",
+     "title": "Carry On",
+     "year": 2012,
+     "type": "show"
+    },
+    {
+     "ratingKey": "103",
+     "title": "Missing Season",
+     "year": 2013,
+     "type": "show"
+    },
+    {
+     "ratingKey": "104",
+     "title": "Later Seasons",
+     "year": 2014,
+     "type": "show"
+    },
+    {
+     "ratingKey": "105",
+     "title": "Specials Show",
+     "year": 2015,
+     "type": "show"
+    },
+    {
+     "ratingKey": "106",
+     "title": "Double Episode",
+     "year": 2016,
+     "type": "show"
+    },
+    {
+     "ratingKey": "107",
+     "title": "Resolution Name",
+     "year": 2016,
+     "type": "show"
+    },
+    {
+     "ratingKey": "108",
+     "title": "Two Copies",
+     "year": 2017,
+     "type": "show"
+    },
+    {
+     "ratingKey": "109",
+     "title": "Unavailable Episode",
+     "year": 2018,
+     "type": "show"
+    },
+    {
+     "ratingKey": "110",
+     "title": "Unnumbered Episode",
+     "year": 2019,
+     "type": "show"
+    },
+    {
+     "ratingKey": "111",
+     "title": "Daily Show",
+     "year": 2020,
+     "type": "show"
+    },
+    {
+     "ratingKey": "112",
+     "title": "Doctor Who",
+     "year": 1963,
+     "type": "show"
+    },
+    {
+     "ratingKey": "113",
+     "title": "Doctor Who",
+     "year": 2005,
+     "type": "show"
+    },
+    {
+     "ratingKey": "114",
+     "title": "Complete Show",
+     "year": 2021,
+     "type": "show"
+    },
+    {
+     "ratingKey": "115",
+     "title": "Several Gaps",
+     "year": 2022,
+     "type": "show"
+    }
+   ],
+   "4": [
+    {
+     "ratingKey": "1001",
+     "type": "episode",
+     "grandparentRatingKey": "100",
+     "grandparentTitle": "Middle Gap",
+     "parentIndex": 1,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1001,
+       "Part": [
+        {
+         "file": "/tv/Middle Gap/Season 1/Middle Gap - S01E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1002",
+     "type": "episode",
+     "grandparentRatingKey": "100",
+     "grandparentTitle": "Middle Gap",
+     "parentIndex": 1,
+     "index": 2,
+     "Media": [
+      {
+       "id": 1002,
+       "Part": [
+        {
+         "file": "/tv/Middle Gap/Season 1/Middle Gap - S01E02.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1003",
+     "type": "episode",
+     "grandparentRatingKey": "100",
+     "grandparentTitle": "Middle Gap",
+     "parentIndex": 1,
+     "index": 4,
+     "Media": [
+      {
+       "id": 1003,
+       "Part": [
+        {
+         "file": "/tv/Middle Gap/Season 1/Middle Gap - S01E04.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1004",
+     "type": "episode",
+     "grandparentRatingKey": "101",
+     "grandparentTitle": "Late Start",
+     "parentIndex": 1,
+     "index": 5,
+     "Media": [
+      {
+       "id": 1004,
+       "Part": [
+        {
+         "file": "/tv/Late Start/Season 1/Late Start - S01E05.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1005",
+     "type": "episode",
+     "grandparentRatingKey": "101",
+     "grandparentTitle": "Late Start",
+     "parentIndex": 1,
+     "index": 6,
+     "Media": [
+      {
+       "id": 1005,
+       "Part": [
+        {
+         "file": "/tv/Late Start/Season 1/Late Start - S01E06.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1006",
+     "type": "episode",
+     "grandparentRatingKey": "101",
+     "grandparentTitle": "Late Start",
+     "parentIndex": 1,
+     "index": 7,
+     "Media": [
+      {
+       "id": 1006,
+       "Part": [
+        {
+         "file": "/tv/Late Start/Season 1/Late Start - S01E07.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1007",
+     "type": "episode",
+     "grandparentRatingKey": "101",
+     "grandparentTitle": "Late Start",
+     "parentIndex": 1,
+     "index": 8,
+     "Media": [
+      {
+       "id": 1007,
+       "Part": [
+        {
+         "file": "/tv/Late Start/Season 1/Late Start - S01E08.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1008",
+     "type": "episode",
+     "grandparentRatingKey": "101",
+     "grandparentTitle": "Late Start",
+     "parentIndex": 1,
+     "index": 9,
+     "Media": [
+      {
+       "id": 1008,
+       "Part": [
+        {
+         "file": "/tv/Late Start/Season 1/Late Start - S01E09.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1009",
+     "type": "episode",
+     "grandparentRatingKey": "101",
+     "grandparentTitle": "Late Start",
+     "parentIndex": 1,
+     "index": 10,
+     "Media": [
+      {
+       "id": 1009,
+       "Part": [
+        {
+         "file": "/tv/Late Start/Season 1/Late Start - S01E10.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1010",
+     "type": "episode",
+     "grandparentRatingKey": "102",
+     "grandparentTitle": "Carry On",
+     "parentIndex": 1,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1010,
+       "Part": [
+        {
+         "file": "/tv/Carry On/Season 1/Carry On - S01E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1011",
+     "type": "episode",
+     "grandparentRatingKey": "102",
+     "grandparentTitle": "Carry On",
+     "parentIndex": 1,
+     "index": 2,
+     "Media": [
+      {
+       "id": 1011,
+       "Part": [
+        {
+         "file": "/tv/Carry On/Season 1/Carry On - S01E02.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1012",
+     "type": "episode",
+     "grandparentRatingKey": "102",
+     "grandparentTitle": "Carry On",
+     "parentIndex": 1,
+     "index": 3,
+     "Media": [
+      {
+       "id": 1012,
+       "Part": [
+        {
+         "file": "/tv/Carry On/Season 1/Carry On - S01E03.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1013",
+     "type": "episode",
+     "grandparentRatingKey": "102",
+     "grandparentTitle": "Carry On",
+     "parentIndex": 2,
+     "index": 4,
+     "Media": [
+      {
+       "id": 1013,
+       "Part": [
+        {
+         "file": "/tv/Carry On/Season 2/Carry On - S02E04.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1014",
+     "type": "episode",
+     "grandparentRatingKey": "102",
+     "grandparentTitle": "Carry On",
+     "parentIndex": 2,
+     "index": 5,
+     "Media": [
+      {
+       "id": 1014,
+       "Part": [
+        {
+         "file": "/tv/Carry On/Season 2/Carry On - S02E05.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1015",
+     "type": "episode",
+     "grandparentRatingKey": "102",
+     "grandparentTitle": "Carry On",
+     "parentIndex": 2,
+     "index": 6,
+     "Media": [
+      {
+       "id": 1015,
+       "Part": [
+        {
+         "file": "/tv/Carry On/Season 2/Carry On - S02E06.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1016",
+     "type": "episode",
+     "grandparentRatingKey": "103",
+     "grandparentTitle": "Missing Season",
+     "parentIndex": 1,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1016,
+       "Part": [
+        {
+         "file": "/tv/Missing Season/Season 1/Missing Season - S01E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1017",
+     "type": "episode",
+     "grandparentRatingKey": "103",
+     "grandparentTitle": "Missing Season",
+     "parentIndex": 1,
+     "index": 2,
+     "Media": [
+      {
+       "id": 1017,
+       "Part": [
+        {
+         "file": "/tv/Missing Season/Season 1/Missing Season - S01E02.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1018",
+     "type": "episode",
+     "grandparentRatingKey": "103",
+     "grandparentTitle": "Missing Season",
+     "parentIndex": 2,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1018,
+       "Part": [
+        {
+         "file": "/tv/Missing Season/Season 2/Missing Season - S02E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1019",
+     "type": "episode",
+     "grandparentRatingKey": "103",
+     "grandparentTitle": "Missing Season",
+     "parentIndex": 2,
+     "index": 2,
+     "Media": [
+      {
+       "id": 1019,
+       "Part": [
+        {
+         "file": "/tv/Missing Season/Season 2/Missing Season - S02E02.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1020",
+     "type": "episode",
+     "grandparentRatingKey": "103",
+     "grandparentTitle": "Missing Season",
+     "parentIndex": 4,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1020,
+       "Part": [
+        {
+         "file": "/tv/Missing Season/Season 4/Missing Season - S04E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1021",
+     "type": "episode",
+     "grandparentRatingKey": "103",
+     "grandparentTitle": "Missing Season",
+     "parentIndex": 4,
+     "index": 2,
+     "Media": [
+      {
+       "id": 1021,
+       "Part": [
+        {
+         "file": "/tv/Missing Season/Season 4/Missing Season - S04E02.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1022",
+     "type": "episode",
+     "grandparentRatingKey": "104",
+     "grandparentTitle": "Later Seasons",
+     "parentIndex": 35,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1022,
+       "Part": [
+        {
+         "file": "/tv/Later Seasons/Season 35/Later Seasons - S35E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1023",
+     "type": "episode",
+     "grandparentRatingKey": "104",
+     "grandparentTitle": "Later Seasons",
+     "parentIndex": 35,
+     "index": 2,
+     "Media": [
+      {
+       "id": 1023,
+       "Part": [
+        {
+         "file": "/tv/Later Seasons/Season 35/Later Seasons - S35E02.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1024",
+     "type": "episode",
+     "grandparentRatingKey": "104",
+     "grandparentTitle": "Later Seasons",
+     "parentIndex": 36,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1024,
+       "Part": [
+        {
+         "file": "/tv/Later Seasons/Season 36/Later Seasons - S36E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1025",
+     "type": "episode",
+     "grandparentRatingKey": "104",
+     "grandparentTitle": "Later Seasons",
+     "parentIndex": 36,
+     "index": 2,
+     "Media": [
+      {
+       "id": 1025,
+       "Part": [
+        {
+         "file": "/tv/Later Seasons/Season 36/Later Seasons - S36E02.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1026",
+     "type": "episode",
+     "grandparentRatingKey": "105",
+     "grandparentTitle": "Specials Show",
+     "parentIndex": 0,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1026,
+       "Part": [
+        {
+         "file": "/tv/Specials Show/Season 0/Specials Show - S00E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1027",
+     "type": "episode",
+     "grandparentRatingKey": "105",
+     "grandparentTitle": "Specials Show",
+     "parentIndex": 0,
+     "index": 4,
+     "Media": [
+      {
+       "id": 1027,
+       "Part": [
+        {
+         "file": "/tv/Specials Show/Season 0/Specials Show - S00E04.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1028",
+     "type": "episode",
+     "grandparentRatingKey": "105",
+     "grandparentTitle": "Specials Show",
+     "parentIndex": 0,
+     "index": 9,
+     "Media": [
+      {
+       "id": 1028,
+       "Part": [
+        {
+         "file": "/tv/Specials Show/Season 0/Specials Show - S00E09.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1029",
+     "type": "episode",
+     "grandparentRatingKey": "105",
+     "grandparentTitle": "Specials Show",
+     "parentIndex": 1,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1029,
+       "Part": [
+        {
+         "file": "/tv/Specials Show/Season 1/Specials Show - S01E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1030",
+     "type": "episode",
+     "grandparentRatingKey": "105",
+     "grandparentTitle": "Specials Show",
+     "parentIndex": 1,
+     "index": 2,
+     "Media": [
+      {
+       "id": 1030,
+       "Part": [
+        {
+         "file": "/tv/Specials Show/Season 1/Specials Show - S01E02.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1031",
+     "type": "episode",
+     "grandparentRatingKey": "106",
+     "grandparentTitle": "Double Episode",
+     "parentIndex": 1,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1031,
+       "Part": [
+        {
+         "file": "/tv/Double Episode/Season 1/Double Episode - S01E01-E02.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1032",
+     "type": "episode",
+     "grandparentRatingKey": "106",
+     "grandparentTitle": "Double Episode",
+     "parentIndex": 1,
+     "index": 3,
+     "Media": [
+      {
+       "id": 1032,
+       "Part": [
+        {
+         "file": "/tv/Double Episode/Season 1/Double Episode - S01E03.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1033",
+     "type": "episode",
+     "grandparentRatingKey": "107",
+     "grandparentTitle": "Resolution Name",
+     "parentIndex": 1,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1033,
+       "Part": [
+        {
+         "file": "/tv/Resolution Name/Season 1/Resolution Name - S01E01-1080p.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1034",
+     "type": "episode",
+     "grandparentRatingKey": "107",
+     "grandparentTitle": "Resolution Name",
+     "parentIndex": 1,
+     "index": 3,
+     "Media": [
+      {
+       "id": 1034,
+       "Part": [
+        {
+         "file": "/tv/Resolution Name/Season 1/Resolution Name - S01E03.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1035",
+     "type": "episode",
+     "grandparentRatingKey": "108",
+     "grandparentTitle": "Two Copies",
+     "parentIndex": 1,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1035,
+       "Part": [
+        {
+         "file": "/tv/Two Copies/Season 1/Two Copies - S01E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1036",
+     "type": "episode",
+     "grandparentRatingKey": "108",
+     "grandparentTitle": "Two Copies",
+     "parentIndex": 1,
+     "index": 2,
+     "Media": [
+      {
+       "id": 1036,
+       "Part": [
+        {
+         "file": "/tv/Two Copies/Season 1/Two Copies - S01E02.mkv"
+        }
+       ]
+      },
+      {
+       "id": 9001,
+       "Part": [
+        {
+         "file": "/tv/Two Copies/Season 1/Two Copies - S01E02 - 4K.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1037",
+     "type": "episode",
+     "grandparentRatingKey": "108",
+     "grandparentTitle": "Two Copies",
+     "parentIndex": 1,
+     "index": 3,
+     "Media": [
+      {
+       "id": 1037,
+       "Part": [
+        {
+         "file": "/tv/Two Copies/Season 1/Two Copies - S01E03.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1038",
+     "type": "episode",
+     "grandparentRatingKey": "109",
+     "grandparentTitle": "Unavailable Episode",
+     "parentIndex": 1,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1038,
+       "Part": [
+        {
+         "file": "/tv/Unavailable Episode/Season 1/Unavailable Episode - S01E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1039",
+     "type": "episode",
+     "grandparentRatingKey": "109",
+     "grandparentTitle": "Unavailable Episode",
+     "parentIndex": 1,
+     "index": 2,
+     "Media": [
+      {
+       "id": 1039,
+       "Part": [
+        {
+         "file": "/tv/Unavailable Episode/Season 1/Unavailable Episode - S01E02.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1040",
+     "type": "episode",
+     "grandparentRatingKey": "109",
+     "grandparentTitle": "Unavailable Episode",
+     "parentIndex": 1,
+     "index": 3,
+     "Media": [
+      {
+       "id": 1040,
+       "Part": [
+        {
+         "file": "/tv/Unavailable Episode/Season 1/Unavailable Episode - S01E03.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1041",
+     "type": "episode",
+     "grandparentRatingKey": "109",
+     "grandparentTitle": "Unavailable Episode",
+     "parentIndex": 1,
+     "index": 4,
+     "Media": [
+      {
+       "id": 1041,
+       "Part": [
+        {
+         "file": "/tv/Unavailable Episode/Season 1/Unavailable Episode - S01E04.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1042",
+     "type": "episode",
+     "grandparentRatingKey": "109",
+     "grandparentTitle": "Unavailable Episode",
+     "parentIndex": 1,
+     "index": 6,
+     "Media": [
+      {
+       "id": 1042,
+       "Part": [
+        {
+         "file": "/tv/Unavailable Episode/Season 1/Unavailable Episode - S01E06.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1043",
+     "type": "episode",
+     "grandparentRatingKey": "109",
+     "grandparentTitle": "Unavailable Episode",
+     "parentIndex": 1,
+     "index": 5,
+     "Media": [
+      {
+       "id": 9002,
+       "deletedAt": 1700000000,
+       "Part": [
+        {
+         "file": "/tv/Unavailable Episode/Season 1/Unavailable Episode - S01E05.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1044",
+     "type": "episode",
+     "grandparentRatingKey": "110",
+     "grandparentTitle": "Unnumbered Episode",
+     "parentIndex": 1,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1044,
+       "Part": [
+        {
+         "file": "/tv/Unnumbered Episode/Season 1/Unnumbered Episode - S01E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1045",
+     "type": "episode",
+     "grandparentRatingKey": "110",
+     "grandparentTitle": "Unnumbered Episode",
+     "parentIndex": 1,
+     "index": 2,
+     "Media": [
+      {
+       "id": 1045,
+       "Part": [
+        {
+         "file": "/tv/Unnumbered Episode/Season 1/Unnumbered Episode - S01E02.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1046",
+     "type": "episode",
+     "grandparentRatingKey": "110",
+     "grandparentTitle": "Unnumbered Episode",
+     "parentIndex": 1,
+     "Media": [
+      {
+       "id": 9003,
+       "Part": [
+        {
+         "file": "/tv/Unnumbered Episode/Season 1/Bonus.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1047",
+     "type": "episode",
+     "grandparentRatingKey": "111",
+     "grandparentTitle": "Daily Show",
+     "parentIndex": 2023,
+     "index": 20230102,
+     "Media": [
+      {
+       "id": 1047,
+       "Part": [
+        {
+         "file": "/tv/Daily Show/Season 2023/Daily Show - S2023E20230102.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1048",
+     "type": "episode",
+     "grandparentRatingKey": "111",
+     "grandparentTitle": "Daily Show",
+     "parentIndex": 2023,
+     "index": 20230109,
+     "Media": [
+      {
+       "id": 1048,
+       "Part": [
+        {
+         "file": "/tv/Daily Show/Season 2023/Daily Show - S2023E20230109.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1049",
+     "type": "episode",
+     "grandparentRatingKey": "112",
+     "grandparentTitle": "Doctor Who",
+     "parentIndex": 1,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1049,
+       "Part": [
+        {
+         "file": "/tv/Doctor Who/Season 1/Doctor Who - S01E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1050",
+     "type": "episode",
+     "grandparentRatingKey": "112",
+     "grandparentTitle": "Doctor Who",
+     "parentIndex": 1,
+     "index": 3,
+     "Media": [
+      {
+       "id": 1050,
+       "Part": [
+        {
+         "file": "/tv/Doctor Who/Season 1/Doctor Who - S01E03.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1051",
+     "type": "episode",
+     "grandparentRatingKey": "113",
+     "grandparentTitle": "Doctor Who",
+     "parentIndex": 1,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1051,
+       "Part": [
+        {
+         "file": "/tv/Doctor Who/Season 1/Doctor Who - S01E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1052",
+     "type": "episode",
+     "grandparentRatingKey": "113",
+     "grandparentTitle": "Doctor Who",
+     "parentIndex": 1,
+     "index": 2,
+     "Media": [
+      {
+       "id": 1052,
+       "Part": [
+        {
+         "file": "/tv/Doctor Who/Season 1/Doctor Who - S01E02.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1053",
+     "type": "episode",
+     "grandparentRatingKey": "114",
+     "grandparentTitle": "Complete Show",
+     "parentIndex": 1,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1053,
+       "Part": [
+        {
+         "file": "/tv/Complete Show/Season 1/Complete Show - S01E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1054",
+     "type": "episode",
+     "grandparentRatingKey": "114",
+     "grandparentTitle": "Complete Show",
+     "parentIndex": 1,
+     "index": 2,
+     "Media": [
+      {
+       "id": 1054,
+       "Part": [
+        {
+         "file": "/tv/Complete Show/Season 1/Complete Show - S01E02.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1055",
+     "type": "episode",
+     "grandparentRatingKey": "114",
+     "grandparentTitle": "Complete Show",
+     "parentIndex": 1,
+     "index": 3,
+     "Media": [
+      {
+       "id": 1055,
+       "Part": [
+        {
+         "file": "/tv/Complete Show/Season 1/Complete Show - S01E03.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1056",
+     "type": "episode",
+     "grandparentRatingKey": "115",
+     "grandparentTitle": "Several Gaps",
+     "parentIndex": 1,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1056,
+       "Part": [
+        {
+         "file": "/tv/Several Gaps/Season 1/Several Gaps - S01E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1057",
+     "type": "episode",
+     "grandparentRatingKey": "115",
+     "grandparentTitle": "Several Gaps",
+     "parentIndex": 2,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1057,
+       "Part": [
+        {
+         "file": "/tv/Several Gaps/Season 2/Several Gaps - S02E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1058",
+     "type": "episode",
+     "grandparentRatingKey": "115",
+     "grandparentTitle": "Several Gaps",
+     "parentIndex": 3,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1058,
+       "Part": [
+        {
+         "file": "/tv/Several Gaps/Season 3/Several Gaps - S03E01.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1059",
+     "type": "episode",
+     "grandparentRatingKey": "115",
+     "grandparentTitle": "Several Gaps",
+     "parentIndex": 3,
+     "index": 2,
+     "Media": [
+      {
+       "id": 1059,
+       "Part": [
+        {
+         "file": "/tv/Several Gaps/Season 3/Several Gaps - S03E02.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1060",
+     "type": "episode",
+     "grandparentRatingKey": "115",
+     "grandparentTitle": "Several Gaps",
+     "parentIndex": 3,
+     "index": 4,
+     "Media": [
+      {
+       "id": 1060,
+       "Part": [
+        {
+         "file": "/tv/Several Gaps/Season 3/Several Gaps - S03E04.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1061",
+     "type": "episode",
+     "grandparentRatingKey": "115",
+     "grandparentTitle": "Several Gaps",
+     "parentIndex": 3,
+     "index": 8,
+     "Media": [
+      {
+       "id": 1061,
+       "Part": [
+        {
+         "file": "/tv/Several Gaps/Season 3/Several Gaps - S03E08.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "1062",
+     "type": "episode",
+     "grandparentRatingKey": "115",
+     "grandparentTitle": "Several Gaps",
+     "parentIndex": 3,
+     "index": 9,
+     "Media": [
+      {
+       "id": 1062,
+       "Part": [
+        {
+         "file": "/tv/Several Gaps/Season 3/Several Gaps - S03E09.mkv"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "2": {
+   "1": [
+    {
+     "ratingKey": "500",
+     "title": "A Movie",
+     "type": "movie"
+    }
+   ]
+  },
+  "3": {}
+ }
+}

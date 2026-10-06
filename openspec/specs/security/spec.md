@@ -57,6 +57,10 @@ creates SHALL NOT make any network requests when opened.
 - **WHEN** `what_to_watch.py` runs
 - **THEN** the only network requests go to the configured Plex server
 
+#### Scenario: Looking for episode gaps
+- **WHEN** `episode_gaps.py` runs
+- **THEN** the only network requests go to the configured Plex server
+
 #### Scenario: Listing users and shares
 - **WHEN** `users_and_shares.py` runs
 - **THEN** the only network requests go to the configured Plex server, the configured Tautulli address

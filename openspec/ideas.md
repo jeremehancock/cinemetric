@@ -42,7 +42,9 @@ These came out of an explore session on 2026-10-05 and apply to every idea below
 
 Suggested order: snapshots next. (The `server-health` settings checks, the `watch-activity` one
 person, busiest moment and unfinished titles additions, the `unwatched` skill, `library-report`
-growth by month with its dashboard chart, and the `what-to-watch` skill were done on 2026-10-05.)
+growth by month with its dashboard chart, and the `what-to-watch` skill were done on 2026-10-05;
+`library-report` music details (lossless vs lossy, missing artwork) on 2026-10-06. Hi-res music
+(bit depth, sample rate) was left out: it isn't in the track listing and needs a request per track.)
 
 ---
 
@@ -149,11 +151,6 @@ change), so check what scheduled runs can do before promising a digest that publ
 - **Busiest moment for one person:** Tautulli's `most_concurrent` stat ignores `user_id` (checked on
   v2.18.2), so with `--user` the report leaves it out. It could be worked out from that person's
   history `started` / `stopped` times instead. Only worth it if someone asks.
-
-### `library-report`
-
-- **Music:** lossless vs lossy (FLAC/ALAC vs MP3/AAC), albums missing artwork. Check what the track
-  listing already includes before adding requests.
 
 ### `users-and-shares`
 

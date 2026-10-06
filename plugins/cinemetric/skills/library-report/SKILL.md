@@ -1,6 +1,6 @@
 ---
 name: library-report
-description: "Report on what's in a Plex Media Server's libraries: item counts, storage used, 4K/1080p and codec breakdowns, 10-bit video, recently added, and housekeeping issues (missing posters, unmatched items, unavailable files, very large files, duplicate copies and the space they use), titles only available in SD or 720p that may be worth upgrading, and how much was added each month. Read-only. Use when the user asks for a Plex library report, library stats, how big their Plex library is, what was recently added to Plex, how fast their Plex library is growing or how much they added in a month or year, which Plex items are unmatched or missing artwork, or whether they have duplicate movies or episodes, multiple versions of a title, or the same title in more than one library, or which titles are low quality, only in SD or 720p, or worth upgrading."
+description: "Report on what's in a Plex Media Server's libraries: item counts, storage used, 4K/1080p and codec breakdowns, 10-bit video, recently added, and housekeeping issues (missing posters, unmatched items, unavailable files, very large files, duplicate copies and the space they use), titles only available in SD or 720p that may be worth upgrading, how much was added each month, and for music how much is lossless (FLAC, ALAC) vs lossy (MP3, AAC), lossy bitrates, all-lossy or mixed albums, and albums or artists missing artwork. Read-only. Use when the user asks for a Plex library report, library stats, how big their Plex library is, what was recently added to Plex, how fast their Plex library is growing or how much they added in a month or year, which Plex items are unmatched or missing artwork, or whether they have duplicate movies or episodes, multiple versions of a title, or the same title in more than one library, or which titles are low quality, only in SD or 720p, or worth upgrading, or how much of their Plex music is lossless or FLAC vs MP3, which albums are only in MP3 or low bitrate, or which albums or artists are missing artwork."
 argument-hint: "[library name] [--recent N]"
 allowed-tools: Read, Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/library_report.py *), Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/library_report.py), Bash(python ${CLAUDE_SKILL_DIR}/scripts/library_report.py *), Bash(python ${CLAUDE_SKILL_DIR}/scripts/library_report.py)
 ---
@@ -12,7 +12,7 @@ Produce a clear, friendly report about the user's Plex libraries using the bundl
 ## 1. Run the script
 
 ```
-python3 ${CLAUDE_SKILL_DIR}/scripts/library_report.py [--library "Name"]... [--recent N] [--large-gb N] [--duplicate-examples N] [--upgrade-examples N] [--growth-months N]
+python3 ${CLAUDE_SKILL_DIR}/scripts/library_report.py [--library "Name"]... [--recent N] [--large-gb N] [--duplicate-examples N] [--upgrade-examples N] [--growth-months N] [--music-examples N]
 ```
 
 - If the user named a library (e.g. "my Movies library"), pass `--library "Movies"`. Repeat it for several.
@@ -24,6 +24,8 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/library_report.py [--library "Name"]... [--r
   500). Use a high number when the user wants the full list.
 - `--growth-months N` sets how many months the growth by month covers (default 12, up to 120). Use
   it when the user asks about a longer or shorter period, e.g. `--growth-months 24` for two years.
+- `--music-examples N` sets how many mixed and all-lossy albums are listed per music library (default
+  15, up to 500). Use a high number when the user wants the full list.
 - Large libraries can take a minute; progress lines go to stderr and the JSON report goes to stdout.
 - Use `--check` alone to test the connection without building a report.
 
@@ -46,8 +48,24 @@ server another way (curl, SSH, etc.).
 The JSON contains `server`, `totals`, `growth`, `cross_library_duplicates`, and one entry per
 library with `counts`, `media` (files, size_gb, resolution, video_codec, ten_bit_files, audio_codec,
 large_files, unavailable_files), `recently_added`, `growth` (movie, TV and music libraries),
-`housekeeping`, and (movie and TV libraries only) `duplicates`
-and `upgrades`.
+`housekeeping`, (movie and TV libraries only) `duplicates`
+and `upgrades`, and (music libraries only) `audio_quality`.
+
+For music libraries, `housekeeping.missing_poster_*` counts albums: call them "albums without cover
+art", not posters. Music `housekeeping` also has `missing_artist_image_count` and
+`missing_artist_image_examples` (artists with no photo).
+
+`audio_quality` (music only) has:
+- `lossless`, `lossy` and `other`, each with `tracks` and `gb`. Lossless means formats that keep
+  every bit of the original audio (FLAC, ALAC, WAV/AIFF and similar); lossy means MP3, AAC, Ogg
+  Vorbis, Opus, WMA and similar. `other` is a format the script doesn't recognise; `media.audio_codec`
+  shows which.
+- `lossy_bitrate`: lossy tracks split into `under_192`, `192_to_255`, `256_and_up` (kbps) and
+  `unknown`.
+- `albums`: how many albums are all `lossless`, all `lossy`, or `mixed` (some of each).
+- `mixed_examples` (`title`, `lossless_tracks`, `lossy_tracks`; most lossy tracks first) and
+  `lossy_examples` (`title`, `tracks`, `codec`, average `kbps` or null; lowest bitrate first).
+
 
 `duplicates` has `titles`, `extra_copies`, `extra_gb` and `examples`: for movies, each copy's
 resolution, codec and size; for TV, one row per show with the number of duplicated episodes.
@@ -75,7 +93,8 @@ are not listed either.
   reason, since Plex can then treat existing items as newly added. Mention it as a possibility, not a
   certainty.
 
-If the user only asked about duplicates, only about what's worth upgrading, or only about growth, lead with that, then
+If the user only asked about duplicates, only about what's worth upgrading, only about growth, or only
+about music formats or artwork, lead with that, then
 mention anything else important in a sentence or two instead of the full report. If the report was
 limited with `--library`, say that other libraries weren't checked, so a title listed as an upgrade
 candidate may already exist in better quality elsewhere.
@@ -87,6 +106,9 @@ Present, in this order:
 2. **Per library**: a short table or bullets with counts and size; the resolution split as
    percentages (e.g. "38% 4K, 55% 1080p"); top video codecs; 10-bit count. Do not call 10-bit files
    HDR: Plex's library listing does not say which files are HDR, and many 10-bit files are not.
+   For music libraries, instead of resolution and video codecs: the share that is lossless vs lossy,
+   by tracks and by storage (e.g. "87% of tracks are lossless, using 96% of the space"), and how the
+   lossy tracks split by bitrate.
 3. **Recently added**: a few highlights across libraries, newest first, then one or two lines on
    growth: how much was added over the period (items and storage), the busiest month, and anything
    notable, such as a library growing much faster than the others.
@@ -103,6 +125,11 @@ Present, in this order:
    `covered_elsewhere` is above zero, that those are left out because a better copy is already in
    another library. Whether to upgrade is the user's choice; older or obscure titles may not exist in
    better quality at all.
+   For music, include albums without cover art, artists without a photo, mixed albums (some tracks
+   lossless, some lossy, often from a track added later from a different source) and all-lossy
+   albums, lowest bitrate first, with a few examples. Describe these as file formats, not a promise
+   of how they sound: a lossless file made from an MP3 is still lossless on paper, and a 256 kbps or
+   higher lossy file is hard for most people to tell apart from lossless.
 5. **Observations**: two or three plain-language takeaways, e.g. "Most of your TV is H.264; converting
    to HEVC would save space" or "Your 4K movies make up 12% of titles but 45% of storage". Only say what
    the numbers support.
@@ -125,6 +152,6 @@ Keep it readable: plain English, no raw JSON, no file paths.
   deleted) or the Duplicates filter in a library's filter list.
 - For which titles nobody watches (titles that take up space and haven't been finished by anyone in
   months), suggest the `cinemetric:unwatched` skill; this report doesn't look at watch history.
-- For upgrade candidates, only list them. Never search for, suggest sources for, download, or replace
-  files.
+- For upgrade candidates and lossy or mixed albums, only list them. Never search for, suggest sources
+  for, download, re-rip, convert, or replace files.
 - Never display, echo, or ask for the Plex token.

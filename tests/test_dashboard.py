@@ -86,11 +86,27 @@ def sample_data():
                        {"title": EVIL_ATTR, "added": "2023-01-01", "gb": 8.0, "last_finished": "2025-01-01" + EVIL}],
         }],
     }
+    when = {"snapshot_date": "2026-09-29" + EVIL, "days_ago": 7}
+    library["since_snapshot"] = dict(when, libraries=[
+        {"name": EVIL, "type": "movie", "status": "same", "renamed_from": EVIL_ATTR,
+         "added_count": 1, "added": [EVIL], "became_unavailable_count": 1, "became_unavailable": [EVIL_ATTR]},
+        {"name": EVIL, "type": "show", "status": "same",
+         "episodes_added_count": 2, "episodes_added": [{"show": EVIL, "count": 2}]},
+        {"name": EVIL_ATTR, "type": "movie", "status": "new"},
+    ], totals={"added": 1, "removed": 0, "episodes_added": 2, "episodes_removed": 0, "became_unavailable": 1,
+               "available_again": 0, "size_gb_change": 12.5})
+    health["since_snapshot"] = dict(when, changes=[{"kind": "version", "from": EVIL, "to": EVIL_ATTR},
+                                                   {"kind": "remote_access", "from": EVIL, "to": EVIL}])
+    sharing["since_snapshot"] = dict(when, added=[{"name": "sam-test" + EVIL, "kind": "friend"}],
+                                     removed=[{"name": "alex-test" + EVIL_ATTR}], accepted=["casey-test" + EVIL],
+                                     libraries_changed=[{"name": "riley-test", "gained": [EVIL], "lost": []}],
+                                     downloads_changed=[{"name": "riley-test" + EVIL, "to": True}],
+                                     email_invites_change=1)
     return {"library": library, "health": health, "watch": watch, "sharing": sharing, "unwatched": unwatched}
 
 
-def page(data, errors=None, hide_names=False):
-    return db.full_page(*db.render(data, errors or {}, hide_names))
+def page(data, errors=None, hide_names=False, snapshot_saved=None):
+    return db.full_page(*db.render(data, errors or {}, hide_names, snapshot_saved))
 
 
 class PageSafety(OfflineTestCase):
@@ -185,7 +201,7 @@ class Collecting(OfflineTestCase):
             db.run_source("health")
         command = run.call_args[0][0]
         self.assertTrue(command[1].endswith("server_health.py"))
-        self.assertEqual(command[2:], ["--stuck-wait", "0"])
+        self.assertEqual(command[2:], ["--stuck-wait", "0", "--snapshot-items"])
 
     def test_run_source_keeps_only_the_error_line(self):
         reply = finished(1, stderr="reading library: Movies\nerror: NOT_CONFIGURED: not connected\n")
@@ -246,9 +262,14 @@ def mode(path):
 
 
 class BuildingAndSaving(OfflineTestCase):
-    def build(self, hide_names=None):
-        with mock.patch.object(db, "collect", return_value=(sample_data(), {})):
+    def build(self, hide_names=None, saved="2026-10-06"):
+        with mock.patch.object(db, "collect", return_value=(sample_data(), {})), \
+                mock.patch.object(db, "save_snapshot", return_value=saved):
             return db.build(argparse.Namespace(output=db.default_output(), hide_names=hide_names))
+
+    def test_snapshot_saved_is_reported(self):
+        self.assertEqual(self.build()["snapshot_saved"], "2026-10-06")
+        self.assertIsNone(self.build(saved=None)["snapshot_saved"])
 
     def test_page_lands_in_the_data_folder(self):
         result = self.build()
@@ -513,3 +534,93 @@ class LibraryGrowthChart(OfflineTestCase):
         self.assertIn("Healthy", html)
         self.assertNotIn("Mostly fine", html)
         self.assertEqual(html, page(data, hide_names=True))
+
+
+# ---------------------------------------------------------------- snapshots and the changes section
+
+class SavingSnapshots(OfflineTestCase):
+    def data(self):
+        data = sample_data()
+        for area in ("library", "health", "sharing"):
+            data[area]["snapshot"] = {"server_id": "machineidfortests", "area": {"from": area}}
+        return data
+
+    def test_reports_are_handed_to_the_changes_script(self):
+        data = self.data()
+        with mock.patch.object(db.subprocess, "run",
+                               return_value=finished(stdout='{"snapshot_saved": "2026-10-06"}')) as run:
+            self.assertEqual(db.save_snapshot(data), "2026-10-06")
+        command = run.call_args.args[0]
+        self.assertTrue(command[1].endswith(os.path.join("changes", "scripts", "changes.py")))
+        self.assertEqual(command[2:], ["save"])
+        given = json.loads(run.call_args.kwargs["input"])
+        self.assertEqual(sorted(given), ["health", "library", "sharing"])
+        self.assertEqual(given["health"]["snapshot"]["area"], {"from": "health"})
+        # The snapshot blocks are for saving only and never reach the page.
+        for area in ("library", "health", "sharing"):
+            self.assertNotIn("snapshot", data[area])
+
+    def test_failed_reports_are_left_out(self):
+        data = self.data()
+        data["sharing"] = None
+        with mock.patch.object(db.subprocess, "run", return_value=finished(stdout='{"snapshot_saved": null}')) as run:
+            db.save_snapshot(data)
+        self.assertEqual(sorted(json.loads(run.call_args.kwargs["input"])), ["health", "library"])
+
+    def test_a_failed_save_does_not_stop_the_build(self):
+        for kwargs in ({"return_value": finished(returncode=1, stderr="error: disk full")},
+                       {"return_value": finished(stdout="not json")},
+                       {"side_effect": OSError("no python")},
+                       {"side_effect": subprocess.TimeoutExpired(cmd="x", timeout=1)}):
+            with self.subTest(kwargs=kwargs), mock.patch.object(db.subprocess, "run", **kwargs):
+                data = self.data()
+                self.assertIsNone(db.save_snapshot(data))
+                self.assertNotIn("snapshot", data["library"])
+
+    def test_nothing_to_save(self):
+        with mock.patch.object(db.subprocess, "run", side_effect=AssertionError("should not run")):
+            self.assertIsNone(db.save_snapshot({"watch": {}}))
+
+
+class ChangesSection(OfflineTestCase):
+    def test_shows_what_changed(self):
+        html = page(sample_data())
+        self.assertIn("Since Sep 29", html)
+        self.assertIn("7 days ago", html)
+        for text in ("Titles added", "New episodes", "+12 GB", "Can&#x27;t be found now",
+                     "1 person now has access", "1 invite accepted", "Download access changed for 1 person",
+                     "+1 invites sent by email"):
+            self.assertIn(text, html)
+
+    def test_names_hidden(self):
+        html = page(sample_data(), hide_names=True)
+        self.assertIn("1 person now has access", html)
+        for name in ("sam-test", "alex-test", "casey-test", "riley-test"):
+            self.assertNotIn(name, html)
+
+    def test_first_build(self):
+        data = sample_data()
+        for area in ("library", "health", "sharing"):
+            data[area]["since_snapshot"] = None
+        self.assertIn("First snapshot saved today", page(data, snapshot_saved="2026-10-06"))
+        self.assertIn("No earlier snapshot to compare with yet", page(data))
+
+    def test_nothing_changed(self):
+        when = {"snapshot_date": "2026-10-05", "days_ago": 1}
+        data = {"library": {"since_snapshot": dict(when, libraries=[{"name": "Movies", "status": "same"}],
+                                                   totals={})},
+                "health": healthy()}
+        data["health"]["since_snapshot"] = dict(when, changes=[])
+        html = page(data)
+        self.assertIn("Nothing changed.", html)
+        self.assertIn("yesterday", html)
+
+    def test_failed_reports_leave_their_part_out(self):
+        data = sample_data()
+        data["sharing"] = None
+        html = page(data, {"sharing": "OWNER_ONLY: only the owner"})
+        self.assertIn("Since Sep 29", html)
+        self.assertNotIn("now has access", html)
+
+    def test_no_section_when_every_report_failed(self):
+        self.assertNotIn("What changed", page({}, {"library": "x", "health": "x", "sharing": "x"}))

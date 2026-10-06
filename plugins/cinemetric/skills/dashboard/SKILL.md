@@ -32,6 +32,8 @@ Script: `python3 ${CLAUDE_SKILL_DIR}/scripts/dashboard.py` (prints JSON; errors 
      out.
    - `sections_missing`: any report that failed, with the reason (shown on the page too).
    - `old_schedule_removed` / `old_schedule_error`: see **Upgrading from automatic updates**.
+   - `snapshot_saved`: the date of the snapshot saved for the "What changed" section, or `null` if it
+     couldn't be saved (the page is still built; say nothing unless the user asks).
 2. **If `ask` contains `destination`,** ask: "Where should the dashboard go: on this computer, online as
    a private claude.ai page, or both?" If you can't publish claude.ai pages here (no `Artifact` tool),
    say so and offer only "on this computer". Save the answer with `destination local|online|both`.
@@ -45,6 +47,10 @@ Script: `python3 ${CLAUDE_SKILL_DIR}/scripts/dashboard.py` (prints JSON; errors 
    (titles added more than 6 months ago that nobody has finished in that time) can get one line of
    facts, such as how many titles and how much space. Never suggest deleting anything; it doesn't
    affect the overall status either.
+   Near the top, a "Since <date>" section shows what changed since a snapshot from an earlier day
+   (titles added and removed, files Plex can't find now, Plex updates, people added or removed). One
+   highlight can come from it. On the first build it says the first snapshot was saved; changes show
+   from the next day's build.
    The Library section has a "Storage added per month" chart for the last 12 months; one of the
    highlights can be how much was added in that time or which month was busiest.
 

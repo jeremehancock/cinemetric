@@ -4,7 +4,8 @@ import argparse
 import time
 from unittest import mock
 
-from helpers import FAKE_TOKEN, FakeServer, OfflineTestCase, Reply, fixture, load_script, plex_container
+from helpers import (FAKE_TOKEN, FakeServer, OfflineTestCase, Reply, fixture, load_script, plex_container,
+                     write_snapshot)
 
 sh = load_script("server-health")
 
@@ -213,10 +214,11 @@ class ReportTestCase(OfflineTestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
-    def report(self, server, stale_days=7.0, stuck_wait=0):
+    def report(self, server, stale_days=7.0, stuck_wait=0, since=None, snapshot_items=False):
         client = sh.PlexClient("http://192.0.2.10:32400", FAKE_TOKEN, True)
         server.attach(client._opener)
-        return sh.build_report(client, argparse.Namespace(stale_days=stale_days, stuck_wait=stuck_wait))
+        return sh.build_report(client, argparse.Namespace(stale_days=stale_days, stuck_wait=stuck_wait,
+                                                          since=since, snapshot_items=snapshot_items))
 
 
 class WholeReport(ReportTestCase):
@@ -457,3 +459,39 @@ class StuckWaitOption(OfflineTestCase):
         self.assertEqual(self.parsed_wait("--stuck-wait", "9999"), 300)
         self.assertEqual(self.parsed_wait("--stuck-wait", "-5"), 0)
         self.assertEqual(self.parsed_wait("--stuck-wait", "0"), 0)
+
+
+class ServerSnapshot(ReportTestCase):
+    def test_snapshot_area(self):
+        report = self.report(sample_server(), snapshot_items=True)
+        self.assertEqual(report["snapshot"], {"server_id": "machineidfortests", "area": {
+            "version": "1.40.0.0000-test", "update_version": "1.41.0.0000-test", "remote_access": "failed"}})
+
+    def test_no_snapshot_block_without_the_flag(self):
+        report = self.report(sample_server())
+        self.assertNotIn("snapshot", report)
+        self.assertIsNone(report["since_snapshot"])
+
+    def test_plex_updated_and_remote_access_fixed(self):
+        write_snapshot(self.tmp, 4, health={"version": "1.39.0", "update_version": False, "remote_access": "mapped"})
+        since = self.report(sample_server())["since_snapshot"]
+        self.assertEqual(since["days_ago"], 4)
+        self.assertEqual(since["changes"], [
+            {"kind": "version", "from": "1.39.0", "to": "1.40.0.0000-test"},
+            {"kind": "update_version", "from": False, "to": "1.41.0.0000-test"},
+            {"kind": "remote_access", "from": "mapped", "to": "failed"},
+        ])
+
+    def test_nothing_changed(self):
+        area = self.report(sample_server(), snapshot_items=True)["snapshot"]["area"]
+        write_snapshot(self.tmp, 1, health=area)
+        self.assertEqual(self.report(sample_server())["since_snapshot"]["changes"], [])
+
+    def test_update_check_failed_today_is_not_a_change(self):
+        write_snapshot(self.tmp, 1, health={"version": "1.40.0.0000-test", "update_version": "1.41.1",
+                                            "remote_access": "failed"})
+        server = sample_server()
+        server.routes["/updater/status"] = Reply("broken", status=500)
+        report = self.report(server, snapshot_items=True)
+        self.assertIsNone(report["snapshot"]["area"]["update_version"])
+        self.assertEqual(report["since_snapshot"]["changes"], [])

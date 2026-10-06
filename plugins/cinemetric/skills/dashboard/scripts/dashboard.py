@@ -26,20 +26,24 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.17.0"
+VERSION = "0.18.0"
 SCRIPT_TIMEOUT_SECONDS = 1800
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SKILLS_DIR = os.path.normpath(os.path.join(HERE, "..", ".."))
 SOURCES = {
-    "library": ("library-report", "library_report.py", []),
+    "library": ("library-report", "library_report.py", ["--snapshot-items"]),
     # The dashboard doesn't show the stuck task check, so it skips the wait.
-    "health": ("server-health", "server_health.py", ["--stuck-wait", "0"]),
+    "health": ("server-health", "server_health.py", ["--stuck-wait", "0", "--snapshot-items"]),
     "watch": ("watch-activity", "watch_activity.py", ["--days", "30", "--top", "8", "--recent", "10"]),
-    "sharing": ("users-and-shares", "users_and_shares.py", []),
+    "sharing": ("users-and-shares", "users_and_shares.py", ["--snapshot-items"]),
     # Each library lists its 10 largest, so the 10 largest overall are always among them.
     "unwatched": ("unwatched", "unwatched.py", ["--limit", "10"]),
 }
+# Reports whose snapshot blocks are saved, and whose since_snapshot feeds the "Since" section.
+SNAPSHOT_AREAS = ("library", "health", "sharing")
+CHANGES_SCRIPT = os.path.join(SKILLS_DIR, "changes", "scripts", "changes.py")
+CHANGE_EXAMPLES = 5
 UNWATCHED_TITLES_LIMIT = 10
 SHARING_PEOPLE_LIMIT = 20
 ERROR_CODE = re.compile(r"^[A-Z_]+: ")
@@ -101,6 +105,26 @@ def collect():
         first = next(iter(errors.values()))
         raise DashboardError(first if "NOT_CONFIGURED" in first else f"Nothing could be collected: {first}")
     return data, errors
+
+
+def save_snapshot(data):
+    """Hand the reports to the changes script to save today's snapshot. Returns the date, or None.
+
+    Then drop the snapshot blocks: they're for saving only and never go on the page."""
+    reports = {area: data[area] for area in SNAPSHOT_AREAS if data.get(area)}
+    saved = None
+    if reports and os.path.exists(CHANGES_SCRIPT):
+        try:
+            proc = subprocess.run([sys.executable, CHANGES_SCRIPT, "save"], input=json.dumps(reports),
+                                  capture_output=True, text=True, timeout=120)
+            if proc.returncode == 0:
+                saved = json.loads(proc.stdout).get("snapshot_saved")
+        except (OSError, ValueError, AttributeError, subprocess.TimeoutExpired):
+            saved = None
+    for report in reports.values():
+        if isinstance(report, dict):
+            report.pop("snapshot", None)
+    return saved if isinstance(saved, str) else None
 
 
 # ---------------------------------------------------------------- formatting helpers
@@ -653,6 +677,135 @@ def sharing_section(sharing, hide_names, error):
     return card("Sharing", body, "wide")
 
 
+def signed(n, word=None):
+    text = f"+{num(n)}" if n > 0 else num(n)
+    return f"{text} {word}" if word else text
+
+
+def note(text, names=None):
+    """One line for the changes section, with up to CHANGE_EXAMPLES names after it."""
+    names = [n for n in names or [] if n]
+    if not names:
+        return f"<li>{e(text)}</li>"
+    shown = ", ".join(names[:CHANGE_EXAMPLES]) + (", …" if len(names) > CHANGE_EXAMPLES else "")
+    return f'<li>{e(text)}<span class="muted">: {e(shown)}</span></li>'
+
+
+def library_change_notes(since):
+    lines = []
+    for lib in since.get("libraries") or []:
+        name, status = lib.get("name") or "A library", lib.get("status")
+        if status == "new":
+            lines.append(note(f"New library: {name}"))
+            continue
+        if status == "removed":
+            lines.append(note(f"Library no longer there: {name}"))
+            continue
+        if lib.get("renamed_from"):
+            lines.append(note(f"{lib['renamed_from']} is now called {name}"))
+        for key, label in (("added", "added"), ("removed", "removed"),
+                           ("became_unavailable", "Plex can't find now"),
+                           ("available_again", "available again")):
+            n = lib.get(f"{key}_count") or 0
+            if n:
+                lines.append(note(f"{name}: {num(n)} {label}", lib.get(key)))
+        for key, label in (("episodes_added", "new episodes"), ("episodes_removed", "episodes removed")):
+            n = lib.get(f"{key}_count") or 0
+            if n:
+                shows = [f"{r.get('show')} ({num(r.get('count'))})" for r in lib.get(key) or []
+                         if isinstance(r, dict)]
+                lines.append(note(f"{name}: {num(n)} {label}", shows))
+    return lines
+
+
+def server_change_notes(since):
+    lines = []
+    for c in since.get("changes") or []:
+        kind, before, after = c.get("kind"), c.get("from"), c.get("to")
+        if kind == "version":
+            lines.append(note(f"Plex went from {before} to {after}"))
+        elif kind == "update_version":
+            lines.append(note("No update waiting now" if after is False else f"Update {after} is available"))
+        elif kind == "remote_access":
+            lines.append(note(f"Remote access went from {before} to {after}"))
+    return lines
+
+
+def sharing_change_notes(since, hide_names):
+    def names(rows):
+        return None if hide_names else [r.get("name") if isinstance(r, dict) else r for r in rows]
+
+    lines = []
+    for key, label in (("added", "now {verb} access"), ("removed", "no longer listed")):
+        rows = since.get(key) or []
+        if rows:
+            text = label.format(verb="has" if len(rows) == 1 else "have")
+            lines.append(note(f"{people_count(len(rows))} {text}", names(rows)))
+    accepted = since.get("accepted") or []
+    if accepted:
+        lines.append(note(f"{plural(len(accepted), 'invite')} accepted", names(accepted)))
+    changed = since.get("libraries_changed") or []
+    if changed:
+        details = None if hide_names else [
+            f"{c.get('name')} ({', '.join(['+' + g for g in c.get('gained') or []] + ['-' + l for l in c.get('lost') or []])})"
+            if "gained" in c else f"{c.get('name')} ({'all libraries' if c.get('to') == 'all' else 'chosen libraries'})"
+            for c in changed]
+        lines.append(note(f"{people_count(len(changed))} with different libraries", details))
+    downloads = since.get("downloads_changed") or []
+    if downloads:
+        lines.append(note(f"Download access changed for {people_count(len(downloads))}", names(downloads)))
+    invites = since.get("email_invites_change") or 0
+    if invites:
+        lines.append(note(f"{signed(invites)} invites sent by email"))
+    return lines
+
+
+def changes_section(data, hide_names, snapshot_saved):
+    reports = {area: data.get(area) for area in SNAPSHOT_AREAS if data.get(area)}
+    if not reports:
+        return ""
+    found = {area: r.get("since_snapshot") for area, r in reports.items()
+             if isinstance(r.get("since_snapshot"), dict)}
+    if not found:
+        text = ("First snapshot saved today. What changed will show here from the next day's update."
+                if snapshot_saved else "No earlier snapshot to compare with yet.")
+        return card("What changed", f'<p class="muted">{e(text)}</p>', "wide")
+
+    oldest = max(found.values(), key=lambda s: s.get("days_ago") or 0)
+    title = f"Since {short_date(oldest.get('snapshot_date'))}"
+    days = oldest.get("days_ago") or 0
+    aside = e("yesterday" if days == 1 else f"{num(days)} days ago")
+
+    blocks, counts_html = [], ""
+    library = found.get("library")
+    if library:
+        t = library.get("totals") or {}
+        counts = [("Titles added", t.get("added")), ("Titles removed", t.get("removed")),
+                  ("New episodes", t.get("episodes_added")), ("Can't be found now", t.get("became_unavailable")),
+                  ("Available again", t.get("available_again"))]
+        shown = [(label, n) for label, n in counts if n]
+        size_change = t.get("size_gb_change") or 0
+        counts_html = "".join(f'<li><span class="share-n">{num(n)}</span><span class="muted">{e(label)}</span></li>'
+                              for label, n in shown)
+        if abs(size_change) >= 1:
+            counts_html += (f'<li><span class="share-n">{e(("+" if size_change > 0 else "-") + size(abs(size_change)))}'
+                            f'</span><span class="muted">Storage</span></li>')
+        blocks.append(("Library", library_change_notes(library)))
+    if found.get("health"):
+        blocks.append(("Server", server_change_notes(found["health"])))
+    if found.get("sharing"):
+        blocks.append(("Sharing", sharing_change_notes(found["sharing"], hide_names)))
+
+    if not counts_html and not any(lines for _, lines in blocks):
+        return card(title, '<p class="muted">Nothing changed.</p>', "wide", aside)
+    lists = "".join(
+        f'<div class="ranked"><h3>{e(heading)}</h3>'
+        + (f'<ul class="share-notes">{"".join(lines)}</ul>' if lines else '<p class="muted">No changes.</p>')
+        + "</div>" for heading, lines in blocks)
+    counts_block = f'<ul class="share-counts">{counts_html}</ul>' if counts_html else ""
+    return card(title, f'{counts_block}<div class="lists">{lists}</div>', "wide", aside)
+
+
 # ---------------------------------------------------------------- page
 
 CSS = """
@@ -796,7 +949,7 @@ CSP = ('<meta http-equiv="Content-Security-Policy" '
        'content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data:">')
 
 
-def render(data, errors, hide_names):
+def render(data, errors, hide_names, snapshot_saved=None):
     library, health, watch = data.get("library"), data.get("health"), data.get("watch")
     server = ((health or {}).get("server") or {}).get("name") or ((library or {}).get("server") or {}).get("name") \
         or "Plex"
@@ -811,6 +964,7 @@ def render(data, errors, hide_names):
  <div class="masthead-meta">{pill(level, label)}<span>Updated {e(generated)}</span></div>
 </header>
 {kpi_row(library, health, watch)}
+{changes_section(data, hide_names, snapshot_saved)}
 {server_card(health, items, errors.get("health"))}
 {watch_section(watch, hide_names, errors.get("watch"))}
 {library_section(library, errors.get("library"))}
@@ -901,7 +1055,8 @@ def build(args):
     hide_names = bool(state.get("hide_names", False))
 
     data, errors = collect()
-    title, body = render(data, errors, hide_names)
+    snapshot_saved = save_snapshot(data)
+    title, body = render(data, errors, hide_names, snapshot_saved)
     output = os.path.abspath(os.path.expanduser(args.output))
     write_page(output, full_page(title, body))
 
@@ -916,6 +1071,7 @@ def build(args):
         "online_page": saved_online_page(state),
         "ask": [] if destination else ["destination"],
         "old_schedule_removed": old_schedule_removed,
+        "snapshot_saved": snapshot_saved,
     }
     if old_schedule_error:
         result["old_schedule_error"] = old_schedule_error

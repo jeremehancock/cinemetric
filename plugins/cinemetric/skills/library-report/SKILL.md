@@ -12,7 +12,7 @@ Produce a clear, friendly report about the user's Plex libraries using the bundl
 ## 1. Run the script
 
 ```
-python3 ${CLAUDE_SKILL_DIR}/scripts/library_report.py [--library "Name"]... [--recent N] [--large-gb N] [--duplicate-examples N] [--upgrade-examples N] [--growth-months N] [--music-examples N]
+python3 ${CLAUDE_SKILL_DIR}/scripts/library_report.py [--library "Name"]... [--recent N] [--large-gb N] [--duplicate-examples N] [--upgrade-examples N] [--growth-months N] [--music-examples N] [--since DAYS]
 ```
 
 - If the user named a library (e.g. "my Movies library"), pass `--library "Movies"`. Repeat it for several.
@@ -26,6 +26,10 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/library_report.py [--library "Name"]... [--r
   it when the user asks about a longer or shorter period, e.g. `--growth-months 24` for two years.
 - `--music-examples N` sets how many mixed and all-lossy albums are listed per music library (default
   15, up to 500). Use a high number when the user wants the full list.
+- `--since DAYS` picks which saved snapshot "since last time" compares with: the newest one at least
+  that many days old. Use it when the user asks what's new this week (`--since 7`) or month
+  (`--since 30`). Without it, the newest snapshot from an earlier day is used. Never pass
+  `--snapshot-items`; it's for the changes skill and the dashboard.
 - Large libraries can take a minute; progress lines go to stderr and the JSON report goes to stdout.
 - Use `--check` alone to test the connection without building a report.
 
@@ -99,6 +103,16 @@ mention anything else important in a sentence or two instead of the full report.
 limited with `--library`, say that other libraries weren't checked, so a title listed as an upgrade
 candidate may already exist in better quality elsewhere.
 
+`since_snapshot` compares this run with a snapshot Cinemetric saved on an earlier day (the
+`cinemetric:changes` skill and the dashboard save them). It has `snapshot_date`, `days_ago`, `totals`
+and `libraries`: per library `status` (`same`, `new` or `removed`), `renamed_from` when renamed, and
+lists `added`, `removed`, `became_unavailable` (files Plex can't find now), `available_again`, plus
+for TV `episodes_added` / `episodes_removed` (shows with a `count`). Each list has a `<name>_count`
+with the full number and names up to 25. When `since_snapshot` is `null`, there is no earlier snapshot
+for this server. Don't mention it, unless the user asked what changed: then say the
+`cinemetric:changes` skill (or building the dashboard) saves a daily snapshot, and changes show from
+the next day.
+
 Present, in this order:
 
 1. **Headline**: server name and version, number of libraries, total items and total storage
@@ -112,6 +126,10 @@ Present, in this order:
 3. **Recently added**: a few highlights across libraries, newest first, then one or two lines on
    growth: how much was added over the period (items and storage), the busiest month, and anything
    notable, such as a library growing much faster than the others.
+   If `since_snapshot` is set, add a short **Since <date>** line or two: titles added and removed,
+   new episodes, files Plex can't find now, and new, removed or renamed libraries. Skip it when
+   nothing changed. A title removed and added again with the same name usually means Plex re-added
+   it, not that it's new.
 4. **Worth a look**: unavailable files, unmatched items, missing posters, and very large files, with
    counts and a few examples. Briefly say why each matters (unavailable files are ones Plex can no
    longer find on disk, often from a moved/deleted file or an unmounted drive; unmatched items have no

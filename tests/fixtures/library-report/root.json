@@ -3,6 +3,6 @@
   "friendlyName": "Test Server",
   "version": "1.40.0.0000-test",
   "platform": "Linux",
-  "machineIdentifier": "machine-id-for-tests"
+  "machineIdentifier": "machineidfortests"
  }
 }

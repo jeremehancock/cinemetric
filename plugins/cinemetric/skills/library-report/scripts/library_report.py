@@ -8,6 +8,7 @@ Safety rules: see openspec/specs/security/spec.md in the Cinemetric repository.
 """
 
 import argparse
+import datetime
 import ipaddress
 import json
 import os
@@ -20,7 +21,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.17.0"
+VERSION = "0.18.0"
 PAGE_SIZE = 500
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
@@ -195,6 +196,104 @@ def clean(text):
     """Titles are untrusted data: strip control characters and cap the length."""
     text = re.sub(r"[\x00-\x1f\x7f]", " ", str(text or "")).strip()
     return text[:MAX_TITLE_LENGTH]
+
+
+# ---------------------------------------------------------------- snapshots
+#
+# Shared helper: the same code is in library_report.py, server_health.py, users_and_shares.py and
+# changes.py. Keep every copy in step. Snapshot files are untrusted data: anything odd is skipped,
+# and every text value is cleaned again on the way in.
+
+SNAPSHOT_FORMAT = 1
+SNAPSHOT_MAX_BYTES = 50 * 1000 * 1000
+SNAPSHOT_NAME = re.compile(r"^(\d{4}-\d{2}-\d{2})\.json$")
+SERVER_ID = re.compile(r"^[A-Za-z0-9]{1,128}$")
+
+
+def data_dir():
+    if os.environ.get("CINEMETRIC_DATA_DIR"):
+        return os.environ["CINEMETRIC_DATA_DIR"]
+    if os.name == "nt":
+        base = os.environ.get("LOCALAPPDATA") or os.path.join(os.path.expanduser("~"), "AppData", "Local")
+    else:
+        base = os.environ.get("XDG_DATA_HOME") or os.path.join(os.path.expanduser("~"), ".local", "share")
+    return os.path.join(base, "cinemetric")
+
+
+def snapshots_dir():
+    return os.path.join(data_dir(), "snapshots")
+
+
+def snapshot_files(server_id):
+    """(date, path) of each snapshot file for a server, newest first. Other names are ignored."""
+    if not SERVER_ID.match(str(server_id or "")):
+        return []
+    folder = os.path.join(snapshots_dir(), server_id)
+    try:
+        names = os.listdir(folder)
+    except OSError:
+        return []
+    found = []
+    for name in names:
+        match = SNAPSHOT_NAME.match(name)
+        if not match:
+            continue
+        try:
+            found.append((datetime.date.fromisoformat(match.group(1)), os.path.join(folder, name)))
+        except ValueError:
+            continue
+    return sorted(found, reverse=True)
+
+
+def clean_tree(value):
+    if isinstance(value, dict):
+        return {clean(k): clean_tree(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [clean_tree(v) for v in value]
+    if isinstance(value, str):
+        return clean(value)
+    return value
+
+
+def read_snapshot(path):
+    """A snapshot's contents with text cleaned, or None if it isn't a sound format 1 snapshot."""
+    try:
+        info = os.lstat(path)
+        if not stat.S_ISREG(info.st_mode) or info.st_size > SNAPSHOT_MAX_BYTES:
+            return None
+        with open(path, encoding="utf-8") as fh:
+            data = json.loads(fh.read(SNAPSHOT_MAX_BYTES + 1))
+    except (OSError, ValueError, RecursionError):
+        return None
+    if not isinstance(data, dict) or data.get("format") != SNAPSHOT_FORMAT:
+        return None
+    return clean_tree(data)
+
+
+def choose_snapshot(server_id, area, since_days=None, today=None):
+    """The snapshot area to compare with, and {"snapshot_date", "days_ago"}; or None.
+
+    The newest snapshot from before today that has this area. With since_days, the newest that is
+    at least that old, or the oldest one when none is.
+    """
+    today = today or datetime.date.today()
+    earlier = [(day, path) for day, path in snapshot_files(server_id) if day < today]
+    if since_days:
+        old_enough = [f for f in earlier if (today - f[0]).days >= since_days]
+        younger = [f for f in earlier if (today - f[0]).days < since_days]
+        earlier = old_enough + younger[::-1]  # newest old-enough first, then oldest younger first
+    for day, path in earlier:
+        data = read_snapshot(path)
+        if data and isinstance(data.get(area), dict):
+            return data[area], {"snapshot_date": day.isoformat(), "days_ago": (today - day).days}
+    return None
+
+
+def as_count(value):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
 
 
 def resolution_bucket(value):
@@ -598,10 +697,25 @@ def episode_label(item):
     )
 
 
-def summarise_section(client, section, args, guids, ranks, pending, keys, growths):
+def rating_key(item):
+    return clean(item.get("ratingKey"))
+
+
+def unavailable_items(items, label_fn):
+    """{ratingKey: label} of items with a file Plex marks unavailable."""
+    return {rating_key(i): label_fn(i) for i in items
+            if any(m.get("deletedAt") for m in i.get("Media", []) or [])}
+
+
+def summarise_section(client, section, args, guids, ranks, pending, keys, growths, snap=None, present=None):
+    """Summarise one library. Also fills snap (this library's snapshot area) and adds the
+    ratingKey of every movie, episode and track to present."""
+    snap = {} if snap is None else snap
+    present = set() if present is None else present
     sid, kind = section.get("key"), section.get("type")
     out = {"name": clean(section.get("title")), "type": kind}
     large = int(args.large_gb * 1e9)
+    snap.update({"name": out["name"], "type": clean(kind), "items": {}, "unavailable": {}})
 
     if kind == "movie":
         movies = client.get_all(sid, TYPE_MOVIE)
@@ -609,6 +723,9 @@ def summarise_section(client, section, args, guids, ranks, pending, keys, growth
         for m in movies:
             tally.add(m, movie_label(m))
         out["counts"] = {"movies": len(movies)}
+        snap["items"] = {rating_key(m): movie_label(m) for m in movies}
+        snap["unavailable"] = unavailable_items(movies, movie_label)
+        present.update(snap["items"])
         out["media"] = tally.as_dict()
         out["recently_added"] = recent(movies, args.recent, movie_label)
         growths.append(growth_counts(movies, keys))
@@ -630,6 +747,12 @@ def summarise_section(client, section, args, guids, ranks, pending, keys, growth
             "seasons": client.count(sid, TYPE_SEASON),
             "episodes": len(episodes),
         }
+        snap["items"] = {rating_key(s): clean(s.get("title")) for s in shows}
+        snap["episodes"] = {}
+        for e in episodes:
+            bump(snap["episodes"], clean(e.get("grandparentRatingKey")))
+        snap["unavailable"] = unavailable_items(episodes, episode_label)
+        present.update(rating_key(e) for e in episodes)
         out["media"] = tally.as_dict()
         out["recently_added"] = recent(episodes, args.recent, episode_label)
         growths.append(growth_counts(episodes, keys))
@@ -654,6 +777,10 @@ def summarise_section(client, section, args, guids, ranks, pending, keys, growth
         }
         out["media"] = tally.as_dict(video=False)
         album_label = lambda a: clean(f"{a.get('parentTitle')} - {a.get('title')}")
+        snap["items"] = {rating_key(a): album_label(a) for a in albums}
+        snap["unavailable"] = unavailable_items(
+            tracks, lambda t: clean(f"{t.get('grandparentTitle')} - {t.get('title')}"))
+        present.update(rating_key(t) for t in tracks)
         out["recently_added"] = recent(albums, args.recent, album_label)
         growths.append(growth_counts(tracks, keys))
         out["growth"] = growth_section(growths[-1], keys)
@@ -668,7 +795,107 @@ def summarise_section(client, section, args, guids, ranks, pending, keys, growth
 
     else:
         out["note"] = "library type not summarised"
+    snap["counts"] = out.get("counts", {})
+    snap["size_gb"] = out.get("media", {}).get("size_gb", 0.0)
     return out
+
+
+# ---------------------------------------------------------------- since the last snapshot
+
+EXAMPLES = 25
+CHANGE_LISTS = ("added", "removed", "episodes_added", "episodes_removed", "became_unavailable",
+                "available_again")
+
+
+def text_map(value):
+    """A {key: text} map from a snapshot, ignoring anything that isn't one."""
+    return {k: v for k, v in value.items() if isinstance(v, str)} if isinstance(value, dict) else {}
+
+
+def size_of(lib):
+    size = lib.get("size_gb")
+    return float(size) if isinstance(size, (int, float)) and not isinstance(size, bool) else 0.0
+
+
+def count_map(value):
+    return {k: as_count(v) for k, v in value.items()} if isinstance(value, dict) else {}
+
+
+def put_list(entry, name, names):
+    entry[f"{name}_count"] = len(names)
+    entry[name] = sorted(names, key=str.lower)[:EXAMPLES]
+
+
+def put_episodes(entry, name, rows):
+    """Shows with the episode difference; the count is the number of episodes."""
+    entry[f"{name}_count"] = sum(r["count"] for r in rows)
+    entry[name] = sorted(rows, key=lambda r: r["show"].lower())[:EXAMPLES]
+
+
+def library_change(old, new, present):
+    entry = {"name": new["name"], "type": new["type"], "status": "same"}
+    if isinstance(old.get("name"), str) and old["name"] != new["name"]:
+        entry["renamed_from"] = old["name"]
+    old_counts = count_map(old.get("counts"))
+    entry["counts_change"] = {k: v - old_counts.get(k, 0) for k, v in new["counts"].items()}
+    entry["size_gb_change"] = round(new["size_gb"] - size_of(old), 1)
+    old_items, new_items = text_map(old.get("items")), new["items"]
+    put_list(entry, "added", [v for k, v in new_items.items() if k not in old_items])
+    put_list(entry, "removed", [v for k, v in old_items.items() if k not in new_items])
+    if new["type"] == "show":
+        old_eps, new_eps = count_map(old.get("episodes")), new["episodes"]
+        name = lambda key: new_items.get(key) or old_items.get(key) or "unknown show"
+        put_episodes(entry, "episodes_added", [
+            {"show": name(k), "count": n - old_eps.get(k, 0)} for k, n in new_eps.items() if n > old_eps.get(k, 0)])
+        put_episodes(entry, "episodes_removed", [
+            {"show": name(k), "count": n - new_eps.get(k, 0)} for k, n in old_eps.items() if n > new_eps.get(k, 0)])
+    old_gone, new_gone = text_map(old.get("unavailable")), new["unavailable"]
+    put_list(entry, "became_unavailable", [v for k, v in new_gone.items() if k not in old_gone])
+    put_list(entry, "available_again", [v for k, v in old_gone.items()
+                                        if k not in new_gone and k in present])
+    return entry
+
+
+def library_changes(old_area, new_area, present, covered_all):
+    """Compare this run's libraries with a snapshot's library area."""
+    libraries = []
+    totals = dict.fromkeys(CHANGE_LISTS, 0)
+    totals["size_gb_change"] = 0.0
+    for key, lib in new_area.items():
+        old = old_area.get(key)
+        if isinstance(old, dict):
+            entry = library_change(old, lib, present)
+            for name in CHANGE_LISTS:
+                totals[name] += entry.get(f"{name}_count", 0)
+            totals["size_gb_change"] += entry["size_gb_change"]
+        else:
+            entry = {"name": lib["name"], "type": lib["type"], "status": "new",
+                     "counts": lib["counts"], "size_gb": lib["size_gb"]}
+            totals["size_gb_change"] += lib["size_gb"]
+        libraries.append(entry)
+    if covered_all:
+        for key, old in old_area.items():
+            if key in new_area or not isinstance(old, dict):
+                continue
+            size = size_of(old)
+            libraries.append({"name": old.get("name") if isinstance(old.get("name"), str) else "",
+                              "type": old.get("type") if isinstance(old.get("type"), str) else "",
+                              "status": "removed", "counts": count_map(old.get("counts")),
+                              "size_gb": size})
+            totals["size_gb_change"] -= size
+    totals["size_gb_change"] = round(totals["size_gb_change"], 1)
+    return {"libraries": libraries, "totals": totals}
+
+
+def since_snapshot(server_id, new_area, present, args):
+    try:
+        found = choose_snapshot(server_id, "library", args.since)
+        if not found:
+            return None
+        old_area, when = found
+        return dict(when, **library_changes(old_area, new_area, present, not args.library))
+    except Exception:  # a bad snapshot never stops the report
+        return None
 
 
 def build_report(client, args):
@@ -681,10 +908,13 @@ def build_report(client, args):
             raise ReportError("No library matched --library. Run without it to see all names.")
 
     libraries, guids, ranks, pending, growths = [], {}, {}, [], []
+    area, present = {}, set()
     keys = month_keys(args.growth_months)
     for section in sections:
         print(f"reading library: {clean(section.get('title'))}", file=sys.stderr)
-        libraries.append(summarise_section(client, section, args, guids, ranks, pending, keys, growths))
+        snap = area.setdefault(clean(section.get("key")), {})
+        libraries.append(summarise_section(client, section, args, guids, ranks, pending, keys, growths,
+                                           snap, present))
     for lib, candidates, by_show in pending:
         lib["upgrades"] = library_upgrades(candidates, ranks, lib["name"], args.upgrade_examples, by_show)
 
@@ -696,7 +926,8 @@ def build_report(client, args):
     # Sum bytes across libraries before rounding, so the combined figures don't drift.
     combined = {k: [sum(g[k][0] for g in growths), sum(g[k][1] for g in growths)] for k in keys}
 
-    return {
+    server_id = str(root.get("machineIdentifier") or "")
+    report = {
         "cinemetric_version": VERSION,
         "generated_at": time.strftime("%Y-%m-%d %H:%M %Z"),
         "server": {
@@ -708,7 +939,11 @@ def build_report(client, args):
         "growth": growth_section(combined, keys),
         "cross_library_duplicates": cross_library_duplicates(guids, args.duplicate_examples),
         "libraries": libraries,
+        "since_snapshot": since_snapshot(server_id, area, present, args),
     }
+    if args.snapshot_items:
+        report["snapshot"] = {"server_id": clean(server_id), "area": area}
+    return report
 
 
 def main():
@@ -721,7 +956,16 @@ def main():
     parser.add_argument("--upgrade-examples", type=int, default=15, help="upgrade examples listed per library")
     parser.add_argument("--growth-months", type=int, default=12, help="months covered by growth by month")
     parser.add_argument("--music-examples", type=int, default=15, help="mixed and lossy album examples listed")
+    parser.add_argument("--since", type=int, help="compare with a snapshot at least this many days old (1-90)")
+    parser.add_argument("--snapshot-items", action="store_true",
+                        help="add this run's part of a snapshot (used by the changes skill and dashboard)")
     args = parser.parse_args()
+    if args.snapshot_items and args.library:
+        print("error: --snapshot-items can't be used with --library: a snapshot covers every library.",
+              file=sys.stderr)
+        return 1
+    if args.since is not None:
+        args.since = max(1, min(args.since, 90))
     args.recent = max(0, min(args.recent, 100))
     args.duplicate_examples = max(0, min(args.duplicate_examples, 500))
     args.upgrade_examples = max(0, min(args.upgrade_examples, 500))

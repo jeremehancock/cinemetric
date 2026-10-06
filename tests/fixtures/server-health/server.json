@@ -8,7 +8,7 @@
    "myPlexSigninState": "ok",
    "myPlexSubscription": "1",
    "transcoderActiveVideoSessions": 1,
-   "machineIdentifier": "machine-id-for-tests"
+   "machineIdentifier": "machineidfortests"
   }
  },
  "/updater/status": {

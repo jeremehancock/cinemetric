@@ -20,7 +20,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.15.0"
+VERSION = "0.16.0"
 PAGE_SIZE = 500
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
@@ -498,6 +498,94 @@ def library_upgrades(candidates, ranks, library, limit, by_show=False):
     }
 
 
+# Music codecs by whether they keep every bit of the original audio. Anything else is "other".
+LOSSLESS_CODECS = {"flac", "alac", "pcm", "aiff", "ape", "wavpack", "tta", "mlp", "truehd"}
+LOSSY_CODECS = {"mp3", "mp2", "aac", "vorbis", "opus", "wma", "wmav1", "wmav2", "wmapro", "ac3", "eac3",
+                "dca", "dts", "musepack"}
+
+
+def codec_group(codec):
+    codec = str(codec or "").lower()
+    if codec in LOSSLESS_CODECS or codec.startswith("dsd"):
+        return "lossless"
+    return "lossy" if codec in LOSSY_CODECS else "other"
+
+
+def bitrate_bucket(kbps):
+    if not kbps:
+        return "unknown"
+    if kbps < 192:
+        return "under_192"
+    return "192_to_255" if kbps < 256 else "256_and_up"
+
+
+def classify_track(track):
+    """A track's group (the best of its counted copies), total size, and lossy bitrate and codec.
+
+    Returns None when the track has no counted copies (as in copies(): found on disk, not optimized).
+    """
+    groups, size, kbps, codecs = set(), 0, 0, []
+    for media in track.get("Media", []) or []:
+        if media.get("deletedAt") or media.get("proxyType"):
+            continue
+        group = codec_group(media.get("audioCodec"))
+        groups.add(group)
+        size += sum(int(p.get("size") or 0) for p in media.get("Part", []) or [])
+        if group == "lossy":
+            kbps = max(kbps, int(media.get("bitrate") or 0))
+            codecs.append(str(media.get("audioCodec")).lower())
+    if not groups:
+        return None
+    group = next(g for g in ("lossless", "lossy", "other") if g in groups)
+    return {"group": group, "bytes": size, "kbps": kbps, "codec": codecs[0] if codecs else None}
+
+
+def audio_quality(tracks, limit):
+    """Lossless vs lossy across a music library's tracks, by track, storage and album."""
+    totals = {g: [0, 0] for g in ("lossless", "lossy", "other")}
+    bitrates = {"under_192": 0, "192_to_255": 0, "256_and_up": 0, "unknown": 0}
+    albums = {}
+    for track in tracks:
+        found = classify_track(track)
+        if not found:
+            continue
+        totals[found["group"]][0] += 1
+        totals[found["group"]][1] += found["bytes"]
+        album = albums.setdefault(track.get("parentRatingKey") or track.get("parentTitle"), {
+            "title": clean(f"{track.get('grandparentTitle')} - {track.get('parentTitle')}"),
+            "lossless": 0, "lossy": 0, "kbps": [], "codecs": {}})
+        if found["group"] == "lossless":
+            album["lossless"] += 1
+        elif found["group"] == "lossy":
+            bitrates[bitrate_bucket(found["kbps"])] += 1
+            album["lossy"] += 1
+            if found["kbps"]:
+                album["kbps"].append(found["kbps"])
+            bump(album["codecs"], found["codec"])
+
+    counts = {"lossless": 0, "lossy": 0, "mixed": 0}
+    mixed, lossy = [], []
+    for album in albums.values():
+        if album["lossless"] and album["lossy"]:
+            counts["mixed"] += 1
+            mixed.append({"title": album["title"], "lossless_tracks": album["lossless"],
+                          "lossy_tracks": album["lossy"]})
+        elif album["lossless"]:
+            counts["lossless"] += 1
+        elif album["lossy"]:
+            counts["lossy"] += 1
+            # Most common codec; ties go to the name that sorts first, so the output is stable.
+            codec = min(album["codecs"], key=lambda c: (-album["codecs"][c], c))
+            kbps = round(sum(album["kbps"]) / len(album["kbps"])) if album["kbps"] else None
+            lossy.append({"title": album["title"], "tracks": album["lossy"], "codec": codec, "kbps": kbps})
+    mixed.sort(key=lambda r: (-r["lossy_tracks"], r["title"].lower()))
+    lossy.sort(key=lambda r: (r["kbps"] is None, r["kbps"] or 0, r["title"].lower()))
+    out = {g: {"tracks": n, "gb": gb(size)} for g, (n, size) in totals.items()}
+    out.update({"lossy_bitrate": bitrates, "albums": counts,
+                "mixed_examples": mixed[:limit], "lossy_examples": lossy[:limit]})
+    return out
+
+
 def movie_label(item):
     year = item.get("year")
     return clean(f"{item.get('title')} ({year})" if year else item.get("title"))
@@ -555,11 +643,12 @@ def summarise_section(client, section, args, guids, ranks, pending, keys, growth
     elif kind == "artist":
         tracks = client.get_all(sid, TYPE_TRACK)
         albums = client.get_all(sid, TYPE_ALBUM)
+        artists = client.get_all(sid, TYPE_ARTIST)
         tally = Tally(large)
         for t in tracks:
             tally.add(t, clean(t.get("title")))
         out["counts"] = {
-            "artists": client.count(sid, TYPE_ARTIST),
+            "artists": len(artists),
             "albums": len(albums),
             "tracks": len(tracks),
         }
@@ -568,7 +657,11 @@ def summarise_section(client, section, args, guids, ranks, pending, keys, growth
         out["recently_added"] = recent(albums, args.recent, album_label)
         growths.append(growth_counts(tracks, keys))
         out["growth"] = growth_section(growths[-1], keys)
+        out["audio_quality"] = audio_quality(tracks, args.music_examples)
         out["housekeeping"] = housekeeping(albums, album_label)
+        no_photo = [clean(a.get("title")) for a in artists if not a.get("thumb")]
+        out["housekeeping"]["missing_artist_image_count"] = len(no_photo)
+        out["housekeeping"]["missing_artist_image_examples"] = no_photo[:15]
 
     elif kind == "photo":
         out["counts"] = {"photos": client.count(sid, TYPE_PHOTO)}
@@ -627,11 +720,13 @@ def main():
     parser.add_argument("--duplicate-examples", type=int, default=15, help="duplicate examples listed per section")
     parser.add_argument("--upgrade-examples", type=int, default=15, help="upgrade examples listed per library")
     parser.add_argument("--growth-months", type=int, default=12, help="months covered by growth by month")
+    parser.add_argument("--music-examples", type=int, default=15, help="mixed and lossy album examples listed")
     args = parser.parse_args()
     args.recent = max(0, min(args.recent, 100))
     args.duplicate_examples = max(0, min(args.duplicate_examples, 500))
     args.upgrade_examples = max(0, min(args.upgrade_examples, 500))
     args.growth_months = max(0, min(args.growth_months, 120))
+    args.music_examples = max(0, min(args.music_examples, 500))
 
     try:
         client = PlexClient(*load_config())

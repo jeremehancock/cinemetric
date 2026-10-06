@@ -28,7 +28,7 @@ def media(resolution="1080", codec="h264", gb=1.0, parts=1, **extra):
 
 def args(**overrides):
     values = {"library": None, "recent": 10, "large_gb": 40.0, "duplicate_examples": 15,
-              "upgrade_examples": 15, "growth_months": 12}
+              "upgrade_examples": 15, "growth_months": 12, "music_examples": 15}
     values.update(overrides)
     return argparse.Namespace(**values)
 
@@ -365,6 +365,138 @@ class GrowthByMonth(OfflineTestCase):
                 self.assertEqual(seen["months"], expected)
 
 
+# ---------------------------------------------------------------- music
+
+MB = 1000 ** 2
+
+
+def track(album="Album", artist="Band", key=None, copies=()):
+    return {"title": "Track", "parentTitle": album, "grandparentTitle": artist,
+            "parentRatingKey": key or f"{artist}/{album}", "Media": list(copies)}
+
+
+def audio(codec="flac", mb=30, kbps=None, **extra):
+    out = dict({"audioCodec": codec, "Part": [{"size": mb * MB}]}, **extra)
+    if kbps is not None:
+        out["bitrate"] = kbps
+    return out
+
+
+def music_library(tracks=(), albums=(), artists=(), **options):
+    lists = {lr.TYPE_TRACK: list(tracks), lr.TYPE_ALBUM: list(albums), lr.TYPE_ARTIST: list(artists)}
+    client = mock.Mock(get_all=lambda sid, kind: lists[kind], count=lambda sid, kind: 0)
+    return lr.summarise_section(client, {"key": "9", "type": "artist", "title": "Music"}, args(**options),
+                                {}, {}, [], [], [])
+
+
+class MusicAudioQuality(OfflineTestCase):
+    def test_codec_groups(self):
+        cases = {"flac": "lossless", "FLAC": "lossless", "alac": "lossless", "pcm": "lossless",
+                 "dsd_lsbf_planar": "lossless", "mp3": "lossy", "AAC": "lossy", "opus": "lossy",
+                 "xyz": "other", "": "other", None: "other"}
+        for codec, expected in cases.items():
+            with self.subTest(codec=codec):
+                self.assertEqual(lr.codec_group(codec), expected)
+
+    def test_flac_and_mp3_collection(self):
+        tracks = ([track("Loud", copies=[audio("flac", 30)]) for _ in range(8)]
+                  + [track("Small", copies=[audio("mp3", 8, kbps=320)]) for _ in range(4)])
+        q = lr.audio_quality(tracks, 15)
+        self.assertEqual(q["lossless"], {"tracks": 8, "gb": 0.2})
+        self.assertEqual(q["lossy"], {"tracks": 4, "gb": 0.0})
+        self.assertEqual(q["lossy_bitrate"], {"under_192": 0, "192_to_255": 0, "256_and_up": 4, "unknown": 0})
+        self.assertEqual(q["albums"], {"lossless": 1, "lossy": 1, "mixed": 0})
+
+    def test_unrecognised_or_missing_codec(self):
+        q = lr.audio_quality([track(copies=[audio("xyz")]), track(copies=[{"Part": [{"size": MB}]}])], 15)
+        self.assertEqual(q["other"]["tracks"], 2)
+        self.assertEqual((q["lossless"]["tracks"], q["lossy"]["tracks"]), (0, 0))
+        self.assertEqual(q["albums"], {"lossless": 0, "lossy": 0, "mixed": 0})
+
+    def test_track_in_two_formats_is_lossless(self):
+        q = lr.audio_quality([track(copies=[audio("mp3", 400, kbps=320), audio("flac", 600)])], 15)
+        self.assertEqual(q["lossless"], {"tracks": 1, "gb": 1.0})
+        self.assertEqual(q["lossy"]["tracks"], 0)
+
+    def test_missing_and_optimized_copies_are_skipped(self):
+        q = lr.audio_quality([track(copies=[audio("flac", deletedAt=1)]),
+                              track(copies=[audio("mp3", kbps=128, proxyType=42)])], 15)
+        for group in ("lossless", "lossy", "other"):
+            self.assertEqual(q[group]["tracks"], 0)
+
+    def test_bitrate_buckets(self):
+        tracks = [track(copies=[audio("mp3", kbps=k)]) for k in (128, 191, 192, 255, 256, 320)]
+        tracks.append(track(copies=[audio("mp3")]))
+        q = lr.audio_quality(tracks, 15)
+        self.assertEqual(q["lossy_bitrate"], {"under_192": 2, "192_to_255": 2, "256_and_up": 2, "unknown": 1})
+
+    def test_mixed_album(self):
+        tracks = ([track("Live", copies=[audio("flac")]) for _ in range(10)]
+                  + [track("Live", copies=[audio("mp3", kbps=256)]) for _ in range(2)])
+        q = lr.audio_quality(tracks, 15)
+        self.assertEqual(q["albums"], {"lossless": 0, "lossy": 0, "mixed": 1})
+        self.assertEqual(q["mixed_examples"], [{"title": "Band - Live", "lossless_tracks": 10, "lossy_tracks": 2}])
+
+    def test_all_mp3_album(self):
+        tracks = [track("Old", copies=[audio("mp3", kbps=k)]) for k in [128] * 6 + [192] * 6]
+        q = lr.audio_quality(tracks, 15)
+        self.assertEqual(q["albums"], {"lossless": 0, "lossy": 1, "mixed": 0})
+        self.assertEqual(q["lossy_examples"], [{"title": "Band - Old", "tracks": 12, "codec": "mp3", "kbps": 160}])
+
+    def test_lossy_examples_lowest_bitrate_first_unknown_last(self):
+        tracks = [track("High", copies=[audio("aac", kbps=256)]), track("Mystery", copies=[audio("mp3")]),
+                  track("Low", copies=[audio("mp3", kbps=128)])]
+        q = lr.audio_quality(tracks, 15)
+        self.assertEqual([(r["title"], r["kbps"]) for r in q["lossy_examples"]],
+                         [("Band - Low", 128), ("Band - High", 256), ("Band - Mystery", None)])
+
+    def test_mixed_examples_most_lossy_first(self):
+        tracks = [track("A", copies=[audio("flac")]), track("A", copies=[audio("mp3")]),
+                  track("B", copies=[audio("flac")])] + [track("B", copies=[audio("mp3")]) for _ in range(3)]
+        q = lr.audio_quality(tracks, 15)
+        self.assertEqual([r["title"] for r in q["mixed_examples"]], ["Band - B", "Band - A"])
+
+    def test_example_limit(self):
+        tracks = [track(f"Album {n}", copies=[audio("mp3", kbps=128)]) for n in range(5)]
+        q = lr.audio_quality(tracks, 2)
+        self.assertEqual(q["albums"]["lossy"], 5)
+        self.assertEqual(len(q["lossy_examples"]), 2)
+
+    def test_empty_library(self):
+        q = music_library()["audio_quality"]
+        self.assertEqual(q, {
+            "lossless": {"tracks": 0, "gb": 0.0}, "lossy": {"tracks": 0, "gb": 0.0},
+            "other": {"tracks": 0, "gb": 0.0},
+            "lossy_bitrate": {"under_192": 0, "192_to_255": 0, "256_and_up": 0, "unknown": 0},
+            "albums": {"lossless": 0, "lossy": 0, "mixed": 0}, "mixed_examples": [], "lossy_examples": []})
+
+    def test_music_examples_option_is_clamped(self):
+        for given, expected in (("9999", 500), ("-1", 0), ("4", 4)):
+            with self.subTest(given=given):
+                seen = {}
+                with mock.patch.object(lr, "load_config", return_value=("http://192.0.2.10:32400", FAKE_TOKEN, True)), \
+                        mock.patch.object(lr, "build_report", side_effect=lambda c, a: seen.update(n=a.music_examples) or {}), \
+                        mock.patch("sys.argv", ["library_report.py", "--music-examples", given]), \
+                        mock.patch("sys.stdout", io.StringIO()):
+                    self.assertEqual(lr.main(), 0)
+                self.assertEqual(seen["n"], expected)
+
+    def test_option_reaches_the_library(self):
+        tracks = [track(f"Album {n}", copies=[audio("mp3", kbps=128)]) for n in range(5)]
+        self.assertEqual(music_library(tracks, music_examples=0)["audio_quality"]["lossy_examples"], [])
+
+
+class MusicHousekeeping(OfflineTestCase):
+    def test_album_without_cover_and_artist_without_photo(self):
+        albums = [{"title": "Bare", "parentTitle": "Band"}, {"title": "Pretty", "parentTitle": "Band", "thumb": "/t"}]
+        artists = [{"title": "Band", "thumb": "/a"}, {"title": "Faceless"}]
+        music = music_library(albums=albums, artists=artists)
+        h = music["housekeeping"]
+        self.assertEqual((h["missing_poster_count"], h["missing_poster_examples"]), (1, ["Band - Bare"]))
+        self.assertEqual((h["missing_artist_image_count"], h["missing_artist_image_examples"]), (1, ["Faceless"]))
+        self.assertEqual(music["counts"]["artists"], 2)
+
+
 # ---------------------------------------------------------------- whole report
 
 def fake_plex(page_size=None):
@@ -480,6 +612,29 @@ class WholeReport(OfflineTestCase):
         music = lr.summarise_section(client, {"key": "9", "type": "artist", "title": "Music"}, args(), {}, {}, [],
                                      keys, [])
         self.assertEqual(music["growth"]["months"], [{"month": keys[0], "added": 3, "gb": 3.0}])
+
+    def test_movie_and_show_libraries_have_no_music_fields(self):
+        for lib in self.report(fake_plex())["libraries"][:3]:
+            with self.subTest(library=lib["name"]):
+                self.assertNotIn("audio_quality", lib)
+                self.assertNotIn("missing_artist_image_count", lib["housekeeping"])
+
+    def test_music_library_uses_only_allowed_paths(self):
+        lists = {"8": [{"title": "Band"}], "9": [{"title": "Album", "parentTitle": "Band"}],
+                 "10": [track(copies=[audio("flac")]), track(copies=[audio("mp3", kbps=128)])]}
+        server = FakeServer({
+            "/": fixture("library-report", "root.json"),
+            "/library/sections": plex_container(Directory=[{"key": "5", "type": "artist", "title": "Music"}]),
+            "/library/sections/5/all": lambda seen: plex_container(
+                size=len(lists.get(seen.query.get("type"), [])), totalSize=len(lists.get(seen.query.get("type"), [])),
+                Metadata=lists.get(seen.query.get("type"), [])),
+        })
+        music = self.report(server)["libraries"][0]
+        self.assertEqual(music["counts"], {"artists": 1, "albums": 1, "tracks": 2})
+        self.assertEqual(music["audio_quality"]["albums"], {"lossless": 0, "lossy": 0, "mixed": 1})
+        for seen in server.requests:
+            self.assertEqual(seen.method, "GET")
+            self.assertTrue(any(rule.match(seen.path) for rule in lr.ALLOWED_PATHS), seen.path)
 
     def test_photo_library_is_counted_only(self):
         photos = self.report(fake_plex())["libraries"][3]

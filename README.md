@@ -142,7 +142,6 @@ Updates to existing skills:
 - [ ] **Snapshots and "what changed"**: save a small summary on your computer after each run, so
       reports and the dashboard can show what's new, what disappeared and how things trend over time.
       Could also power an optional weekly digest that only mentions changes.
-- [ ] **`library-report`**: fuller music details (lossless vs lossy, missing album art)
 - [ ] **`users-and-shares`**: shared libraries nobody has watched in a while
 - [ ] **`setup`**: remember more than one server and switch between them
 

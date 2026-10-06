@@ -19,6 +19,7 @@ setup = load_script("setup")
 shares = load_script("users-and-shares")
 unwatched = load_script("unwatched")
 picker = load_script("what-to-watch")
+gaps = load_script("episode-gaps")
 
 # (script name, address check, error it raises). Each check takes just the address.
 ADDRESS_CHECKS = [
@@ -28,15 +29,18 @@ ADDRESS_CHECKS = [
     ("users-and-shares", lambda url: shares.validate_url(url, "plex_url"), shares.ReportError),
     ("unwatched", lambda url: unwatched.validate_url(url, "plex_url"), unwatched.ReportError),
     ("what-to-watch", lambda url: picker.validate_url(url, "plex_url"), picker.ReportError),
+    ("episode-gaps", lambda url: gaps.validate_url(url, "plex_url"), gaps.ReportError),
     ("setup", setup.clean_tautulli_url, setup.SetupError),
 ]
-WARNS_ABOUT_PLAIN_HTTP = ADDRESS_CHECKS[:6]
+WARNS_ABOUT_PLAIN_HTTP = ADDRESS_CHECKS[:7]
 LOOKS_LOCAL = [("library-report", library.looks_local), ("server-health", health.looks_local),
                ("watch-activity", watch.looks_local), ("users-and-shares", shares.looks_local),
-               ("unwatched", unwatched.looks_local), ("what-to-watch", picker.looks_local)]
+               ("unwatched", unwatched.looks_local), ("what-to-watch", picker.looks_local),
+               ("episode-gaps", gaps.looks_local)]
 CLEANERS = [("library-report", library.clean), ("server-health", health.clean),
             ("watch-activity", watch.clean), ("users-and-shares", shares.clean),
-            ("unwatched", unwatched.clean), ("what-to-watch", picker.clean), ("setup", setup.clean)]
+            ("unwatched", unwatched.clean), ("what-to-watch", picker.clean), ("episode-gaps", gaps.clean),
+            ("setup", setup.clean)]
 
 
 class AddressChecks(OfflineTestCase):
@@ -139,7 +143,8 @@ def plex_clients():
     return [(name, module, builder(module))
             for name, module in (("library-report", library), ("server-health", health),
                                  ("watch-activity", watch), ("users-and-shares", shares),
-                                 ("unwatched", unwatched), ("what-to-watch", picker))]
+                                 ("unwatched", unwatched), ("what-to-watch", picker),
+                                 ("episode-gaps", gaps))]
 
 
 class PlexClientRules(OfflineTestCase):

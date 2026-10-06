@@ -32,8 +32,9 @@ CSS and JavaScript with no build step, ready for any static host.
 | `users-and-shares` | Who your server is shared with (friends, Plex Home, managed users, pending invites), which libraries each person can see, who can download, when each person last played something, and which shared libraries nobody has played from lately. Reads the share list from your plex.tv account; only the server owner can use it |
 | `unwatched` | Movies and shows nobody has finished in a while (added more than 6 months ago, no finished play by anyone since), largest first, with how much space they use and when each was last finished. Facts only: it never suggests deleting anything. Uses Tautulli if you have it, otherwise Plex's own history |
 | `what-to-watch` | Finds something to watch tonight in your own library: by genre, length, decade, rating or content rating, unwatched only, shuffled for fresh ideas each time. Suggests a few titles with a reason for each, or picks up where you left off. Only titles already on your server |
+| `episode-gaps` | Gaps in your TV shows: episode numbers missing between ones you have (E01, E02 and E04 are there, so E03 is probably missing), seasons that start late, seasons missing between others, and episodes whose files Plex can't find. Specials, two-episode files and shows numbered straight on across seasons aren't counted as gaps. Uses only what's on your server, so it can't see episodes after the last one you have |
 | `changes` | What changed since yesterday, last week or last month: titles added and removed, new episodes, files Plex can no longer find, Plex updates, and people given or losing access. Each time you run it (or build the dashboard) it saves a small private snapshot on your computer, at most one per day, kept 90 days, to compare with next time. Nothing runs in the background; the library, server and sharing reports and the dashboard show the same "since last time" changes |
-| `dashboard` | One page with library, server, watch, unwatched and sharing stats and charts. Saved on your computer, as a private claude.ai page you can open anywhere, or both; each refresh updates the same file and link |
+| `dashboard` | One page with library, server, watch, unwatched, episode gaps and sharing stats and charts. Saved on your computer, as a private claude.ai page you can open anywhere, or both; each refresh updates the same file and link |
 
 More skills are planned, and ideas are welcome; see [Roadmap](#roadmap).
 
@@ -66,7 +67,8 @@ where you can revoke it at any time.
 Then try: *"Give me a Plex library report"*, *"What's been added to my Movies library recently?"*,
 *"How's my Plex server doing?"*, *"What's been watched on Plex this month?"*,
 *"Who have I shared my Plex server with?"*, *"What on my Plex server has nobody watched in months?"*,
-*"Find me a comedy under 2 hours I haven't seen"* or *"Build my Plex dashboard"*
+*"Find me a comedy under 2 hours I haven't seen"*, *"Am I missing any episodes on Plex?"* or
+*"Build my Plex dashboard"*
 
 ### Optional: add Tautulli
 
@@ -133,8 +135,6 @@ New skills:
 - [ ] **`playback-check`**: files likely to transcode on common devices (image-based subtitles, TrueHD
       or DTS audio, bitrates above your remote streaming limit), plus which devices transcode most when
       Tautulli is set up
-- [ ] **`tv-completeness`**: gaps in episode numbers and seasons that are only partly there, using only
-      what's on your server
 - [ ] **`year-in-review`**: a yearly recap page with top titles, total hours and busiest months, with
       care taken around other people's viewing details
 

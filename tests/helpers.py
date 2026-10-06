@@ -28,6 +28,7 @@ FIXTURES_DIR = os.path.join(ROOT, "tests", "fixtures")
 SCRIPTS = {
     "changes": "changes.py",
     "dashboard": "dashboard.py",
+    "episode-gaps": "episode_gaps.py",
     "library-report": "library_report.py",
     "server-health": "server_health.py",
     "setup": "setup.py",

@@ -37,15 +37,16 @@ These came out of an explore session on 2026-10-05 and apply to every idea below
   The ideas below fall into three groups:
     1. Join areas together     (playback-check)
     2. Remember over time      (weekly digest, dashboard trends; snapshots are done)
-    3. Go one level deeper     (per-item details: subtitles, audio, episode gaps)
+    3. Go one level deeper     (per-item details: subtitles, audio)
 ```
 
-Suggested order: open. (Snapshots and "what changed" were done on 2026-10-06. The `server-health`
-settings checks, the `watch-activity` one person, busiest moment and unfinished titles additions, the
-`unwatched` skill, `library-report` growth by month with its dashboard chart, and the `what-to-watch`
-skill were done on 2026-10-05; `library-report` music details (lossless vs lossy, missing artwork) on
-2026-10-06. Hi-res music (bit depth, sample rate) was left out: it isn't in the track listing and
-needs a request per track.)
+Suggested order: open. (Snapshots and "what changed" were done on 2026-10-06, and so was
+`episode-gaps`, the former `tv-completeness` idea. The `server-health` settings checks, the
+`watch-activity` one person, busiest moment and unfinished titles additions, the `unwatched` skill,
+`library-report` growth by month with its dashboard chart, and the `what-to-watch` skill were done on
+2026-10-05; `library-report` music details (lossless vs lossy, missing artwork) on 2026-10-06. Hi-res
+music (bit depth, sample rate) was left out: it isn't in the track listing and needs a request per
+track.)
 
 ---
 
@@ -77,22 +78,6 @@ recently. Snapshots could cache results so later runs only check new titles.
 - Which device rules are worth encoding, given clients vary a lot? Keep it to the few universal
   causes (image subtitles, lossless audio, bitrate) rather than a device database.
 - Should this be part of `server-health` instead of its own skill?
-
-### `tv-completeness`
-
-**What:** gaps in episode numbering (S02E01, E02 and E04 present, so E03 is probably missing) and
-seasons that look only partly there.
-
-**Data:** the episode listing `library-report` already fetches (`type=4`) has season and episode
-numbers.
-
-**The big catch:** it can only spot gaps *between* episodes that are on disk. It can't know a season
-has 10 episodes if only 1 to 8 exist, or that a whole season is missing. Knowing that would mean
-asking Plex's online metadata service, which is a new destination and would need a change to the
-"Only known destinations" requirement in the security spec. Decided for now: on-server only.
-
-**Open questions:** specials (season 0) and multi-episode files (S01E01-E02) need care so they don't
-show up as false gaps.
 
 ### `year-in-review`
 

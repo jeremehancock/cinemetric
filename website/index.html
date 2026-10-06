@@ -119,7 +119,7 @@
       <div class="wrap">
         <div class="section-head reveal">
           <p class="kicker">The library</p>
-          <h2 id="skills-title">Nine skills. One curious question at a time.</h2>
+          <h2 id="skills-title">Ten skills. One curious question at a time.</h2>
           <p>Just ask Claude in your own words. Each skill knows when it's needed, runs a small script against your server and turns the result into a clear report.</p>
         </div>
 
@@ -179,6 +179,13 @@
             </span>
             <span class="poster-title">changes</span>
             <span class="poster-sub">What's new since</span>
+          </a></li>
+          <li class="reveal"><a class="poster" href="#skill-gaps" style="--a:#c026d3;--b:#3d0c44">
+            <span class="poster-art" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><rect x="4" y="14" width="10" height="20" rx="2" fill="currentColor"/><rect x="19" y="14" width="10" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4 3" opacity=".7"/><rect x="34" y="14" width="10" height="20" rx="2" fill="currentColor"/><path d="M4 10h40M4 38h40" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".6"/></svg>
+            </span>
+            <span class="poster-title">episode-gaps</span>
+            <span class="poster-sub">What's missing</span>
           </a></li>
           <li class="reveal"><a class="poster" href="#skill-dashboard" style="--a:#8b5cf6;--b:#2a1a4d">
             <span class="poster-art" aria-hidden="true">
@@ -592,13 +599,62 @@
       </div>
     </section>
 
+    <!-- ============ SKILL: EPISODE GAPS ============ -->
+    <section class="section feature" id="skill-gaps" aria-labelledby="f-gaps">
+      <div class="wrap feature-grid">
+        <div class="feature-copy reveal">
+          <p class="kicker" style="--k:#e879f9">episode-gaps</p>
+          <h2 id="f-gaps">Spot the episodes that slipped through.</h2>
+          <p>Finds the holes in your TV shows using only what's on your server: an episode missing between two you have, a season that starts late, a season missing between others.</p>
+          <ul class="ticks">
+            <li>E01, E02 and E04 are there? It points out E03.</li>
+            <li>Seasons that start late, seasons missing in the middle, and episodes whose files Plex can't find.</li>
+            <li>Specials, files holding two episodes and shows numbered straight on across seasons aren't counted as gaps.</li>
+            <li>Honest about its limits: it can't see episodes after the last one you have, because it never asks an online service.</li>
+            <li>Just the facts: it never tells you where to get anything.</li>
+          </ul>
+          <p class="ask-line">Ask Claude: <q>Am I missing any episodes on Plex?</q> or <q>Is anything missing from Lanterns?</q></p>
+        </div>
+
+        <figure class="mock demo reveal" aria-label="Example: gaps in the TV episodes on the server">
+          <div class="mock-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><em>Claude Code</em></div>
+          <div class="tabpanel" id="panel-gaps-1">
+            <pre class="term"><code><span class="t-you">&gt; Am I missing any episodes on Plex?</span>
+<span class="t-dot">⏺</span> 6 of your 212 shows have gaps: 19
+  episodes are missing between ones you
+  have, one season is missing, and Plex
+  can't find the files for 4 episodes.
+
+  <b class="t-h">Shows with gaps</b>
+  Northern Static: S02E04 to E09, and
+    S03E01 to E02 (season 3 starts late)
+  Low Tide: S01E05 to E08 (Plex can't
+    find the files)
+  Copper Coast: S01E01 to E03
+  Lanterns: season 5, S04E11, and
+    S06E02 to E03
+  The Night Ferry: S01E07 to E08
+  Field Notes: S02E03
+
+  <b class="t-h">Worth knowing</b>
+  Only gaps between the episodes you have
+  can be found. If a season ends early or
+  a newer season is out, that can't be
+  seen. 2 shows only have their later
+  seasons, which isn't counted as a gap.</code></pre>
+          </div>
+          <figcaption>Example reply with made-up data. Claude's wording will vary.</figcaption>
+        </figure>
+      </div>
+    </section>
+
     <!-- ============ SKILL: DASHBOARD ============ -->
-    <section class="section feature" id="skill-dashboard" aria-labelledby="f-dash">
+    <section class="section feature flip" id="skill-dashboard" aria-labelledby="f-dash">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#a382ff">dashboard</p>
           <h2 id="f-dash">Everything, on one good-looking page.</h2>
-          <p>Library stats, server health, watch activity, what nobody has finished in a while, and who your server is shared with, together, with charts. Ask Claude to refresh it whenever you like.</p>
+          <p>Library stats, server health, watch activity, what nobody has finished in a while, gaps in your TV episodes, and who your server is shared with, together, with charts. Ask Claude to refresh it whenever you like.</p>
           <ul class="ticks">
             <li>Save it <strong>on your computer</strong>, as a <strong>private claude.ai page</strong> you can open from anywhere, or <strong>both</strong>.</li>
             <li>Each refresh updates the same file and the same link, so your bookmarks keep working.</li>
@@ -611,7 +667,7 @@
 
         <figure class="mock demo reveal" aria-label="Example: the dashboard page">
           <div class="mock-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><em>Your browser</em></div>
-          <div class="shot"><img src="screens/dashboard.jpg" width="900" height="4433" loading="lazy" alt="The real Cinemetric dashboard in dark mode: library size, plays and watch time, a section listing what changed since Sep 27: titles added and removed, new episodes, files Plex can't find, a Plex update and sharing changes, a server card with an update notice, a plays-per-day bar chart, top shows, movies, music and viewers, the library table with a storage-added-per-month bar chart, titles nobody has finished in six months, and who the server is shared with."></div>
+          <div class="shot"><img src="screens/dashboard.jpg" width="900" height="4868" loading="lazy" alt="The real Cinemetric dashboard in dark mode: library size, plays and watch time, a section listing what changed since Sep 27: titles added and removed, new episodes, files Plex can't find, a Plex update and sharing changes, a server card with an update notice, a plays-per-day bar chart, top shows, movies, music and viewers, the library table with a storage-added-per-month bar chart, titles nobody has finished in six months, gaps in TV episodes, and who the server is shared with."></div>
           <figcaption>The real dashboard, filled with made-up sample data. Scroll inside it to see more.</figcaption>
         </figure>
       </div>

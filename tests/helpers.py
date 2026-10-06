@@ -37,6 +37,7 @@ SCRIPTS = {
     "users-and-shares": "users_and_shares.py",
     "watch-activity": "watch_activity.py",
     "what-to-watch": "what_to_watch.py",
+    "year-in-review": "year_in_review.py",
 }
 
 # Settings a test must never pick up from the developer's own environment.

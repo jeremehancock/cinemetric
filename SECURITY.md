@@ -6,8 +6,9 @@ your token or API key in the chat. The one exception to "only Plex and Tautulli"
 it to sign you in, and `users-and-shares` reads your share list from it, because that list is only
 stored in your plex.tv account. `users-and-shares` sends read-only requests to three fixed plex.tv
 addresses and never shows the email addresses or access tokens of the people you share with. Cinemetric's scripts never publish anything. If you choose to put
-the dashboard online, Claude publishes it as a private claude.ai page that only you can see unless you
-share it.
+the dashboard or your year-in-review recaps online, Claude publishes them as private claude.ai pages
+that only you can see unless you share them. A whole-server recap names no one and leaves off titles
+only one person watched.
 
 When you run the `changes` skill or build the dashboard, it saves a small snapshot on your computer
 (at most one per day, in `~/.local/share/cinemetric/snapshots`, or

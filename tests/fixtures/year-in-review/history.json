@@ -1,0 +1,22 @@
+{
+ "_comment": "Made-up watch history. 'when' is local time; tests turn it into Tautulli rows and Plex history entries. 'user' is the Plex account; the owner's Tautulli user_id differs from Plex's account 1, as on real servers. 'played' is seconds actually played, 'paused' seconds paused, so stopped minus started is played plus paused.",
+ "people": [
+  {"user_id": 1001, "account": "1", "friendly_name": "alex-test", "username": "alex-test", "is_admin": 1},
+  {"user_id": 2, "account": "2", "friendly_name": "sam-test", "username": "sam-test", "is_admin": 0},
+  {"user_id": 3, "account": "3", "friendly_name": "jo-test", "username": "jo-test", "is_admin": 0}
+ ],
+ "plays": [
+  {"when": "2024-12-31 23:50", "user": 2, "kind": "movie", "title": "Last Year Movie", "year": 2001, "played": 3600},
+  {"when": "2025-01-01 00:10", "user": 2, "kind": "movie", "title": "New Year Movie", "year": 1999, "played": 3600},
+  {"when": "2025-03-05 20:00", "user": 1, "kind": "movie", "title": "Shared Movie", "year": 2010, "played": 7200, "paused": 1800},
+  {"when": "2025-03-06 20:00", "user": 2, "kind": "movie", "title": "Shared Movie", "year": 2010, "played": 7200},
+  {"when": "2025-03-07 20:00", "user": 3, "kind": "episode", "title": "Pilot", "show": "Shared Show", "played": 1800},
+  {"when": "2025-05-01 19:00", "user": 2, "kind": "episode", "title": "News", "show": "Live Channel", "played": 3600, "live": 1},
+  {"when": "2025-06-01 09:00", "user": 1, "kind": "track", "title": "Song", "artist": "Solo Artist", "played": 240},
+  {"when": "2025-08-01 21:00", "user": 1, "kind": "movie", "title": "<b>Test</b>", "year": 2020, "played": 5400},
+  {"when": "2025-08-02 21:00", "user": 2, "kind": "movie", "title": "<b>Test</b>", "year": 2020, "played": 5400},
+  {"when": "2025-12-31 23:50", "user": 1, "kind": "episode", "title": "Finale", "show": "Shared Show", "played": 1800},
+  {"when": "2026-01-01 00:10", "user": 1, "kind": "movie", "title": "Next Year Movie", "year": 2022, "played": 3600}
+ ],
+ "devices": ["Alex's iPhone", "Living Room TV"]
+}

@@ -127,6 +127,316 @@ export function blockReason(text: string, hosts: readonly string[]): string | un
   return isAimedAtServers(text, hosts) ? writeReason(text) : undefined
 }
 
+// The same for a shell command, except that a command which only runs
+// text-only programs (a commit, a pull request, `cat > notes.md <<'EOF'`)
+// is let through even when its text mentions the server and a write word.
+export function shellBlockReason(command: string, hosts: readonly string[]): string | undefined {
+  if (!isAimedAtServers(command, hosts) || onlyHandlesText(command)) return undefined
+  return writeReason(command)
+}
+
+// Programs that only handle text: they can't send a request and don't run
+// their arguments. Left off on purpose: sed (its `e` command), sort
+// (--compress-program), rg (--pre), awk, find and xargs, which can all run
+// other programs.
+const TEXT_ONLY_PROGRAMS = new Set([
+  'echo', 'printf', 'cat', 'tee', 'head', 'tail', 'grep', 'wc', 'ls', 'pwd', 'cd', 'mkdir', 'true',
+  'false',
+])
+
+// git and gh count only with one of these straight after the name, so
+// `git -c alias.x='!cmd'`, `git push` and `gh api` are checked as usual.
+const TEXT_ONLY_SUBCOMMANDS: Record<string, ReadonlySet<string>> = {
+  git: new Set([
+    'add', 'commit', 'status', 'log', 'diff', 'show', 'tag', 'branch', 'checkout', 'switch',
+    'restore', 'stash', 'notes', 'rev-parse',
+  ]),
+  gh: new Set(['pr', 'issue', 'release']),
+}
+
+// True when the guard can read the whole command and every program it runs
+// only handles text. Anything it can't read counts as false, so the command
+// gets the usual checks.
+export function onlyHandlesText(command: string): boolean {
+  if (/\/dev\/(?:tcp|udp)\//i.test(command)) return false
+  const commands = commandsIn(command)
+  return commands !== undefined && commands.every(isTextOnly)
+}
+
+function isTextOnly(words: readonly string[]): boolean {
+  // Words such as NAME=value before the program's name set a variable.
+  let first = 0
+  while (first < words.length && isAssignment(words[first] ?? '')) first++
+  const [name, subcommand] = words.slice(first)
+  if (name === undefined) return true
+  if (TEXT_ONLY_PROGRAMS.has(name)) return true
+  return subcommand !== undefined && (TEXT_ONLY_SUBCOMMANDS[name]?.has(subcommand) ?? false)
+}
+
+function isAssignment(word: string): boolean {
+  return /^[A-Za-z_][A-Za-z0-9_]*=/.test(word)
+}
+
+// Thrown by the reader when it meets shell syntax it doesn't read.
+class CannotRead extends Error {}
+
+// Stands in for text the shell fills in by running a command, such as
+// $(...). It can't be part of a program's name on the lists above.
+const FILLED_IN = '\u0000'
+
+type Heredoc = { end: string; stripTabs: boolean; expands: boolean }
+
+// Reads a shell command the way the shell would, far enough to know which
+// programs it runs. Gives back each command as its words with quotes removed
+// (redirections and their files left out), including the commands run by
+// $(...), backticks, <(...) and >(...). Gives back undefined for anything it
+// doesn't read: ${...}, $((...)), subshells and groups, and anything left open.
+export function commandsIn(text: string): string[][] | undefined {
+  try {
+    const reader = new ShellReader(text)
+    reader.readCommands(false)
+    return reader.commands
+  } catch (error) {
+    if (error instanceof CannotRead) return undefined
+    throw error
+  }
+}
+
+class ShellReader {
+  at = 0
+  commands: string[][] = []
+  private heredocs: Heredoc[] = []
+
+  constructor(private readonly text: string) {}
+
+  // Reads commands until the end of the text, or until the `)` that closes
+  // a $(...), <(...) or >(...) when `inParentheses` is true.
+  readCommands(inParentheses: boolean): void {
+    const text = this.text
+    let words: string[] = []
+    let word: string | undefined
+    let isFileName = false
+
+    const endWord = () => {
+      if (word !== undefined && !isFileName) words.push(word)
+      if (word !== undefined) isFileName = false
+      word = undefined
+    }
+    const endCommand = () => {
+      endWord()
+      if (isFileName) throw new CannotRead()
+      if (words.length > 0) this.commands.push(words)
+      words = []
+    }
+    const add = (part: string) => {
+      word = (word ?? '') + part
+    }
+
+    while (true) {
+      if (this.at >= text.length) {
+        if (inParentheses || this.heredocs.length > 0) throw new CannotRead()
+        endCommand()
+        return
+      }
+      const c = text.charAt(this.at)
+      const next = text[this.at + 1]
+
+      if (c === ' ' || c === '\t') {
+        endWord()
+        this.at++
+      } else if (c === '\n') {
+        endCommand()
+        this.at++
+        this.readHeredocBodies()
+      } else if (c === '#' && word === undefined) {
+        while (this.at < text.length && text[this.at] !== '\n') this.at++
+      } else if (c === ')') {
+        if (!inParentheses) throw new CannotRead()
+        endCommand()
+        this.at++
+        return
+      } else if (c === ';' || c === '|' || (c === '&' && next !== '>')) {
+        endCommand()
+        this.at += next === c || (c === '|' && next === '&') ? 2 : 1
+      } else if ((c === '<' || c === '>') && next === '(') {
+        this.at += 2
+        this.readCommands(true)
+        add(FILLED_IN)
+      } else if (c === '<' && next === '<' && text[this.at + 2] === '<') {
+        // A here-string: the next word is text given to the program.
+        endRedirectNumber()
+        this.at += 3
+      } else if (c === '<' && next === '<') {
+        endRedirectNumber()
+        this.at += 2
+        this.readHeredocStart()
+      } else if (c === '<' || c === '>' || c === '&') {
+        endRedirectNumber()
+        endWord()
+        const operator = /^(?:&>>?|[0-9]*(?:>>|>\||>&|<&|<>|>|<))/.exec(text.slice(this.at))
+        this.at += operator ? operator[0].length : 1
+        isFileName = true
+      } else if (c === '(' || ((c === '{' || c === '}') && word === undefined)) {
+        throw new CannotRead()
+      } else if (c === "'") {
+        const close = text.indexOf("'", this.at + 1)
+        if (close < 0) throw new CannotRead()
+        add(text.slice(this.at + 1, close))
+        this.at = close + 1
+      } else if (c === '"') {
+        this.at++
+        add(this.readDoubleQuoted())
+      } else if (c === '\\') {
+        if (next === undefined) throw new CannotRead()
+        if (next !== '\n') add(next)
+        this.at += 2
+      } else if (c === '`') {
+        this.readBackticks()
+        add(FILLED_IN)
+      } else if (c === '$') {
+        add(this.readDollar())
+      } else {
+        add(c)
+        this.at++
+      }
+    }
+
+    // `2>` and the like: a number written right before a redirection is the
+    // stream being redirected, not a word.
+    function endRedirectNumber() {
+      if (word !== undefined && /^[0-9]+$/.test(word)) word = undefined
+      else endWord()
+    }
+  }
+
+  // After `$`: a command run by $(...), ANSI-C quoting $'...', or a plain `$`
+  // (a variable, whose value the guard doesn't need).
+  private readDollar(): string {
+    const text = this.text
+    const next = text[this.at + 1]
+    if (next === '(') {
+      if (text[this.at + 2] === '(') throw new CannotRead()
+      this.at += 2
+      this.readCommands(true)
+      return FILLED_IN
+    }
+    if (next === '{') throw new CannotRead()
+    if (next === "'") {
+      let i = this.at + 2
+      while (i < text.length && text[i] !== "'") i += text[i] === '\\' ? 2 : 1
+      if (i >= text.length) throw new CannotRead()
+      const inside = text.slice(this.at + 2, i)
+      this.at = i + 1
+      return inside
+    }
+    this.at++
+    return '$'
+  }
+
+  // Reads up to the closing double quote, starting just after the opening one.
+  private readDoubleQuoted(): string {
+    const text = this.text
+    let inside = ''
+    while (true) {
+      if (this.at >= text.length) throw new CannotRead()
+      const c = text.charAt(this.at)
+      const next = text[this.at + 1]
+      if (c === '"') {
+        this.at++
+        return inside
+      } else if (c === '\\') {
+        if (next === undefined) throw new CannotRead()
+        inside += '$`"\\\n'.includes(next) ? (next === '\n' ? '' : next) : c + next
+        this.at += 2
+      } else if (c === '`') {
+        this.readBackticks()
+        inside += FILLED_IN
+      } else if (c === '$') {
+        inside += this.readDollar()
+      } else {
+        inside += c
+        this.at++
+      }
+    }
+  }
+
+  // Reads `...` as a command of its own, starting at the opening backtick.
+  private readBackticks(): void {
+    const text = this.text
+    let inside = ''
+    let i = this.at + 1
+    while (true) {
+      if (i >= text.length) throw new CannotRead()
+      if (text[i] === '`') break
+      if (text[i] === '\\' && '$`\\'.includes(text[i + 1] ?? '')) {
+        inside += text[i + 1]
+        i += 2
+      } else {
+        inside += text[i]
+        i++
+      }
+    }
+    this.at = i + 1
+    const commands = commandsIn(inside)
+    if (commands === undefined) throw new CannotRead()
+    this.commands.push(...commands)
+  }
+
+  // After `<<`: the word that ends the here-document. Quoting any part of it
+  // means the body is plain text; otherwise the shell fills in $(...) there.
+  private readHeredocStart(): void {
+    const text = this.text
+    let stripTabs = false
+    if (text[this.at] === '-') {
+      stripTabs = true
+      this.at++
+    }
+    while (text[this.at] === ' ' || text[this.at] === '\t') this.at++
+    let end = ''
+    let expands = true
+    while (this.at < text.length && !/[\s;&|<>()]/.test(text[this.at] ?? '')) {
+      const c = text.charAt(this.at)
+      if (c === "'" || c === '"') {
+        const close = text.indexOf(c, this.at + 1)
+        if (close < 0) throw new CannotRead()
+        end += text.slice(this.at + 1, close)
+        this.at = close + 1
+        expands = false
+      } else if (c === '\\') {
+        end += text[this.at + 1] ?? ''
+        this.at += 2
+        expands = false
+      } else if (c === '$' || c === '`') {
+        throw new CannotRead()
+      } else {
+        end += c
+        this.at++
+      }
+    }
+    if (end === '') throw new CannotRead()
+    this.heredocs.push({ end, stripTabs, expands })
+  }
+
+  // After a new line: the bodies of any here-documents started on that line.
+  private readHeredocBodies(): void {
+    const text = this.text
+    for (const heredoc of this.heredocs) {
+      while (true) {
+        if (this.at >= text.length) throw new CannotRead()
+        let lineEnd = text.indexOf('\n', this.at)
+        if (lineEnd < 0) lineEnd = text.length
+        const line = text.slice(this.at, lineEnd)
+        this.at = Math.min(lineEnd + 1, text.length)
+        if ((heredoc.stripTabs ? line.replace(/^\t+/, '') : line) === heredoc.end) break
+        // The shell runs anything in $(...) or backticks while filling in an
+        // unquoted body. Rather than read those, check the whole command.
+        if (heredoc.expands && /\$\(|\$\{|`/.test(line)) throw new CannotRead()
+      }
+    }
+    this.heredocs = []
+  }
+}
+
 const SETTINGS_FILE = /(^|[\/\\])\.claude[\/\\]settings(\.local)?\.json$/
 const SETTINGS_FILE_IN_TEXT = /\.claude[\/\\]settings(\.local)?\.json/
 

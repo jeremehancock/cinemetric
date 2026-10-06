@@ -146,6 +146,54 @@ describe('commands aimed at the servers', () => {
   })
 })
 
+const DELETE_ONE = 'curl -X DELETE "http://192.168.1.20:32400/library/metadata/1"'
+
+describe('commands that only handle text', () => {
+  const textOnly: [string, string][] = [
+    ['opening a pull request that talks about the server',
+      'gh pr create --title "Guard" --body "Blocks curl -X DELETE to plex.tv and :32400"'],
+    ['a commit message written with a here-document',
+      `git commit -m "$(cat <<'EOF'\nStop ${DELETE_ONE} (it doesn't ask)\n\nMore text\nEOF\n)"`],
+    ['writing notes to a file',
+      "cat > notes.md <<'EOF'\nThe scan is 192.168.1.20:32400/library/sections/1/refresh\nEOF"],
+    ['searching code', 'grep -rn "X-Plex-Token" src | grep POST'],
+    ['a commit after other git steps',
+      'cd /work && git add -A && GIT_EDITOR=true git commit -m "POST to :32400" 2>&1 | tail -5'],
+  ]
+  for (const [name, command] of textOnly) {
+    test(`${name} runs`, async ($, on) => {
+      const ran = world(on, CONFIGURED)
+      const answer = await $.tool.call({ tool: 'Bash', command })
+      expect(refusal(answer)).toBeUndefined()
+      expect(ran).toEqual(['Bash'])
+    })
+  }
+
+  const stillChecked: [string, string][] = [
+    ['text piped into a shell', `echo '${DELETE_ONE}' | sh`],
+    ['a request hidden in a command substitution', `echo "$(${DELETE_ONE})"`],
+    ['a request in backticks', `echo \`${DELETE_ONE}\``],
+    ['a request inside an unquoted here-document', `cat <<EOF\n$(${DELETE_ONE})\nEOF`],
+    ['a request in a process substitution', `tee >(${DELETE_ONE}) < notes.md`],
+    ['a text program next to a request', `echo start; ${DELETE_ONE}`],
+    ['git told to run something', `git -c alias.x='!${DELETE_ONE}' x`],
+    ['an unclosed quote', `echo "${DELETE_ONE}`],
+    ['a ${...} the guard does not read', 'echo ${x:-curl -X DELETE http://192.168.1.20:32400/x}'],
+    ['a subshell', `(echo hi; ${DELETE_ONE})`],
+    ['a program written with a path', '/usr/bin/curl -X DELETE http://192.168.1.20:32400/x'],
+    ['a request through /dev/tcp',
+      'echo "DELETE /library/metadata/1 HTTP/1.1" > /dev/tcp/192.168.1.20/32400 # :32400'],
+  ]
+  for (const [name, command] of stillChecked) {
+    test(`${name} is blocked`, async ($, on) => {
+      const ran = world(on, CONFIGURED)
+      const answer = await $.tool.call({ tool: 'Bash', command })
+      expect(refusal(answer)).toContain('Cinemetric read-only guard')
+      expect(ran).toEqual([])
+    })
+  }
+})
+
 describe('where the addresses come from', () => {
   test('without a settings file, address-free signs still count', async ($, on) => {
     world(on)

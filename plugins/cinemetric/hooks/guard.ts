@@ -15,6 +15,7 @@ import {
   isThisPlugin,
   serverBlockMessage,
   settingBlockMessage,
+  shellBlockReason,
 } from './guard-rules'
 
 // The hosts from Cinemetric's settings file, and the file's modification
@@ -79,7 +80,7 @@ export function setUpGuard(on: On): void {
   // through a Claude Code settings file.
   on('tool.call', { tool: 'Bash' }, async ($, e, next) => {
     if (commandTouchesGuardSetting(e.command)) return { deny: settingBlockMessage() }
-    const reason = blockReason(e.command, await configuredHosts($))
+    const reason = shellBlockReason(e.command, await configuredHosts($))
     return reason ? { deny: serverBlockMessage(reason) } : next(e)
   }).catch(($, e, next) => {
     sayGuardFailed($)

@@ -36,12 +36,12 @@ These came out of an explore session on 2026-10-05 and apply to every idea below
 
   The ideas below fall into three groups:
     1. Join areas together     (playback-check is done)
-    2. Remember over time      (weekly digest; snapshots and dashboard trends are done)
+    2. Remember over time      (snapshots and dashboard trends are done)
     3. Go one level deeper     (subtitles and audio per file are done in playback-check)
 ```
 
-Suggested order: open. (Snapshots and "what changed" were done on 2026-10-06, and so were
-`episode-gaps`, the former `tv-completeness` idea, and `playback-check`, which turned out cheap: Plex
+Suggested order: open. (Snapshots and "what changed" were done on 2026-10-06, and so were dashboard
+trends, `episode-gaps`, the former `tv-completeness` idea, and `playback-check`, which turned out cheap: Plex
 returns subtitle and audio details for 100 titles per request, so no sampling was needed. The `server-health` settings checks, the
 `watch-activity` one person, busiest moment and unfinished titles additions, the `unwatched` skill,
 `library-report` growth by month with its dashboard chart, and the `what-to-watch` skill were done on
@@ -76,20 +76,10 @@ singles people out reads differently from a stats report, especially if the page
 
 ## Updates to existing skills
 
-### Weekly digest (built on snapshots)
+### Snapshots
 
-Snapshots themselves were done on 2026-10-06 (the `changes` skill, `since_snapshot` in the library,
-server and sharing reports, and the dashboard's "Since" section). One file per server per day, kept 90
-days, in `<data folder>/snapshots/<server id>/`. See `openspec/specs/changes`.
-
-**Weekly digest:** pairs with Claude Code's `/schedule` skill: a routine that runs
-`changes.py --since 7` and only mentions what changed. The dashboard previously tried scheduled runs
-and hit a limit (background mode couldn't publish claude.ai pages on the test account; see the
-archived `dashboard-local-or-online` change), so check what scheduled runs can do before promising a
-digest that publishes anything.
-
-Dashboard trends were done on 2026-10-06 too (`changes.py trends` and the dashboard's Trends section;
-see `openspec/specs/changes` and `openspec/specs/dashboard`).
+Snapshots and dashboard trends are described in `openspec/specs/changes` and
+`openspec/specs/dashboard`.
 
 **Open questions:** should the dashboard's "Since" section compare with about a week ago instead of
 the previous day? Should snapshots be opt-out for people who don't want anything saved?
@@ -99,9 +89,3 @@ the previous day? Should snapshots be opt-out for people who don't want anything
 - **Busiest moment for one person:** Tautulli's `most_concurrent` stat ignores `user_id` (checked on
   v2.18.2), so with `--user` the report leaves it out. It could be worked out from that person's
   history `started` / `stopped` times instead. Only worth it if someone asks.
-
-### `setup`
-
-**More than one server:** save several servers and switch between them, or pass a server name to a
-report. Medium effort: it changes the config file format, and every script's copy of `load_config`
-would need updating (see "Self-contained scripts"). Probably only worth it if users ask.

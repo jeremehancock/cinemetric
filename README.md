@@ -137,12 +137,6 @@ New skills:
 - [ ] **`year-in-review`**: a yearly recap page with top titles, total hours and busiest months, with
       care taken around other people's viewing details
 
-Updates to existing skills:
-
-- [ ] **Weekly digest**: a scheduled weekly run that only mentions what changed, using the snapshots
-      the `changes` skill already saves
-- [ ] **`setup`**: remember more than one server and switch between them
-
 ## Support Development
 
 Cinemetric is free and open source, and it stays that way. If it has been useful to you and you'd like

@@ -132,6 +132,8 @@ The page SHALL have a Sharing section built from the `users-and-shares` report, 
 - each library with the number of people who can see it;
 - each "worth a look" item from the report as a short sentence with the number of people it applies
   to (and their names when names are shown);
+- an `unused_library` item as a short sentence with the number of libraries and their titles. Library
+  titles SHALL be shown even when names are hidden, because they aren't about any person;
 - when names are shown, a list of people with name, type, number of libraries (or "all"), and last
   played date (or "no plays found"), with at most 20 people listed and a line saying how many more
   there are.
@@ -156,6 +158,12 @@ overall status. When nobody else can reach the server, the section SHALL say so 
 #### Scenario: Not shared with anyone
 - **WHEN** the sharing report has no people
 - **THEN** the Sharing section says the server isn't shared with anyone
+
+#### Scenario: A shared library nobody plays from
+- **WHEN** names are hidden and the sharing report's `worth_a_look` has an `unused_library` item for
+  "Fitness" with `days` 90
+- **THEN** the Sharing section says one shared library has had no plays by the people it's shared with
+  in 90+ days, names "Fitness", and the page's overall status is unchanged
 
 ### Requirement: Unwatched section
 The page SHALL have an Unwatched section built from the `unwatched` report, showing:

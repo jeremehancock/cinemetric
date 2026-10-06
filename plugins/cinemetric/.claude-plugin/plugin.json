@@ -1,12 +1,26 @@
 {
   "name": "cinemetric",
-  "version": "0.22.0",
-  "description": "Claude skills for your Plex server. Read-only reports on your media and server.",
+  "version": "0.23.0",
+  "description": "Claude skills for your Plex server. Read-only reports on your media and server, plus mods for Claude Code: a read-only guard and a library status line.",
   "author": {
     "name": "Jereme Hancock"
   },
   "homepage": "https://cinemetric.dev",
   "repository": "https://github.com/jeremehancock/cinemetric",
   "license": "MIT",
-  "keywords": ["plex", "media", "reports", "homelab"]
+  "keywords": ["plex", "media", "reports", "homelab"],
+  "userConfig": {
+    "read_only_guard": {
+      "type": "boolean",
+      "title": "Read-only guard",
+      "description": "Stops Claude from running its own commands that would change your Plex server, Tautulli or plex.tv. Only you can switch it off.",
+      "default": true
+    },
+    "library_status_line": {
+      "type": "boolean",
+      "title": "Library status line",
+      "description": "Shows your Plex library's size and when Cinemetric last checked it, just above the prompt. Read from snapshots on this computer; never contacts your server.",
+      "default": false
+    }
+  }
 }

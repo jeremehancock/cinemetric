@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 config.json
 .env
+
+# Type declarations Claude Code writes beside a plugin it loads from a folder
+plugins/*/.claude-plugin/types/

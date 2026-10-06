@@ -58,6 +58,7 @@
       </button>
       <nav class="nav" id="main-nav" aria-label="Main">
         <a href="#skills">Skills</a>
+        <a href="#mods">Mods</a>
         <a href="#privacy">Privacy</a>
         <a href="#setup">Setup</a>
         <a href="#support">Support</a>
@@ -763,13 +764,70 @@
       </div>
     </section>
 
+    <!-- ============ MODS ============ -->
+    <section class="section mods" id="mods" aria-labelledby="mods-title">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="kicker">Extras for Claude Code</p>
+          <h2 id="mods-title">Mods, built right in.</h2>
+          <p>Mods are small add-ons that run inside Claude Code (the terminal and the desktop app's Code tab). They come with Cinemetric, so there's nothing extra to install, and each one has its own on/off switch.</p>
+        </div>
+
+        <div class="mods-grid">
+          <div class="mod-list">
+            <article class="card mod-card reveal" aria-labelledby="mod-guard">
+              <div class="mod-head">
+                <svg class="mod-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8.5 12l2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <div>
+                  <h3 id="mod-guard">Read-only guard</h3>
+                  <p class="mod-meta"><span class="mod-state is-on">On by default</span> Name: <code>guard</code></p>
+                </div>
+              </div>
+              <p>Cinemetric's skills only read from your server. The guard also checks the commands Claude writes on its own: if one would change something on your Plex server, Tautulli or plex.tv (deleting a title, starting a library scan, marking something watched, stopping someone's stream), it stops it before it runs and tells Claude&nbsp;why.</p>
+              <p class="mod-caveat"><strong>A safety net, not a guarantee.</strong> It reads each command before it runs, so it can't see inside a program Claude saves to a file and runs&nbsp;later. Only you can turn it&nbsp;off.</p>
+            </article>
+
+            <article class="card mod-card reveal" aria-labelledby="mod-status">
+              <div class="mod-head">
+                <svg class="mod-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 15h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 11l2-2 2 2 3-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <div>
+                  <h3 id="mod-status">Library status line</h3>
+                  <p class="mod-meta"><span class="mod-state">Off by default</span> Name: <code>status</code></p>
+                </div>
+              </div>
+              <p>A quiet line just above the prompt showing how big your library is and when Cinemetric last checked&nbsp;it:</p>
+              <div class="codeblock mod-sample"><code>Plex: 1,970 movies · 417 shows · 59.4 TB · checked today</code></div>
+              <p>It reads the snapshot Cinemetric saves when you ask what changed or refresh the dashboard, so it never contacts your&nbsp;server.</p>
+            </article>
+          </div>
+
+          <div class="mod-switch reveal">
+            <h3>Switching mods on and off</h3>
+            <p>Type this in Claude Code to see every mod and whether it's on:</p>
+            <div class="codeblock">
+              <code>/cinemetric-mods</code>
+              <button class="copy" type="button" data-copy="/cinemetric-mods" aria-label="Copy: /cinemetric-mods"><svg aria-hidden="true"><use href="#i-copy"/></svg></button>
+            </div>
+            <p>Add a mod's name and <code>on</code> or <code>off</code> to switch it. For example, to turn on the status line:</p>
+            <div class="codeblock">
+              <code>/cinemetric-mods status on</code>
+              <button class="copy" type="button" data-copy="/cinemetric-mods status on" aria-label="Copy: /cinemetric-mods status on"><svg aria-hidden="true"><use href="#i-copy"/></svg></button>
+            </div>
+            <p>Each mod also has a switch in Claude Code's settings menu, opened with <code>/config</code>.</p>
+            <p>The guard is the one exception to who can switch things: only you can turn it off, never Claude, so Claude can't switch off its own safety&nbsp;net.</p>
+            <p class="mod-note">Mods need Claude Code 2.1.260 or newer. On an older version every skill still works, and Cinemetric lets you know (at most once a day) that the mods are waiting for an&nbsp;update.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ============ PRIVACY ============ -->
     <section class="section privacy" id="privacy" aria-labelledby="privacy-title">
       <div class="wrap">
         <div class="section-head reveal">
           <p class="kicker">Built to be trusted</p>
           <h2 id="privacy-title">Look, don't touch.</h2>
-          <p>Cinemetric reads from your server and never writes to it. Your keys stay with you.</p>
+          <p>Cinemetric reads from your server and never writes to it, and the <a href="#mods">read-only guard</a> stops Claude's own commands from changing it. Your keys stay with you.</p>
         </div>
         <ul class="cards" role="list">
           <li class="card reveal">
@@ -802,7 +860,7 @@
         <div class="section-head reveal">
           <p class="kicker">Getting started</p>
           <h2 id="setup-title">Up and running in four steps.</h2>
-          <p>You'll need <strong>Claude Code</strong>, <strong>Python 3.8 or newer</strong>, and a computer that can reach your Plex server over the network.</p>
+          <p>You'll need <strong>Claude Code 2.1.75 or newer</strong> (2.1.260 or newer for <a href="#mods">mods</a>), <strong>Python 3.8 or newer</strong>, and a computer that can reach your Plex server over the network.</p>
         </div>
 
         <p class="steps-lead reveal">Do each of these steps in Claude Code:</p>
@@ -864,6 +922,18 @@
                 <li><strong>Claude Code on another machine</strong> (over SSH or in the cloud)? Claude gives you a command to run in a terminal on that machine instead.</li>
               </ul>
               <p><a class="more" href="https://github.com/jeremehancock/cinemetric#optional-add-tautulli" target="_blank" rel="noopener noreferrer">Full Tautulli details in the README <svg aria-hidden="true"><use href="#i-arrow"/></svg></a></p>
+            </div>
+          </details>
+
+          <details class="extra reveal">
+            <summary><span>Mods (optional)</span></summary>
+            <div class="extra-body">
+              <p>Mods come with Cinemetric, so there's nothing more to install. The <strong>read-only guard</strong> is already on. Everything else, like the <strong>library status line</strong>, starts off. To see them all and whether each is on:</p>
+              <div class="codeblock">
+                <code>/cinemetric-mods</code>
+                <button class="copy" type="button" data-copy="/cinemetric-mods" aria-label="Copy: /cinemetric-mods"><svg aria-hidden="true"><use href="#i-copy"/></svg></button>
+              </div>
+              <p>Mods need Claude Code 2.1.260 or newer. <a class="more" href="#mods">What each mod does and how to switch them <svg aria-hidden="true"><use href="#i-arrow"/></svg></a></p>
             </div>
           </details>
 

@@ -42,6 +42,37 @@ More skills are planned, and ideas are welcome; see [Roadmap](#roadmap).
 
 Every Cinemetric skill is **read-only**: it never changes anything on your server. See [SECURITY.md](SECURITY.md).
 
+## Mods
+
+Mods are small add-ons that run inside Claude Code (the terminal and the desktop app's Code tab). They
+come with Cinemetric, so there's nothing extra to install, and each one has its own on/off switch.
+
+| Mod | Starts | What it does |
+|---|---|---|
+| `guard` | On | **Read-only guard.** Checks the commands Claude writes on its own, outside Cinemetric's skills. If one would change something on your Plex server, Tautulli or plex.tv (deleting a title, starting a library scan, marking something watched, stopping someone's stream, running a Tautulli command that isn't a read), the guard stops it before it runs and tells Claude why |
+| `status` | Off | **Library status line.** A dim line just above the prompt such as `Plex: 1,970 movies · 417 shows · 59.4 TB · checked 3 days ago`, read from the newest snapshot Cinemetric saved when you asked what changed or refreshed the dashboard. It never contacts your server, and updates after each turn, so a fresh snapshot shows straight away |
+
+> [!IMPORTANT]
+> **The guard is a safety net, not a guarantee.** It reads each command before it runs, so it catches the
+> common ways of changing things, but it can't see inside a program Claude saves to a file and runs
+> later.
+
+**Switching mods on and off.** Type `/cinemetric-mods` in Claude Code to see every mod and whether it's
+on, and `/cinemetric-mods <name> on` or `off` to switch one:
+
+```
+/cinemetric-mods
+/cinemetric-mods status on
+```
+
+Each mod also has a switch in Claude Code's settings menu (`/config`). The guard is the one exception
+to who can switch things: only you can turn it off (`/cinemetric-mods guard off` or `/config`), never
+Claude, so Claude can't switch off its own safety net.
+
+**Claude Code version.** Mods need Claude Code 2.1.260 or newer. On an older version every skill still
+works, and Cinemetric shows a short notice (at most once a day) that the mods are waiting for an
+update. Run `claude update` to get them.
+
 ## Install
 
 In Claude Code:
@@ -51,7 +82,8 @@ In Claude Code:
 /plugin install cinemetric@cinemetric
 ```
 
-Requirements: Claude Code and Python 3.8+ (standard library only, nothing to `pip install`).
+Requirements: Claude Code 2.1.75 or newer (2.1.260 or newer for [mods](#mods)) and Python 3.8+
+(standard library only, nothing to `pip install`).
 Your computer must be able to reach your Plex server over the network. No SSH is needed.
 
 ## Set up your server connection

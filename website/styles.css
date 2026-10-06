@@ -52,7 +52,7 @@ p, li, figcaption, .poster-sub { text-wrap: pretty; }
 /* Short text (a line or three) looks better with its lines evened out, so a second line
    is never just a word or two hanging under a full one. */
 .ticks li, .feature-copy > p, .ask-line, .card p, .mock figcaption, .steps-lead, .section-head p,
-.step-body p, .extra-body p, .extra-body li, .notice p, .legal { text-wrap: balance; }
+.step-body p, .extra-body p, .extra-body li, .notice p, .mod-switch p, .legal { text-wrap: balance; }
 q { quotes: "\201C" "\201D"; }
 
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
@@ -317,6 +317,38 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
 .card h3 { white-space: nowrap; }
 .card p { color: var(--muted); margin: 0; font-size: .96rem; }
 
+/* ---------- Mods ---------- */
+.mods-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.mod-list { display: grid; gap: 18px; min-width: 0; }
+.mod-head { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+.mod-ico {
+  flex: none; width: 52px; height: 52px; padding: 12px; border-radius: 14px;
+  color: var(--accent-hi); background: rgba(229, 160, 13, .12);
+}
+.mod-card { min-width: 0; }
+.mod-card h3 { white-space: normal; margin: 0 0 6px; }
+.mod-card p + p, .mod-card .codeblock + p { margin-top: 12px; }
+.mod-card .mod-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; font-size: .9rem; }
+.mod-state {
+  display: inline-block; padding: 2px 10px; border-radius: 999px; font-weight: 700; font-size: .8rem;
+  color: var(--muted); border: 1px solid var(--line-2);
+}
+.mod-state.is-on { color: var(--accent-ink); border-color: transparent; background: linear-gradient(140deg, var(--accent-hi), var(--accent)); }
+.mod-card .mod-caveat {
+  margin-top: 16px; padding: 12px 14px; border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0; background: rgba(229, 160, 13, .08); color: var(--text);
+}
+.mod-caveat strong { color: var(--accent-hi); }
+.mod-sample { margin-top: 12px; padding: 4px 14px; }
+.codeblock.mod-sample code { font-size: .85rem; white-space: normal; overflow-wrap: anywhere; }
+.mod-switch {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 22px;
+}
+.mod-switch h3 { margin-top: 0; }
+.mod-switch p { color: var(--muted); }
+.mod-switch .codeblock { margin: 0 0 16px; }
+.mod-note { font-size: .92rem; border-top: 1px solid var(--line); padding-top: 14px; margin-bottom: 0; }
+
 /* ---------- Setup ---------- */
 .section-head + .steps-lead { margin-top: -24px; }
 .steps-lead { color: var(--muted); font-size: 1.05rem; margin: 0 0 20px; }
@@ -421,6 +453,7 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
 }
 @media (max-width: 860px) {
   .feature-grid { grid-template-columns: 1fr; }
+  .mods-grid { grid-template-columns: 1fr; }
   .feature.flip .feature-copy { order: 0; }
   .notice-grid { grid-template-columns: 1fr; }
 }

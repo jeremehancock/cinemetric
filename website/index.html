@@ -119,7 +119,7 @@
       <div class="wrap">
         <div class="section-head reveal">
           <p class="kicker">The library</p>
-          <h2 id="skills-title">Eleven skills. One curious question at a time.</h2>
+          <h2 id="skills-title">Twelve skills. One curious question at a time.</h2>
           <p>Just ask Claude in your own words. Each skill knows when it's needed, runs a small script against your server and turns the result into a clear report.</p>
         </div>
 
@@ -193,6 +193,13 @@
             </span>
             <span class="poster-title">playback-check</span>
             <span class="poster-sub">Why it transcodes</span>
+          </a></li>
+          <li class="reveal"><a class="poster" href="#skill-recap" style="--a:#6366f1;--b:#1e1b4b">
+            <span class="poster-art" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><rect x="6" y="10" width="36" height="32" rx="3" fill="none" stroke="currentColor" stroke-width="3.5"/><path d="M6 18h36M15 6v8M33 6v8" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><rect x="12" y="30" width="5" height="7" rx="1" fill="currentColor"/><rect x="21" y="25" width="5" height="12" rx="1" fill="currentColor"/><rect x="30" y="28" width="5" height="9" rx="1" fill="currentColor" opacity=".7"/></svg>
+            </span>
+            <span class="poster-title">year-in-review</span>
+            <span class="poster-sub">Your year on Plex</span>
           </a></li>
           <li class="reveal"><a class="poster" href="#skill-dashboard" style="--a:#8b5cf6;--b:#2a1a4d">
             <span class="poster-art" aria-hidden="true">
@@ -707,8 +714,32 @@
       </div>
     </section>
 
+    <!-- ============ SKILL: YEAR IN REVIEW ============ -->
+    <section class="section feature" id="skill-recap" aria-labelledby="f-recap">
+      <div class="wrap feature-grid">
+        <div class="feature-copy reveal">
+          <p class="kicker" style="--k:#818cf8">year-in-review</p>
+          <h2 id="f-recap">A year of watching, on one page.</h2>
+          <p>Hours watched, the busiest months and the busiest day, movies vs TV vs music, and the most watched movies, shows and artists for any calendar year.</p>
+          <ul class="ticks">
+            <li>The whole-server recap names no one, and leaves off titles only one person watched, so it never gives away what someone else watches.</li>
+            <li>Or make one of <strong>your own year</strong>, or one person's to give to them.</li>
+            <li>Saved <strong>on your computer</strong>, as a <strong>private claude.ai page</strong>, or <strong>both</strong>. Run it again in December and the same page updates.</li>
+            <li>Hours come from Tautulli; with Plex alone it counts plays.</li>
+          </ul>
+          <p class="ask-line">Ask Claude: <q>Make our Plex year in review</q> or <q>Show me my year on Plex</q></p>
+        </div>
+
+        <figure class="mock demo reveal" aria-label="Example: a year-in-review page">
+          <div class="mock-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><em>Your browser</em></div>
+          <div class="shot"><img src="screens/year-in-review.jpg" width="900" height="1449" loading="lazy" alt="A real Cinemetric year-in-review page in dark mode for 2025: hours watched, plays, titles, days with something on and how many people watched, a bar chart of hours per month with the busiest month marked and the busiest day, the split between movies, TV and music, the most watched movies, shows and music artists with how many people played each, and a note that titles only one person watched were left out. No names appear on it."></div>
+          <figcaption>A real recap page, filled with made-up sample data. Scroll inside it to see more.</figcaption>
+        </figure>
+      </div>
+    </section>
+
     <!-- ============ SKILL: DASHBOARD ============ -->
-    <section class="section feature" id="skill-dashboard" aria-labelledby="f-dash">
+    <section class="section feature flip" id="skill-dashboard" aria-labelledby="f-dash">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#a382ff">dashboard</p>

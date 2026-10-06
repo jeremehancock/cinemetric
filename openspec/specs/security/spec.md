@@ -66,6 +66,11 @@ creates SHALL NOT make any network requests when opened.
 - **THEN** the only network requests go to the configured Plex server and, if set up, the configured
   Tautulli address
 
+#### Scenario: Building a year in review
+- **WHEN** `year_in_review.py` runs
+- **THEN** the only network requests go to the configured Plex server and, if set up, the configured
+  Tautulli address
+
 #### Scenario: Listing users and shares
 - **WHEN** `users_and_shares.py` runs
 - **THEN** the only network requests go to the configured Plex server, the configured Tautulli address
@@ -73,6 +78,10 @@ creates SHALL NOT make any network requests when opened.
 
 #### Scenario: Opening the dashboard
 - **WHEN** the user opens the dashboard page in a browser
+- **THEN** the browser makes no network requests
+
+#### Scenario: Opening a recap page
+- **WHEN** the user opens a year-in-review page in a browser
 - **THEN** the browser makes no network requests
 
 #### Scenario: Saving, listing or forgetting snapshots
@@ -112,11 +121,11 @@ real terminal, so Claude can't run it.
 ### Requirement: Private files
 Cinemetric's config folder, data folder and snapshots folders SHALL be created readable only by the
 user (`700`), and every file holding settings or report data (config, in-progress sign-in, Tautulli
-form status, dashboard page, dashboard state and snapshots) SHALL be created readable only by the user
-(`600`) from the start, with no moment where looser permissions apply. On Linux and macOS, a config
-file owned by another user or accessible to other users SHALL be refused, with the `chmod 600`
-command that fixes it. The in-progress sign-in file SHALL be deleted once a server is selected or
-setup is cancelled.
+form status, dashboard page, dashboard state, year-in-review pages, year-in-review state and
+snapshots) SHALL be created readable only by the user (`600`) from the start, with no moment where looser permissions apply. On
+Linux and macOS, a config file owned by another user or accessible to other users SHALL be refused,
+with the `chmod 600` command that fixes it. The in-progress sign-in file SHALL be deleted once a
+server is selected or setup is cancelled.
 
 #### Scenario: Config readable by others
 - **WHEN** a script finds `config.json` with group or other permissions
@@ -125,6 +134,10 @@ setup is cancelled.
 #### Scenario: A new snapshot
 - **WHEN** `changes.py` saves the first snapshot for a server
 - **THEN** the `snapshots` folder and the server's folder are `700` and the file is `600`
+
+#### Scenario: A new recap page
+- **WHEN** `year_in_review.py` writes a recap page
+- **THEN** the file is `600` and the data folder is `700`
 
 ### Requirement: Encrypted connections by default
 HTTPS certificates SHALL be checked unless the user explicitly turned checking off: `"verify_tls":
@@ -211,4 +224,24 @@ SHALL HTML-escape it.
 - **WHEN** a snapshot's title contains a newline and is 500 characters long
 - **THEN** a title from it in `since_snapshot` has the newline replaced with a space and is cut to
   120 characters
+
+### Requirement: Recap pages go online only by choice
+A year-in-review page SHALL be published to claude.ai only when the user has chosen `online` or
+`both` for recaps, and only as a private page (visible to the user alone until they choose to share
+it). The year-in-review script SHALL never publish anything itself; it only saves the user's choice
+and each recap's link. The published page is the same file as the local one, so it keeps the same
+rules: no scripts, no outside requests, every server value HTML-escaped, and no person's name in a
+whole-server recap.
+
+#### Scenario: Local only
+- **WHEN** the saved recap destination is `local`
+- **THEN** the recap is not published, and no saved online page is updated
+
+#### Scenario: Never chosen
+- **WHEN** no recap destination has been saved
+- **THEN** nothing is published until the user chooses `online` or `both`
+
+#### Scenario: A whole-server recap online
+- **WHEN** the destination is `both` and a whole-server recap is built
+- **THEN** neither the local file nor the online page contains any person's name
 

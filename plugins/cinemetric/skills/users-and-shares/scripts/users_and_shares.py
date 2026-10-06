@@ -28,7 +28,7 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 
-VERSION = "0.21.0"
+VERSION = "0.22.0"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 MAX_PLEX_TV_BYTES = 5 * 1024 * 1024

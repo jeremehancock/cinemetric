@@ -40,7 +40,7 @@ These came out of an explore session on 2026-10-05 and apply to every idea below
     3. Go one level deeper     (subtitles and audio per file are done in playback-check)
 ```
 
-Suggested order: open. (Snapshots and "what changed" were done on 2026-10-06, and so were dashboard
+Suggested order: open. (Snapshots and "what changed" were done on 2026-10-06, and so were `year-in-review`, dashboard
 trends, `episode-gaps`, the former `tv-completeness` idea, and `playback-check`, which turned out cheap: Plex
 returns subtitle and audio details for 100 titles per request, so no sampling was needed. The `server-health` settings checks, the
 `watch-activity` one person, busiest moment and unfinished titles additions, the `unwatched` skill,
@@ -53,24 +53,7 @@ track.)
 
 ## New skills
 
-### `year-in-review`
-
-**What:** a yearly recap page: top titles, total hours watched, busiest months, most active people,
-favorite genres. Built with the same page machinery as `dashboard`, saved locally and/or as a private
-claude.ai page.
-
-**Data:** Tautulli history gives the richest version; Plex's own history works with less detail
-(plays only, no watch time), as in `watch-activity`.
-
-**Privacy note:** the security spec's "other people's private details stay private" rule covers
-emails, access tokens and account ids, not viewing habits, and `watch-activity` already shows
-per-person activity. So this doesn't conflict with a spec. It is still a tone decision: a recap that
-singles people out reads differently from a stats report, especially if the page gets shared.
-
-**Open questions:**
-- Per-person sections by default, or only when asked?
-- Calendar year only, or any date range?
-- Could this just be a `dashboard` mode instead of a new skill?
+None right now.
 
 ---
 
@@ -83,6 +66,16 @@ Snapshots and dashboard trends are described in `openspec/specs/changes` and
 
 **Open questions:** should the dashboard's "Since" section compare with about a week ago instead of
 the previous day? Should snapshots be opt-out for people who don't want anything saved?
+
+### `year-in-review`
+
+Left out of the first version (see `openspec/changes/archive/*-year-in-review/design.md`):
+
+- **Favorite genres.** Genres aren't in Tautulli's history rows or Plex's history entries, so each
+  title needs a metadata lookup; a batched one like `playback-check`'s would keep it cheap.
+- **Compared with last year.** The same counting run twice; easy once someone asks.
+- **Hours from Plex alone.** Finished plays times each title's length, if that can be had without one
+  request per title.
 
 ### `watch-activity`
 

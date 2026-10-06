@@ -8,3 +8,7 @@ shipped to users or published online.
   (`website/screens/dashboard.jpg`) from made-up sample data and updates its height in
   `website/index.html`. Run `python3 tools/dashboard_screenshot.py` after changing how the
   dashboard looks. Needs Google Chrome or Chromium, and Pillow (`pip install pillow`).
+- **`year_in_review_screenshot.py`**: retakes the website's year-in-review screenshot
+  (`website/screens/year-in-review.jpg`) from made-up sample plays and updates its height in
+  `website/index.html`. Run `python3 tools/year_in_review_screenshot.py` after changing how the recap
+  page looks. Same needs as the dashboard tool.

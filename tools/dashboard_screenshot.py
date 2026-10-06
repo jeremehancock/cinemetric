@@ -211,6 +211,44 @@ episode_gaps = {
 }
 
 
+def transcoder(label, plays, transcodes, reasons, **names):
+    return dict(names, plays=plays, transcodes=transcodes,
+                reasons=dict({"subtitles": 0, "video": 0, "audio": 0, "unknown": 0, "not_checked": 0}, **reasons))
+
+
+playback = {
+    "bitrate_limit": {"kbps": 12000, "source": "server"},
+    "limits": ("These are likely causes on common devices, not a promise: what each device can play differs. "
+               "Image-based subtitles only cause a conversion while subtitles are on, and the bitrate limit "
+               "only affects people watching from outside the home network."),
+    "libraries": [
+        {"name": "Movies", "type": "movie", "titles": 1284, "files": 1302, "files_flagged": 611,
+         "image_subtitles": 342, "truehd_audio": 88, "dts_audio": 297, "over_bitrate_limit": 154, "listed": []},
+        {"name": "TV Shows", "type": "show", "titles": 8640, "files": 8640, "files_flagged": 412,
+         "image_subtitles": 286, "truehd_audio": 0, "dts_audio": 131, "over_bitrate_limit": 23, "listed": []},
+    ],
+    "skipped_libraries": [{"name": "Music", "type": "artist"}],
+    "totals": {"titles": 9924, "files": 9942, "files_flagged": 1023, "image_subtitles": 628,
+               "truehd_audio": 88, "dts_audio": 428, "over_bitrate_limit": 177},
+    "playback_history": {
+        "days": 90, "plays": 1146, "direct_play": 1061, "direct_stream": 21, "transcodes": 64,
+        "devices": [
+            transcoder("", 41, 23, {"subtitles": 15, "video": 4, "audio": 6},
+                       device="Living Room", app="Plex for Roku", platform="Roku"),
+            transcoder("", 58, 14, {"video": 9, "audio": 5}, device="Den TV", app="Plex for Fire TV",
+                       platform="Android"),
+            transcoder("", 32, 9, {"audio": 9}, device="Kitchen Tablet", app="Plex for iOS", platform="iOS"),
+            transcoder("", 77, 6, {"video": 6}, device="Office", app="Plex Web", platform="Chrome"),
+        ],
+        "people": [
+            transcoder("", 96, 27, {"subtitles": 15, "video": 6, "audio": 7}, person="sam"),
+            transcoder("", 140, 18, {"video": 11, "audio": 7}, person="alex"),
+            transcoder("", 74, 11, {"audio": 9, "video": 2}, person="jordan"),
+        ],
+    },
+}
+
+
 # ---------------------------------------------------------------- page and screenshot
 
 def load_dashboard():
@@ -224,7 +262,7 @@ def render_page(path):
     db = load_dashboard()
     db.friendly_now = lambda: "Sun Oct 4, 2026 at 7:30 PM"
     data = {"library": library, "health": health, "watch": watch, "sharing": sharing, "unwatched": unwatched,
-            "episode_gaps": episode_gaps}
+            "episode_gaps": episode_gaps, "playback": playback}
     title, body = db.render(data, {}, hide_names=False)
     page = db.full_page(title, body).replace('<html lang="en">', '<html lang="en" data-theme="dark">')
     with open(path, "w", encoding="utf-8") as f:

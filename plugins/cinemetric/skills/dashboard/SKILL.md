@@ -1,6 +1,6 @@
 ---
 name: dashboard
-description: "Build or refresh the Plex dashboard: one HTML page combining library stats, server health, watch activity, titles nobody has finished in a while, gaps in TV episodes, and who the server is shared with, with charts. Saved on this computer, as a private claude.ai page, or both, and updated in place each time. Read-only. Use when the user asks for a Plex dashboard or overview page, to update or refresh it, or to change where it's saved or published."
+description: "Build or refresh the Plex dashboard: one HTML page combining library stats, server health, watch activity, titles nobody has finished in a while, gaps in TV episodes, files likely to transcode and the devices that transcode most, and who the server is shared with, with charts. Saved on this computer, as a private claude.ai page, or both, and updated in place each time. Read-only. Use when the user asks for a Plex dashboard or overview page, to update or refresh it, or to change where it's saved or published."
 argument-hint: "[--hide-names | --show-names]"
 allowed-tools: Read, Artifact, Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/dashboard.py *), Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/dashboard.py), Bash(python ${CLAUDE_SKILL_DIR}/scripts/dashboard.py *), Bash(python ${CLAUDE_SKILL_DIR}/scripts/dashboard.py)
 ---
@@ -51,6 +51,12 @@ Script: `python3 ${CLAUDE_SKILL_DIR}/scripts/dashboard.py` (prints JSON; errors 
    missing between others); it can get one line of facts, such as how many shows have gaps. It can't
    see episodes after the last one on the server, so never call a show complete, and never suggest
    downloading or replacing anything. It doesn't affect the overall status.
+   The Playback section counts files likely to be transcoded on some devices (image-based subtitles,
+   TrueHD or DTS audio, above the remote streaming limit) and, with Tautulli, the devices and people
+   whose plays were transcoded most in the last 90 days. It can get one line of facts. Say "likely",
+   never "will", and never suggest converting or replacing files. When names are hidden, devices are
+   shown only by app and platform and the people list is left out. It doesn't affect the overall
+   status.
    Near the top, a "Since <date>" section shows what changed since a snapshot from an earlier day
    (titles added and removed, files Plex can't find now, Plex updates, people added or removed). One
    highlight can come from it. On the first build it says the first snapshot was saved; changes show
@@ -105,8 +111,8 @@ what the reason says.
 
 - **`NOT_CONFIGURED`**: Cinemetric isn't connected yet. Use the `cinemetric:setup` skill first.
 - A missing section means one report failed; explain its reason in plain words (same errors as the
-  `library-report`, `server-health`, `watch-activity`, `users-and-shares`, `unwatched` and
-  `episode-gaps` skills). The rest of the dashboard still works.
+  `library-report`, `server-health`, `watch-activity`, `users-and-shares`, `unwatched`,
+  `episode-gaps` and `playback-check` skills). The rest of the dashboard still works.
 - **`sections_missing.sharing` starting with `OWNER_ONLY`**: they're connected to a server someone
   shared with them. Only the owner can see who a server is shared with, so that section will always be
   empty for them. Nothing is broken.

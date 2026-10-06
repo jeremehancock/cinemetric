@@ -35,13 +35,14 @@ These came out of an explore session on 2026-10-05 and apply to every idea below
                               dashboard
 
   The ideas below fall into three groups:
-    1. Join areas together     (playback-check)
+    1. Join areas together     (playback-check is done)
     2. Remember over time      (weekly digest, dashboard trends; snapshots are done)
-    3. Go one level deeper     (per-item details: subtitles, audio)
+    3. Go one level deeper     (subtitles and audio per file are done in playback-check)
 ```
 
-Suggested order: open. (Snapshots and "what changed" were done on 2026-10-06, and so was
-`episode-gaps`, the former `tv-completeness` idea. The `server-health` settings checks, the
+Suggested order: open. (Snapshots and "what changed" were done on 2026-10-06, and so were
+`episode-gaps`, the former `tv-completeness` idea, and `playback-check`, which turned out cheap: Plex
+returns subtitle and audio details for 100 titles per request, so no sampling was needed. The `server-health` settings checks, the
 `watch-activity` one person, busiest moment and unfinished titles additions, the `unwatched` skill,
 `library-report` growth by month with its dashboard chart, and the `what-to-watch` skill were done on
 2026-10-05; `library-report` music details (lossless vs lossy, missing artwork) on 2026-10-06. Hi-res
@@ -51,33 +52,6 @@ track.)
 ---
 
 ## New skills
-
-### `playback-check`
-
-**What:** files across the library that are likely to transcode on common devices, and why:
-- image-based subtitles (PGS, VOBSUB), which force Plex to draw subtitles into the video
-- TrueHD or DTS audio, which many TVs and streaming sticks can't play directly
-- bitrates above the remote streaming limit the server is set to
-- with Tautulli: which devices and users transcode most often, from past plays.
-
-**Why:** `server-health` explains transcoding that is happening *right now*. This answers the
-follow-up question: "why does this keep happening, and which files will cause it?"
-
-**Data:**
-- Subtitle and audio stream details are **not** in the library listing. They come from each title's
-  detail page, `/library/metadata/<id>` **(to verify that the listing really lacks them)**. That's one
-  request per title.
-- The remote streaming limit is in `/:/prefs`, which `server-health` already reads.
-- Tautulli history includes the transcode decision per play.
-
-**The big catch:** cost. One request per title means thousands of requests on a big library. Options:
-limit to one library at a time, sample (e.g. the 200 largest files), or only check titles added
-recently. Snapshots could cache results so later runs only check new titles.
-
-**Open questions:**
-- Which device rules are worth encoding, given clients vary a lot? Keep it to the few universal
-  causes (image subtitles, lossless audio, bitrate) rather than a device database.
-- Should this be part of `server-health` instead of its own skill?
 
 ### `year-in-review`
 

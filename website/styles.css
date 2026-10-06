@@ -208,10 +208,10 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
 
 /* ---------- Shelf ---------- */
 .shelf-section { padding-top: 40px; }
-/* Every card is the same size; nine skills make three full rows of three. A short last row would be
-   centered under the full ones. */
+/* Every card is the same size. Eleven skills can't fill every row, so the short last row is centered
+   under the full ones: 4, 4 and 3 on wide screens. */
 .shelf {
-  --per-row: 5; --gap: 16px;
+  --per-row: 4; --gap: 16px;
   list-style: none; margin: 0; padding: 0;
   display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap);
 }
@@ -411,9 +411,9 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
 .js .reveal.in { opacity: 1; transform: none; }
 
 /* ---------- Responsive ---------- */
-/* Ten skills: two rows of five, or five rows of two when five would squeeze the names. */
+/* Rows of three (3, 3, 3 and 2) when four would squeeze the names. */
 @media (max-width: 1140px) {
-  .shelf { --per-row: 2; }
+  .shelf { --per-row: 3; }
 }
 @media (max-width: 1000px) {
   .poster { min-height: 180px; }

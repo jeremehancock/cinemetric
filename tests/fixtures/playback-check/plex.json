@@ -1,0 +1,1296 @@
+{
+ "_note": "Made-up Plex answers for playback-check tests. Titles, paths and values are invented.",
+ "/": {
+  "MediaContainer": {
+   "friendlyName": "Test Server",
+   "version": "1.41.0.0000"
+  }
+ },
+ "/library/sections": {
+  "MediaContainer": {
+   "Directory": [
+    {
+     "key": "1",
+     "title": "Movies",
+     "type": "movie"
+    },
+    {
+     "key": "2",
+     "title": "TV Shows",
+     "type": "show"
+    },
+    {
+     "key": "3",
+     "title": "Music",
+     "type": "artist"
+    }
+   ]
+  }
+ },
+ "prefs_with_limit": {
+  "MediaContainer": {
+   "Setting": [
+    {
+     "id": "WanPerStreamMaxUploadRate",
+     "value": 12000
+    },
+    {
+     "id": "PlexOnlineToken",
+     "value": "pref-secret-value"
+    }
+   ]
+  }
+ },
+ "prefs_no_limit": {
+  "MediaContainer": {
+   "Setting": [
+    {
+     "id": "WanPerStreamMaxUploadRate",
+     "value": 0
+    },
+    {
+     "id": "PlexOnlineToken",
+     "value": "pref-secret-value"
+    }
+   ]
+  }
+ },
+ "movies": [
+  {
+   "ratingKey": "1001",
+   "title": "Image Only",
+   "year": 2001,
+   "type": "movie",
+   "Media": [
+    {
+     "id": 1,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 1,
+       "file": "/media/secret-path/file-1.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "1002",
+   "title": "Image With Text",
+   "year": 2002,
+   "type": "movie",
+   "Media": [
+    {
+     "id": 2,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 2,
+       "file": "/media/secret-path/file-2.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "1003",
+   "title": "Forced Image",
+   "year": 2003,
+   "type": "movie",
+   "Media": [
+    {
+     "id": 3,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 3,
+       "file": "/media/secret-path/file-3.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "1004",
+   "title": "Default Image",
+   "year": 2004,
+   "type": "movie",
+   "Media": [
+    {
+     "id": 4,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 4,
+       "file": "/media/secret-path/file-4.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "1005",
+   "title": "Sidecar Sup",
+   "year": 2005,
+   "type": "movie",
+   "Media": [
+    {
+     "id": 5,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 5,
+       "file": "/media/secret-path/file-5.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "1006",
+   "title": "Text Only",
+   "year": 2006,
+   "type": "movie",
+   "Media": [
+    {
+     "id": 6,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 6,
+       "file": "/media/secret-path/file-6.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "1007",
+   "title": "TrueHD Only",
+   "year": 2007,
+   "type": "movie",
+   "Media": [
+    {
+     "id": 7,
+     "videoResolution": "1080",
+     "bitrate": 30000,
+     "audioCodec": "truehd",
+     "Part": [
+      {
+       "id": 7,
+       "file": "/media/secret-path/file-7.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "1008",
+   "title": "DTS With AC3",
+   "year": 2008,
+   "type": "movie",
+   "Media": [
+    {
+     "id": 8,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "dca-ma",
+     "Part": [
+      {
+       "id": 8,
+       "file": "/media/secret-path/file-8.mkv",
+       "size": 4000000000
+      }
+     ],
+     "audioProfile": "ma"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1009",
+   "title": "EAC3 Main",
+   "year": 2009,
+   "type": "movie",
+   "Media": [
+    {
+     "id": 9,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "eac3",
+     "Part": [
+      {
+       "id": 9,
+       "file": "/media/secret-path/file-9.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "1010",
+   "title": "Two Versions",
+   "year": 2010,
+   "type": "movie",
+   "Media": [
+    {
+     "id": 10,
+     "videoResolution": "4k",
+     "bitrate": 40000,
+     "audioCodec": "truehd",
+     "Part": [
+      {
+       "id": 10,
+       "file": "/media/secret-path/file-10.mkv",
+       "size": 60000000000
+      }
+     ]
+    },
+    {
+     "id": 11,
+     "videoResolution": "1080",
+     "bitrate": 8000,
+     "audioCodec": "ac3",
+     "Part": [
+      {
+       "id": 11,
+       "file": "/media/secret-path/file-11.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "1011",
+   "title": "Gone File",
+   "year": 2011,
+   "type": "movie",
+   "Media": [
+    {
+     "id": 12,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "dca",
+     "Part": [
+      {
+       "id": 12,
+       "file": "/media/secret-path/file-12.mkv",
+       "size": 4000000000
+      }
+     ],
+     "deletedAt": 1700000000
+    }
+   ]
+  },
+  {
+   "ratingKey": "1012",
+   "title": "No Details",
+   "year": 2012,
+   "type": "movie",
+   "Media": [
+    {
+     "id": 13,
+     "videoResolution": "1080",
+     "bitrate": 5000,
+     "audioCodec": "dca",
+     "Part": [
+      {
+       "id": 13,
+       "file": "/media/secret-path/file-13.mkv",
+       "size": 4000000000
+      }
+     ],
+     "audioProfile": "dts"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1013",
+   "title": "Clean Movie",
+   "year": 2013,
+   "type": "movie",
+   "Media": [
+    {
+     "id": 14,
+     "videoResolution": "1080",
+     "bitrate": 4000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 14,
+       "file": "/media/secret-path/file-14.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "1014",
+   "title": "No Language",
+   "year": 2014,
+   "type": "movie",
+   "Media": [
+    {
+     "id": 15,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 15,
+       "file": "/media/secret-path/file-15.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "details": {
+  "1001": {
+   "ratingKey": "1001",
+   "title": "Image Only",
+   "year": 2001,
+   "Media": [
+    {
+     "id": 1,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 1,
+       "file": "/media/secret-path/file-1.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "pgs",
+         "languageTag": "en",
+         "languageCode": "eng"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1002": {
+   "ratingKey": "1002",
+   "title": "Image With Text",
+   "year": 2002,
+   "Media": [
+    {
+     "id": 2,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 2,
+       "file": "/media/secret-path/file-2.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "pgs",
+         "languageTag": "en",
+         "languageCode": "eng"
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "en",
+         "languageCode": "eng"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1003": {
+   "ratingKey": "1003",
+   "title": "Forced Image",
+   "year": 2003,
+   "Media": [
+    {
+     "id": 3,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 3,
+       "file": "/media/secret-path/file-3.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "pgs",
+         "languageTag": "en",
+         "languageCode": "eng",
+         "forced": true
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "en",
+         "languageCode": "eng"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1004": {
+   "ratingKey": "1004",
+   "title": "Default Image",
+   "year": 2004,
+   "Media": [
+    {
+     "id": 4,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 4,
+       "file": "/media/secret-path/file-4.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "hdmv_pgs_subtitle",
+         "languageTag": "en",
+         "languageCode": "eng",
+         "default": true
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "en",
+         "languageCode": "eng"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1005": {
+   "ratingKey": "1005",
+   "title": "Sidecar Sup",
+   "year": 2005,
+   "Media": [
+    {
+     "id": 5,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 5,
+       "file": "/media/secret-path/file-5.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "PGS",
+         "languageTag": "fr",
+         "languageCode": "fra",
+         "key": "/library/streams/55"
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "en",
+         "languageCode": "eng"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1006": {
+   "ratingKey": "1006",
+   "title": "Text Only",
+   "year": 2006,
+   "Media": [
+    {
+     "id": 6,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 6,
+       "file": "/media/secret-path/file-6.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "en",
+         "languageCode": "eng"
+        },
+        {
+         "streamType": 3,
+         "codec": "ass",
+         "languageTag": "en",
+         "languageCode": "eng"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1007": {
+   "ratingKey": "1007",
+   "title": "TrueHD Only",
+   "year": 2007,
+   "Media": [
+    {
+     "id": 7,
+     "videoResolution": "1080",
+     "bitrate": 30000,
+     "audioCodec": "truehd",
+     "Part": [
+      {
+       "id": 7,
+       "file": "/media/secret-path/file-7.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "truehd",
+         "selected": true,
+         "profile": "dolby truehd + dolby atmos"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1008": {
+   "ratingKey": "1008",
+   "title": "DTS With AC3",
+   "year": 2008,
+   "Media": [
+    {
+     "id": 8,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "dca-ma",
+     "Part": [
+      {
+       "id": 8,
+       "file": "/media/secret-path/file-8.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "dca",
+         "selected": true,
+         "profile": "ma"
+        },
+        {
+         "streamType": 2,
+         "codec": "ac3"
+        }
+       ]
+      }
+     ],
+     "audioProfile": "ma"
+    }
+   ]
+  },
+  "1009": {
+   "ratingKey": "1009",
+   "title": "EAC3 Main",
+   "year": 2009,
+   "Media": [
+    {
+     "id": 9,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "eac3",
+     "Part": [
+      {
+       "id": 9,
+       "file": "/media/secret-path/file-9.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "eac3",
+         "default": true
+        },
+        {
+         "streamType": 2,
+         "codec": "truehd"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1010": {
+   "ratingKey": "1010",
+   "title": "Two Versions",
+   "year": 2010,
+   "Media": [
+    {
+     "id": 10,
+     "videoResolution": "4k",
+     "bitrate": 40000,
+     "audioCodec": "truehd",
+     "Part": [
+      {
+       "id": 10,
+       "file": "/media/secret-path/file-10.mkv",
+       "size": 60000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "truehd",
+         "selected": true
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": 11,
+     "videoResolution": "1080",
+     "bitrate": 8000,
+     "audioCodec": "ac3",
+     "Part": [
+      {
+       "id": 11,
+       "file": "/media/secret-path/file-11.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "ac3",
+         "selected": true
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1011": {
+   "ratingKey": "1011",
+   "title": "Gone File",
+   "year": 2011,
+   "Media": [
+    {
+     "id": 12,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "dca",
+     "Part": [
+      {
+       "id": 12,
+       "file": "/media/secret-path/file-12.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "dca",
+         "selected": true
+        }
+       ]
+      }
+     ],
+     "deletedAt": 1700000000
+    }
+   ]
+  },
+  "1013": {
+   "ratingKey": "1013",
+   "title": "Clean Movie",
+   "year": 2013,
+   "Media": [
+    {
+     "id": 14,
+     "videoResolution": "1080",
+     "bitrate": 4000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 14,
+       "file": "/media/secret-path/file-14.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "selected": true
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1014": {
+   "ratingKey": "1014",
+   "title": "No Language",
+   "year": 2014,
+   "Media": [
+    {
+     "id": 15,
+     "videoResolution": "1080",
+     "bitrate": 6000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 15,
+       "file": "/media/secret-path/file-15.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "vobsub",
+         "languageTag": null,
+         "languageCode": null
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "en",
+         "languageCode": "eng"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "3001": {
+   "ratingKey": "3001",
+   "grandparentRatingKey": "2001",
+   "Media": [
+    {
+     "id": 100,
+     "videoResolution": "1080",
+     "bitrate": 3000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 100,
+       "file": "/media/secret-path/file-100.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "pgs",
+         "languageTag": "en",
+         "languageCode": "eng"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "3002": {
+   "ratingKey": "3002",
+   "grandparentRatingKey": "2001",
+   "Media": [
+    {
+     "id": 101,
+     "videoResolution": "1080",
+     "bitrate": 3000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 101,
+       "file": "/media/secret-path/file-101.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "pgs",
+         "languageTag": "en",
+         "languageCode": "eng"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "3003": {
+   "ratingKey": "3003",
+   "grandparentRatingKey": "2001",
+   "Media": [
+    {
+     "id": 102,
+     "videoResolution": "1080",
+     "bitrate": 3000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 102,
+       "file": "/media/secret-path/file-102.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "en",
+         "languageCode": "eng"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "3004": {
+   "ratingKey": "3004",
+   "grandparentRatingKey": "2002",
+   "Media": [
+    {
+     "id": 103,
+     "videoResolution": "1080",
+     "bitrate": 3000,
+     "audioCodec": "dca",
+     "Part": [
+      {
+       "id": 103,
+       "file": "/media/secret-path/file-103.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "dca",
+         "selected": true
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "3005": {
+   "ratingKey": "3005",
+   "grandparentRatingKey": "2002",
+   "Media": [
+    {
+     "id": 104,
+     "videoResolution": "1080",
+     "bitrate": 3000,
+     "audioCodec": "dca",
+     "Part": [
+      {
+       "id": 104,
+       "file": "/media/secret-path/file-104.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "dca",
+         "selected": true
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "3006": {
+   "ratingKey": "3006",
+   "grandparentRatingKey": "2002",
+   "Media": [
+    {
+     "id": 105,
+     "videoResolution": "1080",
+     "bitrate": 3000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 105,
+       "file": "/media/secret-path/file-105.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "selected": true
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "3007": {
+   "ratingKey": "3007",
+   "grandparentRatingKey": "2003",
+   "Media": [
+    {
+     "id": 106,
+     "videoResolution": "1080",
+     "bitrate": 3000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 106,
+       "file": "/media/secret-path/file-106.mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "selected": true
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "shows": [
+  {
+   "ratingKey": "2001",
+   "title": "Subtitled Show",
+   "year": 2010,
+   "type": "show"
+  },
+  {
+   "ratingKey": "2002",
+   "title": "DTS Show",
+   "year": 2012,
+   "type": "show"
+  },
+  {
+   "ratingKey": "2003",
+   "title": "Clean Show",
+   "year": 2014,
+   "type": "show"
+  }
+ ],
+ "episodes": [
+  {
+   "ratingKey": "3001",
+   "grandparentRatingKey": "2001",
+   "grandparentTitle": "Subtitled Show",
+   "title": "Episode 0",
+   "type": "episode",
+   "Media": [
+    {
+     "id": 100,
+     "videoResolution": "1080",
+     "bitrate": 3000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 100,
+       "file": "/media/secret-path/file-100.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "3002",
+   "grandparentRatingKey": "2001",
+   "grandparentTitle": "Subtitled Show",
+   "title": "Episode 1",
+   "type": "episode",
+   "Media": [
+    {
+     "id": 101,
+     "videoResolution": "1080",
+     "bitrate": 3000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 101,
+       "file": "/media/secret-path/file-101.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "3003",
+   "grandparentRatingKey": "2001",
+   "grandparentTitle": "Subtitled Show",
+   "title": "Episode 2",
+   "type": "episode",
+   "Media": [
+    {
+     "id": 102,
+     "videoResolution": "1080",
+     "bitrate": 3000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 102,
+       "file": "/media/secret-path/file-102.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "3004",
+   "grandparentRatingKey": "2002",
+   "grandparentTitle": "DTS Show",
+   "title": "Episode 3",
+   "type": "episode",
+   "Media": [
+    {
+     "id": 103,
+     "videoResolution": "1080",
+     "bitrate": 3000,
+     "audioCodec": "dca",
+     "Part": [
+      {
+       "id": 103,
+       "file": "/media/secret-path/file-103.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "3005",
+   "grandparentRatingKey": "2002",
+   "grandparentTitle": "DTS Show",
+   "title": "Episode 4",
+   "type": "episode",
+   "Media": [
+    {
+     "id": 104,
+     "videoResolution": "1080",
+     "bitrate": 3000,
+     "audioCodec": "dca",
+     "Part": [
+      {
+       "id": 104,
+       "file": "/media/secret-path/file-104.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "3006",
+   "grandparentRatingKey": "2002",
+   "grandparentTitle": "DTS Show",
+   "title": "Episode 5",
+   "type": "episode",
+   "Media": [
+    {
+     "id": 105,
+     "videoResolution": "1080",
+     "bitrate": 3000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 105,
+       "file": "/media/secret-path/file-105.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "3007",
+   "grandparentRatingKey": "2003",
+   "grandparentTitle": "Clean Show",
+   "title": "Episode 6",
+   "type": "episode",
+   "Media": [
+    {
+     "id": 106,
+     "videoResolution": "1080",
+     "bitrate": 3000,
+     "audioCodec": "aac",
+     "Part": [
+      {
+       "id": 106,
+       "file": "/media/secret-path/file-106.mkv",
+       "size": 4000000000
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

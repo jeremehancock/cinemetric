@@ -4,7 +4,8 @@
 
 Say what changed on a Plex server since an earlier day. The script runs the library-report,
 server-health and users-and-shares scripts, prints the "since the last snapshot" part each of them
-works out, and saves, prunes, lists and deletes the daily snapshots they compare with. Script:
+works out, and saves, prunes, lists and deletes the snapshots they compare with (saved only when
+this script or the dashboard runs, at most one per server per day). Script:
 `skills/changes/scripts/changes.py`. How snapshots are chosen and read is in the conventions and
 security specs; how Claude presents the result is in the skill's `SKILL.md`.
 

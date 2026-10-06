@@ -75,8 +75,8 @@ window was read (`complete`).
 `libraries_changed` (`gained` and `lost`, or `from` / `to` when either side is "all"),
 `downloads_changed` (`to` is the new setting) and `email_invites_change`. When `since_snapshot` is
 `null`, there is no earlier snapshot for this server. Don't mention it, unless the user asked what
-changed: then say the `cinemetric:changes` skill (or building the dashboard) saves a daily snapshot,
-and changes show from the next day.
+changed: then say the `cinemetric:changes` skill (or building the dashboard) saves a snapshot each
+time it runs, and changes show from a later day's run.
 
 If the user asked a specific question ("what can Alex see?", "who can see my Kids library?", "who has
 pending invites?"), answer that first and directly, then offer the full overview. Otherwise present,

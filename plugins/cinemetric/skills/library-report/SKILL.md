@@ -110,8 +110,8 @@ lists `added`, `removed`, `became_unavailable` (files Plex can't find now), `ava
 for TV `episodes_added` / `episodes_removed` (shows with a `count`). Each list has a `<name>_count`
 with the full number and names up to 25. When `since_snapshot` is `null`, there is no earlier snapshot
 for this server. Don't mention it, unless the user asked what changed: then say the
-`cinemetric:changes` skill (or building the dashboard) saves a daily snapshot, and changes show from
-the next day.
+`cinemetric:changes` skill (or building the dashboard) saves a snapshot each time it runs, and changes
+show from a later day's run.
 
 Present, in this order:
 

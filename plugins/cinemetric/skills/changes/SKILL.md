@@ -1,6 +1,6 @@
 ---
 name: changes
-description: "Say what changed on a Plex Media Server since last time: titles added and removed in each library, new episodes, files Plex can no longer find (and ones that came back), new, removed or renamed libraries, Plex updates and remote access changes, and people who were given or lost access, accepted an invite, or can now see different libraries. Saves a small private snapshot on this computer each day to compare with (kept 90 days). Read-only toward Plex. Use when the user asks what changed on Plex, what's new since yesterday or last week or this month, whether anything went missing or disappeared from Plex, whether Plex updated, who was added to or removed from their Plex lately, or to list or delete Cinemetric's saved snapshots."
+description: "Say what changed on a Plex Media Server since last time: titles added and removed in each library, new episodes, files Plex can no longer find (and ones that came back), new, removed or renamed libraries, Plex updates and remote access changes, and people who were given or lost access, accepted an invite, or can now see different libraries. Each run saves a small private snapshot on this computer (at most one per day, kept 90 days) to compare with next time; nothing runs in the background. Read-only toward Plex. Use when the user asks what changed on Plex, what's new since yesterday or last week or this month, whether anything went missing or disappeared from Plex, whether Plex updated, who was added to or removed from their Plex lately, or to list or delete Cinemetric's saved snapshots."
 argument-hint: "[--since DAYS] | list | forget"
 allowed-tools: Read, Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/changes.py *), Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/changes.py), Bash(python ${CLAUDE_SKILL_DIR}/scripts/changes.py *), Bash(python ${CLAUDE_SKILL_DIR}/scripts/changes.py)
 ---
@@ -80,15 +80,19 @@ Present, in this order, and skip anything that didn't change:
 4. **People**: who was added or removed, accepted invites, and changes to libraries or downloads.
 
 **First run.** When `library`, `health` and `sharing` are all `null` and `snapshot_saved` is set,
-this was the first snapshot: say Cinemetric saved today's snapshot and can show what changed from
-tomorrow on (or after the next run on another day). Offer the full library report meanwhile.
+this was the first snapshot: say Cinemetric saved today's snapshot, and the next time the user asks
+on a later day it can show what changed since today. Make clear nothing runs in the background: a
+snapshot is only saved when they ask what changed or build the dashboard. Offer the full library report meanwhile.
 
 Keep it short and readable: plain English, no raw JSON, no file paths. Mention once, only on a first
 run, that the dashboard saves snapshots too and shows the same changes.
 
 ## Snapshots
 
-- One small private file per server per day, in Cinemetric's data folder (`~/.local/share/cinemetric`
+- A snapshot is saved only when this skill runs or the dashboard is built; nothing runs in the
+  background. A later run on the same day updates that day's file, so there is at most one per server
+  per day. "What changed this week" only covers a week if one of them ran about a week ago.
+- Each is a small private file in Cinemetric's data folder (`~/.local/share/cinemetric`
   on Linux and macOS). Only this skill and the dashboard save them; the reports only read them.
 - They hold titles, library names and sizes, the Plex version, and each person's name, kind, status,
   libraries and download setting. No emails, account ids or watch history.

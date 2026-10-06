@@ -62,7 +62,8 @@ that those parts need the owner's account, not that anything is broken.
 and `to`. For `update_version`, `false` means "no update waiting", so a version → `false` usually
 means the update was installed. When `since_snapshot` is `null`, there is no earlier snapshot for this
 server. Don't mention it, unless the user asked what changed: then say the `cinemetric:changes` skill
-(or building the dashboard) saves a daily snapshot, and changes show from the next day.
+(or building the dashboard) saves a snapshot each time it runs, and changes show from a later day's
+run.
 
 Present, in this order:
 

@@ -78,6 +78,9 @@ the specs leave open. At least the following SHALL be covered:
   listed (cutoff, show added dates), sizes, and the report totals.
 - `what-to-watch`: watched status for movies and shows, each filter, merging the same title across
   libraries, sorting and the limit, and continue watching.
+- `episode-gaps`: what counts as there (duplicates, unavailable files, multi-episode file names,
+  unnumbered episodes), specials, gaps inside a season, late starts, numbering that carries on,
+  missing seasons, date-numbered seasons, sorting and the limit, and the report totals.
 - `changes`: choosing which snapshot to compare with (earlier day, `--since`, missing area, other
   server), saving and merging the same day, pruning after 90 days, `save` without network, `list`,
   `forget`, file permissions, and a report that fails.
@@ -109,6 +112,11 @@ the specs leave open. At least the following SHALL be covered:
 #### Scenario: A snapshot copies more about people than allowed
 - **WHEN** a change to `users_and_shares.py` puts a last played date or email into the sharing
   snapshot area
+- **THEN** a test fails
+
+#### Scenario: Specials show up as gaps
+- **WHEN** a change to `episode_gaps.py` reports missing episodes for season 0, or for a season that
+  continues the previous season's numbering
 - **THEN** a test fails
 
 ### Requirement: Tests run on GitHub

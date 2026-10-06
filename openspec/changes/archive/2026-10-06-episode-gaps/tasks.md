@@ -48,7 +48,7 @@
 
 ## 7. Verify
 
-- [ ] 7.1 Run against the real server (if available): valid JSON, a few listed gaps checked by hand in Plex, no file paths in the output, run time noted
+- [x] 7.1 Run against the real server (if available): valid JSON, a few listed gaps checked by hand in Plex, no file paths in the output, run time noted
 - [x] 7.2 `openspec validate episode-gaps` passes
 
 ## 8. Release

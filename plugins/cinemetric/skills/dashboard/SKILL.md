@@ -61,6 +61,11 @@ Script: `python3 ${CLAUDE_SKILL_DIR}/scripts/dashboard.py` (prints JSON; errors 
    (titles added and removed, files Plex can't find now, Plex updates, people added or removed). One
    highlight can come from it. On the first build it says the first snapshot was saved; changes show
    from the next day's build.
+   Right after it, a Trends section charts total storage, each library's main count (movies,
+   episodes, albums or photos) and the number of people with access, one point per saved snapshot
+   (up to 90 days). It needs snapshots from two different days; until then it says so in one line.
+   Snapshots only exist for days the dashboard or the changes skill ran, so gaps are normal. It
+   doesn't affect the overall status.
    The Library section has a "Storage added per month" chart for the last 12 months; one of the
    highlights can be how much was added in that time or which month was busiest.
 

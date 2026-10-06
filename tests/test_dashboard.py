@@ -850,3 +850,145 @@ class ChangesSection(OfflineTestCase):
 
     def test_no_section_when_every_report_failed(self):
         self.assertNotIn("What changed", page({}, {"library": "x", "health": "x", "sharing": "x"}))
+
+
+# ---------------------------------------------------------------- trends
+
+def trend_dates(*days_ago):
+    import datetime
+    today = datetime.date(2026, 10, 6)
+    return [(today - datetime.timedelta(days=d)).isoformat() for d in days_ago]
+
+
+def sample_trends(n=30):
+    return {
+        "server_id": "machineidfortests", "days": 90, "dates": trend_dates(*range(n - 1, -1, -1)),
+        "library": {
+            "total_size_gb": [1000.0 + i for i in range(n)],
+            "libraries": [
+                {"key": "1", "name": "Movies", "type": "movie", "size_gb": [500.0] * n,
+                 "counts": {"movies": [100 + i for i in range(n)]}},
+                {"key": "2", "name": "TV", "type": "show", "size_gb": [500.0] * n,
+                 "counts": {"shows": [10] * n, "episodes": [400 + 2 * i for i in range(n)]}},
+                {"key": "3", "name": "DVR", "type": "movie", "size_gb": [0.0] * n, "counts": {"movies": [0] * n}},
+            ],
+        },
+        "sharing": {"people": [3] * (n - 1) + [4], "home": [1] * n, "managed": [0] * n,
+                    "friend": [2] * (n - 1) + [3], "pending": [0] * (n - 1) + [1]},
+    }
+
+
+def page_with_trends(trends, data=None, hide_names=False):
+    return db.full_page(*db.render(data if data is not None else sample_data(), {}, hide_names, None, trends))
+
+
+class TrendsSection(OfflineTestCase):
+    def test_a_month_of_snapshots(self):
+        html = page_with_trends(sample_trends())
+        self.assertIn("<h2>Trends</h2>", html)
+        self.assertIn("30 snapshot days, Sep 7 to Oct 6", html)
+        self.assertIn("Storage over time", html)
+        self.assertIn("1.0 TB → 1.0 TB (+29 GB)", html)
+        self.assertIn("100 → 129 movies (+29)", html)
+        self.assertIn("400 → 458 episodes (+58)", html)
+        self.assertIn("People with access", html)
+        self.assertIn("3 → 4 (+1)", html)
+        self.assertIn("Oct 6: 4 people, 1 pending invite", html)
+        self.assertNotIn("DVR", html.split("<h2>Trends</h2>")[1].split("</section>")[0])  # all zero
+
+    def test_comes_right_after_the_changes_section(self):
+        html = page_with_trends(sample_trends())
+        self.assertLess(html.index("Since Sep 29"), html.index("<h2>Trends</h2>"))
+        self.assertLess(html.index("<h2>Trends</h2>"), html.index("<h2>Server</h2>"))
+
+    def test_only_one_day(self):
+        html = page_with_trends(sample_trends(1))
+        self.assertIn("Trends will show here once there are snapshots from two different days.", html)
+        trends = html.split("<h2>Trends</h2>")[1].split("</section>")[0]
+        self.assertNotIn("<svg", trends)
+
+    def test_no_trends_no_section(self):
+        for trends in (None, "not a dict", {"dates": ["not a date"]}):
+            with self.subTest(trends=trends):
+                self.assertNotIn("<h2>Trends</h2>", page_with_trends(trends))
+
+    def test_points_are_placed_by_date(self):
+        import re
+        trends = {"dates": trend_dates(10, 9, 1), "library": {"total_size_gb": [1.0, 2.0, 3.0]}, "sharing": {}}
+        section = db.trends_section(trends)
+        wide = section[section.index('class="chart chart-wide"'):section.index('class="chart chart-narrow"')]
+        xs = [float(x) for x in re.findall(r'<circle class="trend-dot[^"]*" cx="([\d.]+)"', wide)]
+        self.assertEqual(len(xs), 3)
+        self.assertAlmostEqual((xs[2] - xs[1]) / (xs[1] - xs[0]), 8, places=1)
+
+    def test_null_breaks_the_line(self):
+        trends = {"dates": trend_dates(3, 2, 1, 0), "library": {"total_size_gb": [1.0, None, 3.0, 4.0]},
+                  "sharing": {}}
+        section = db.trends_section(trends)
+        path = section.split('class="trend-line" d="')[1].split('"')[0]
+        self.assertEqual(path.count("M"), 2)
+
+    def test_series_with_one_value_is_left_out(self):
+        trends = sample_trends(5)
+        trends["sharing"]["people"] = [None, None, None, None, 4]
+        html = page_with_trends(trends)
+        self.assertNotIn("People with access", html)
+        self.assertIn("Storage over time", html)
+
+    def test_status_and_needs_a_look_unchanged(self):
+        data = sample_data()
+        data["health"]["worth_a_look"] = []
+        data["library"]["libraries"][0]["media"]["unavailable_files"] = 0
+        data["library"]["libraries"][0]["housekeeping"]["unmatched_count"] = 0
+        trends = sample_trends()
+        trends["library"]["total_size_gb"] = [1000.0 - i for i in range(30)]  # storage went down
+        html = page_with_trends(trends, data)
+        self.assertIn("Healthy", html)
+        self.assertEqual(html.count('class="attn '), 0)
+
+    def test_library_name_is_escaped(self):
+        trends = sample_trends()
+        trends["library"]["libraries"][0]["name"] = EVIL
+        html = page_with_trends(trends)
+        self.assertNotIn("<script", html)
+        self.assertIn("&lt;script&gt;", html)
+
+    def test_names_hidden_changes_nothing(self):
+        section = db.trends_section(sample_trends())
+        self.assertIn(section, page_with_trends(sample_trends(), hide_names=True))
+
+
+class ReadingTrends(OfflineTestCase):
+    def data(self, server_ids=("machineidfortests",) * 3):
+        data = sample_data()
+        for area, server_id in zip(("library", "health", "sharing"), server_ids):
+            data[area]["snapshot"] = {"server_id": server_id, "area": {}}
+        return data
+
+    def test_server_id_from_the_snapshot_blocks(self):
+        self.assertEqual(db.snapshot_server_id(self.data()), "machineidfortests")
+        self.assertIsNone(db.snapshot_server_id(self.data(("a1", "b2", "a1"))))
+        self.assertIsNone(db.snapshot_server_id(sample_data()))
+
+    def test_trends_run_after_save_with_the_server_id(self):
+        replies = [finished(stdout='{"snapshot_saved": "2026-10-06"}'), finished(stdout=json.dumps(sample_trends()))]
+        with mock.patch.object(db, "collect", return_value=(self.data(), {})), \
+                mock.patch.object(db.subprocess, "run", side_effect=replies) as run:
+            result = db.build(argparse.Namespace(output=db.default_output(), hide_names=None))
+        commands = [c.args[0][2:] for c in run.call_args_list]
+        self.assertEqual(commands, [["save"], ["trends", "--server-id", "machineidfortests"]])
+        with open(result["output"], encoding="utf-8") as fh:
+            self.assertIn("<h2>Trends</h2>", fh.read())
+
+    def test_failed_trends_do_not_stop_the_build(self):
+        for reply in (finished(returncode=1, stderr="error: boom"), finished(stdout="not json"),
+                      finished(stdout="[1, 2]"), OSError("no python"),
+                      subprocess.TimeoutExpired(cmd="x", timeout=1)):
+            with self.subTest(reply=reply):
+                replies = [finished(stdout='{"snapshot_saved": null}'), reply]
+                with mock.patch.object(db, "collect", return_value=(self.data(), {})), \
+                        mock.patch.object(db.subprocess, "run", side_effect=replies):
+                    result = db.build(argparse.Namespace(output=db.default_output(), hide_names=None))
+                self.assertEqual(result["sections_missing"], {})
+                with open(result["output"], encoding="utf-8") as fh:
+                    self.assertNotIn("<h2>Trends</h2>", fh.read())

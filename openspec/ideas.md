@@ -36,7 +36,7 @@ These came out of an explore session on 2026-10-05 and apply to every idea below
 
   The ideas below fall into three groups:
     1. Join areas together     (playback-check is done)
-    2. Remember over time      (weekly digest, dashboard trends; snapshots are done)
+    2. Remember over time      (weekly digest; snapshots and dashboard trends are done)
     3. Go one level deeper     (subtitles and audio per file are done in playback-check)
 ```
 
@@ -76,7 +76,7 @@ singles people out reads differently from a stats report, especially if the page
 
 ## Updates to existing skills
 
-### Weekly digest and dashboard trends (built on snapshots)
+### Weekly digest (built on snapshots)
 
 Snapshots themselves were done on 2026-10-06 (the `changes` skill, `since_snapshot` in the library,
 server and sharing reports, and the dashboard's "Since" section). One file per server per day, kept 90
@@ -88,9 +88,8 @@ and hit a limit (background mode couldn't publish claude.ai pages on the test ac
 archived `dashboard-local-or-online` change), so check what scheduled runs can do before promising a
 digest that publishes anything.
 
-**Trends on the dashboard:** the snapshots already hold per-library counts and sizes for each day, so
-a chart of library size or people with access over the last 90 days needs no new data. Reading 90
-files on each build is the cost to check.
+Dashboard trends were done on 2026-10-06 too (`changes.py trends` and the dashboard's Trends section;
+see `openspec/specs/changes` and `openspec/specs/dashboard`).
 
 **Open questions:** should the dashboard's "Since" section compare with about a week ago instead of
 the previous day? Should snapshots be opt-out for people who don't want anything saved?

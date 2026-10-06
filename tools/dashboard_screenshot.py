@@ -249,6 +249,47 @@ playback = {
 }
 
 
+# Trends: one point per snapshot day from Jul 8 to Oct 4, with a few days skipped (snapshots only
+# exist on days the dashboard ran), ending at the library and sharing numbers above.
+def trend_days():
+    import datetime
+    start, end = datetime.date(2026, 7, 8), datetime.date(2026, 10, 4)
+    skipped = {5, 6, 13, 19, 20, 27, 34, 41, 42, 43, 44, 45, 46, 52, 59, 66, 73, 80}
+    return [(start + datetime.timedelta(days=i)).isoformat() for i in range((end - start).days + 1) if i not in skipped]
+
+
+trend_dates = trend_days()
+
+
+def ramp(end, per_day, steps=()):
+    """Values growing by per_day each step to end; steps adds one-off jumps (index, amount)."""
+    n = len(trend_dates)
+    values = [end - per_day * (n - 1 - i) for i in range(n)]
+    for index, amount in steps:
+        values = [v - amount if i < index else v for i, v in enumerate(values)]
+    return [round(v, 1) if isinstance(v, float) else v for v in values]
+
+
+trend_people = [7] * 20 + [8] * 25 + [9] * (len(trend_dates) - 45)
+trends = {
+    "server_id": "samplenas", "days": 90, "dates": trend_dates,
+    "library": {
+        "total_size_gb": ramp(42100.0, 21.0, steps=((30, 260.0), (58, 410.0))),
+        "libraries": [
+            {"key": "1", "name": "Movies", "type": "movie", "size_gb": [], "counts": {"movies": ramp(1284, 1, ((30, 14),))}},
+            {"key": "2", "name": "TV Shows", "type": "show", "size_gb": [],
+             "counts": {"episodes": ramp(6930, 9, ((58, 120),))}},
+            {"key": "3", "name": "Music", "type": "artist", "size_gb": [], "counts": {"albums": ramp(520, 0.4)}},
+            {"key": "4", "name": "Home Videos", "type": "movie", "size_gb": [], "counts": {"movies": ramp(38, 0, ((60, 4),))}},
+        ],
+    },
+    "sharing": {"people": trend_people, "pending": [0] * (len(trend_dates) - 3) + [1] * 3},
+}
+for entry in trends["library"]["libraries"]:
+    for name, values in entry["counts"].items():
+        entry["counts"][name] = [int(v) for v in values]
+
+
 # ---------------------------------------------------------------- page and screenshot
 
 def load_dashboard():
@@ -263,7 +304,7 @@ def render_page(path):
     db.friendly_now = lambda: "Sun Oct 4, 2026 at 7:30 PM"
     data = {"library": library, "health": health, "watch": watch, "sharing": sharing, "unwatched": unwatched,
             "episode_gaps": episode_gaps, "playback": playback}
-    title, body = db.render(data, {}, hide_names=False)
+    title, body = db.render(data, {}, hide_names=False, trends=trends)
     page = db.full_page(title, body).replace('<html lang="en">', '<html lang="en" data-theme="dark">')
     with open(path, "w", encoding="utf-8") as f:
         f.write(page)

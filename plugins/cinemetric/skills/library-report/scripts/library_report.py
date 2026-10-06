@@ -21,7 +21,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.20.0"
+VERSION = "0.21.0"
 PAGE_SIZE = 500
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
@@ -255,8 +255,9 @@ def clean_tree(value):
     return value
 
 
-def read_snapshot(path):
-    """A snapshot's contents with text cleaned, or None if it isn't a sound format 1 snapshot."""
+def load_snapshot(path):
+    """A snapshot's contents as saved (text not cleaned yet), or None if it isn't a sound format 1
+    snapshot. Clean any text taken from it before showing it; read_snapshot does that for all of it."""
     try:
         info = os.lstat(path)
         if not stat.S_ISREG(info.st_mode) or info.st_size > SNAPSHOT_MAX_BYTES:
@@ -267,7 +268,13 @@ def read_snapshot(path):
         return None
     if not isinstance(data, dict) or data.get("format") != SNAPSHOT_FORMAT:
         return None
-    return clean_tree(data)
+    return data
+
+
+def read_snapshot(path):
+    """A snapshot's contents with text cleaned, or None if it isn't a sound format 1 snapshot."""
+    data = load_snapshot(path)
+    return clean_tree(data) if data is not None else None
 
 
 def choose_snapshot(server_id, area, since_days=None, today=None):

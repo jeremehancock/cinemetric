@@ -149,4 +149,30 @@
       }, 1800);
     });
   });
+
+  /* ---------- No lonely last words, for browsers without text-wrap: pretty ---------- */
+  // Firefox doesn't support the CSS rule yet, so glue each paragraph's last two words
+  // together with a non-breaking space. Then the last line always has at least two words.
+  if (!(window.CSS && CSS.supports && CSS.supports("text-wrap", "pretty"))) {
+    document.querySelectorAll("main p, main li, main figcaption, .legal").forEach(function (el) {
+      if (el.querySelector("p, li, div, pre") || el.closest(".chips, .term")) return;
+      // Find the last space in the element's text (which may be split across links and
+      // bold words), then swap that one space for a non-breaking one.
+      var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      var nodes = [], text = "", n;
+      while ((n = walker.nextNode())) { nodes.push({ node: n, start: text.length }); text += n.data; }
+      var trimmed = text.replace(/\s+$/, "");
+      var pair = /(\S+)(\s)(\S+)$/.exec(trimmed);
+      // Skip long word pairs (like file paths) that would stick out of a narrow column.
+      if (!pair || pair[1].length + pair[3].length > 24) return;
+      var at = pair.index + pair[1].length;
+      for (var i = nodes.length - 1; i >= 0; i--) {
+        if (nodes[i].start <= at) {
+          var d = nodes[i].node.data, k = at - nodes[i].start;
+          nodes[i].node.data = d.slice(0, k) + "\u00a0" + d.slice(k + 1);
+          return;
+        }
+      }
+    });
+  }
 })();

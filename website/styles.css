@@ -47,6 +47,12 @@ h1, h2, h3 { line-height: 1.12; letter-spacing: -0.02em; margin: 0 0 .5em; text-
 h2 { font-size: clamp(1.75rem, 3.6vw, 2.6rem); font-weight: 800; }
 h3 { font-size: 1.15rem; font-weight: 700; }
 p { margin: 0 0 1em; }
+/* Keeps a paragraph or list item from ending on a single lonely word. */
+p, li, figcaption, .poster-sub { text-wrap: pretty; }
+/* Short text (a line or three) looks better with its lines evened out, so a second line
+   is never just a word or two hanging under a full one. */
+.ticks li, .feature-copy > p, .ask-line, .card p, .mock figcaption, .steps-lead, .section-head p,
+.step-body p, .extra-body p, .extra-body li, .notice p, .legal { text-wrap: balance; }
 q { quotes: "\201C" "\201D"; }
 
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }

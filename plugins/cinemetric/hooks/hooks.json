@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/mods_notice.py\" 2>/dev/null || python \"${CLAUDE_PLUGIN_ROOT}/hooks/mods_notice.py\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  },
+  "modules": ["./register.ts"]
+}

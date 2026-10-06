@@ -43,6 +43,7 @@ SCRIPTS = {
 # Settings a test must never pick up from the developer's own environment.
 CLEARED_ENV = (
     "PLEX_URL", "PLEX_TOKEN", "TAUTULLI_URL", "TAUTULLI_API_KEY", "CINEMETRIC_DATA_DIR",
+    "CINEMETRIC_MODS_ACTIVE",
 )
 
 FAKE_TOKEN = "token-for-tests"

@@ -61,6 +61,11 @@ creates SHALL NOT make any network requests when opened.
 - **WHEN** `episode_gaps.py` runs
 - **THEN** the only network requests go to the configured Plex server
 
+#### Scenario: Checking what's likely to transcode
+- **WHEN** `playback_check.py` runs
+- **THEN** the only network requests go to the configured Plex server and, if set up, the configured
+  Tautulli address
+
 #### Scenario: Listing users and shares
 - **WHEN** `users_and_shares.py` runs
 - **THEN** the only network requests go to the configured Plex server, the configured Tautulli address

@@ -53,7 +53,7 @@ Errors that a skill needs to recognize SHALL start with a fixed code: `NOT_CONFI
 
 ### Requirement: Connection check
 The `library-report`, `server-health`, `watch-activity`, `users-and-shares`, `unwatched`,
-`what-to-watch` and `episode-gaps` scripts SHALL accept `--check`, which only tests the configured
+`what-to-watch`, `episode-gaps` and `playback-check` scripts SHALL accept `--check`, which only tests the configured
 connections and prints a short JSON result instead of building a report.
 
 #### Scenario: Testing the connection

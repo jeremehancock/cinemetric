@@ -81,6 +81,12 @@ the specs leave open. At least the following SHALL be covered:
 - `episode-gaps`: what counts as there (duplicates, unavailable files, multi-episode file names,
   unnumbered episodes), specials, gaps inside a season, late starts, numbering that carries on,
   missing seasons, date-numbered seasons, sorting and the limit, and the report totals.
+- `playback-check`: each cause (image-based subtitles with and without a text alternative, forced
+  tracks, TrueHD and DTS with and without a common track, bitrate with the server limit, the option
+  and no limit), separate media versions, unavailable files, detail batches and titles missing from
+  them, grouping transcodes by device and person, the reasons from stream data and the 200 cap,
+  dropping private Tautulli fields, Tautulli missing or failing, sorting and the limit, and the report
+  totals.
 - `changes`: choosing which snapshot to compare with (earlier day, `--since`, missing area, other
   server), saving and merging the same day, pruning after 90 days, `save` without network, `list`,
   `forget`, file permissions, and a report that fails.
@@ -117,6 +123,11 @@ the specs leave open. At least the following SHALL be covered:
 #### Scenario: Specials show up as gaps
 - **WHEN** a change to `episode_gaps.py` reports missing episodes for season 0, or for a season that
   continues the previous season's numbering
+- **THEN** a test fails
+
+#### Scenario: A text subtitle alternative is ignored
+- **WHEN** a change to `playback_check.py` flags a file whose English PGS track also has an English
+  SRT track, with neither forced nor default
 - **THEN** a test fails
 
 ### Requirement: Tests run on GitHub

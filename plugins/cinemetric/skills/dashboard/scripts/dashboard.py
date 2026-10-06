@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Cinemetric dashboard: one HTML page combining the library report, server health, watch activity
-and who the server is shared with.
+"""Cinemetric dashboard: one HTML page combining the library report, server status, the last 30 days
+of watching, unwatched titles, episode gaps, playback problems and who the server is shared with.
 
 It runs the other Cinemetric report scripts (so it has exactly their read-only behaviour and
 safety rules), then writes a self-contained HTML page: no scripts and no external requests (a

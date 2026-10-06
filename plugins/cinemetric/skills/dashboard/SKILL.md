@@ -1,6 +1,6 @@
 ---
 name: dashboard
-description: "Build or refresh the Plex dashboard: one HTML page combining library stats, server health, watch activity, titles nobody has finished in a while, gaps in TV episodes, files likely to transcode and the devices that transcode most, and who the server is shared with, with charts. Saved on this computer, as a private claude.ai page, or both, and updated in place each time. Read-only. Use when the user asks for a Plex dashboard or overview page, to update or refresh it, or to change where it's saved or published."
+description: "Build or refresh the Plex dashboard: one HTML page combining library stats, server status (version, updates, remote access and anything that needs a look), the last 30 days of watching, titles nobody has finished in a while, gaps in TV episodes, files likely to transcode and the devices that transcode most, and who the server is shared with, with charts. Saved on this computer, as a private claude.ai page, or both, and updated in place each time. Read-only. Use when the user asks for a Plex dashboard or overview page, to update or refresh it, or to change where it's saved or published."
 argument-hint: "[--hide-names | --show-names]"
 allowed-tools: Read, Artifact, Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/dashboard.py *), Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/dashboard.py), Bash(python ${CLAUDE_SKILL_DIR}/scripts/dashboard.py *), Bash(python ${CLAUDE_SKILL_DIR}/scripts/dashboard.py)
 ---

@@ -2,8 +2,9 @@
 
 ## Purpose
 
-One HTML page that combines the library report, server health, watch activity, titles nobody has
-finished in a while, gaps in TV episodes, and who the server is shared with, saved on the user's computer, published by
+One HTML page that combines the library report, server status (version, updates, remote access and
+anything that needs a look), the last 30 days of watching, titles nobody has finished in a while,
+gaps in TV episodes, files likely to transcode, and who the server is shared with, saved on the user's computer, published by
 Claude as a private claude.ai page, or both, and refreshed in place each time the user runs the
 skill. Script: `skills/dashboard/scripts/dashboard.py`. How Claude offers, publishes and explains it
 is in the skill's `SKILL.md`.

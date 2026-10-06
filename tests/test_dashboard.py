@@ -72,6 +72,7 @@ def sample_data():
             {"kind": "downloads_allowed", "people": ["riley-test" + EVIL_ATTR]},
             {"kind": "all_libraries", "people": ["sam-test" + EVIL]},
             {"kind": "old_pending_invite", "people": ["casey-test"], "days": 30},
+            {"kind": "unused_library", "libraries": [EVIL], "days": 90},
         ],
     }
     unwatched = {
@@ -341,6 +342,16 @@ class SharingSection(OfflineTestCase):
         self.assertIn("3 people with no plays in 90+ days", html)
         self.assertNotIn("person-0", html)
         self.assertNotIn("Last played", html)
+
+    def test_unused_library_shows_titles_even_with_names_hidden(self):
+        worth = [{"kind": "unused_library", "libraries": ["Fitness"], "days": 90}]
+        html = page({"health": healthy(), "sharing": sharing_report(1, worth)}, hide_names=True)
+        self.assertIn("1 shared library with no plays by the people it is shared with in 90+ days", html)
+        self.assertIn("Fitness", html)
+        self.assertIn("Healthy", html)
+        worth = [{"kind": "unused_library", "libraries": ["Fitness", "Kids"], "days": 30}]
+        html = page({"sharing": sharing_report(1, worth)})
+        self.assertIn("2 shared libraries with no plays by the people they are shared with in 30+ days", html)
 
     def test_sample_names_hidden_everywhere(self):
         html = page(sample_data(), hide_names=True)

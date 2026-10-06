@@ -26,7 +26,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.16.0"
+VERSION = "0.17.0"
 SCRIPT_TIMEOUT_SECONDS = 1800
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -570,6 +570,15 @@ KIND_LABEL = {"home": "Plex Home", "managed": "Managed", "friend": "Friend"}
 
 def share_note(item, hide_names):
     """One neutral sentence for a users-and-shares worth_a_look item, or None for unknown kinds."""
+    if item.get("kind") == "unused_library":
+        # Library titles aren't about any person, so they're shown even when names are hidden.
+        titles = [t for t in item.get("libraries") or [] if t]
+        if not titles:
+            return None
+        n = len(titles)
+        text = (f"{num(n)} shared {'library' if n == 1 else 'libraries'} with no plays "
+                f"by the people {'it is' if n == 1 else 'they are'} shared with in {num(item.get('days'))}+ days")
+        return f'<li>{e(text)}<span class="muted">: {e(", ".join(titles))}</span></li>'
     people = [p for p in item.get("people") or [] if p]
     n = len(people)
     if not n:

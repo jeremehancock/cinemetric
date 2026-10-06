@@ -29,7 +29,7 @@ CSS and JavaScript with no build step, ready for any static host.
 | `library-report` | Counts, storage, 4K/1080p and codec breakdown, 10-bit video, recently added, unavailable files, unmatched items, missing posters, very large files, duplicates |
 | `server-health` | Version and updates, remote access, CPU and memory, who's streaming now (direct play vs transcode, bandwidth), streaming settings (hardware transcoding, remote limits), running tasks, library scans, scheduled maintenance |
 | `watch-activity` | Who's watching right now, plays and watch time, most watched movies, shows and music, most active users and devices, daily trends, recent plays, the most streams at once, and titles started but never finished. Works for everyone or one person. Uses Tautulli if you have it, otherwise Plex's own history |
-| `users-and-shares` | Who your server is shared with (friends, Plex Home, managed users, pending invites), which libraries each person can see, who can download, and when each person last played something. Reads the share list from your plex.tv account; only the server owner can use it |
+| `users-and-shares` | Who your server is shared with (friends, Plex Home, managed users, pending invites), which libraries each person can see, who can download, when each person last played something, and which shared libraries nobody has played from lately. Reads the share list from your plex.tv account; only the server owner can use it |
 | `unwatched` | Movies and shows nobody has finished in a while (added more than 6 months ago, no finished play by anyone since), largest first, with how much space they use and when each was last finished. Facts only: it never suggests deleting anything. Uses Tautulli if you have it, otherwise Plex's own history |
 | `what-to-watch` | Finds something to watch tonight in your own library: by genre, length, decade, rating or content rating, unwatched only, shuffled for fresh ideas each time. Suggests a few titles with a reason for each, or picks up where you left off. Only titles already on your server |
 | `dashboard` | One page with library, server, watch, unwatched and sharing stats and charts. Saved on your computer, as a private claude.ai page you can open anywhere, or both; each refresh updates the same file and link |
@@ -142,7 +142,6 @@ Updates to existing skills:
 - [ ] **Snapshots and "what changed"**: save a small summary on your computer after each run, so
       reports and the dashboard can show what's new, what disappeared and how things trend over time.
       Could also power an optional weekly digest that only mentions changes.
-- [ ] **`users-and-shares`**: shared libraries nobody has watched in a while
 - [ ] **`setup`**: remember more than one server and switch between them
 
 ## Support Development

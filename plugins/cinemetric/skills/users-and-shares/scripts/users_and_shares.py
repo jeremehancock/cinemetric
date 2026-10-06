@@ -5,7 +5,8 @@ Lists the people the server is shared with (friends, Plex Home members, managed 
 invites), which libraries each one can see, whether they can download, and when they last played
 something. Who a server is shared with is only stored in the owner's plex.tv account, so this script
 also sends read-only GET requests to three plex.tv addresses. Last played dates come from Tautulli
-when it is set up, otherwise from the server's own watch history.
+when it is set up, otherwise from the server's own watch history. Recent watch history is also
+read to see which of the people each library is shared with played anything from it.
 
 Uses only the Python standard library. Prints one JSON document to stdout; errors go to stderr.
 
@@ -26,12 +27,14 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 
-VERSION = "0.16.0"
+VERSION = "0.17.0"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 MAX_PLEX_TV_BYTES = 5 * 1024 * 1024
 OLD_INVITE_DAYS = 30
 DAY = 86400
+HISTORY_PAGE_SIZE = 1000
+HISTORY_CAP = 100000
 
 # The only Plex server paths this script may request.
 ALLOWED_PATHS = [
@@ -47,8 +50,8 @@ PLEX_TV_RULES = [
     ("GET", re.compile(r"^https://plex\.tv/api/invites/requested$")),
 ]
 
-# The only Tautulli API command this script may run. It only reads data.
-TAUTULLI_COMMANDS = {"get_users_table"}
+# The only Tautulli API commands this script may run. Both only read data.
+TAUTULLI_COMMANDS = {"get_users_table", "get_history"}
 
 KIND_ORDER = {"home": 0, "managed": 1, "friend": 2}
 FILTER_FIELDS = ("filterAll", "filterMovies", "filterMusic", "filterPhotos", "filterTelevision")
@@ -488,6 +491,73 @@ def add_last_played(people, plex, config, unavailable):
         person["last_played"] = day(person["_played"])
 
 
+def plex_library_plays(plex, cutoff):
+    """({(account id, section key)}, complete) from Plex's history since cutoff, newest first."""
+    plays, rows, start = set(), 0, 0
+    while rows < HISTORY_CAP:
+        size = min(HISTORY_PAGE_SIZE, HISTORY_CAP - rows)
+        page = plex.get("/status/sessions/history/all", {"sort": "viewedAt:desc"}, start=start, size=size)
+        batch = page.get("Metadata") or []
+        rows += len(batch)
+        start += len(batch)
+        for view in batch:
+            if (epoch(view.get("viewedAt")) or 0) >= cutoff:
+                plays.add((str(view.get("accountID")), str(view.get("librarySectionID") or "")))
+        if len(batch) < size or (epoch(batch[-1].get("viewedAt")) or 0) < cutoff:
+            return plays, True
+    return plays, False
+
+
+def tautulli_library_plays(client, cutoff, section_keys):
+    """({(user id, section key)}, complete) from Tautulli's history since cutoff. Unfinished plays count.
+
+    Tautulli's history rows don't say which library a play came from, so each library is read on its
+    own with Tautulli's section_id filter.
+    """
+    plays, rows = set(), 0
+    for key in section_keys:
+        start = 0
+        while True:
+            if rows >= HISTORY_CAP:
+                return plays, False
+            size = min(HISTORY_PAGE_SIZE, HISTORY_CAP - rows)
+            page = client.call("get_history", after=day(cutoff), section_id=key, order_column="date",
+                               order_dir="desc", start=start, length=size) or {}
+            batch = page.get("data") or []
+            rows += len(batch)
+            start += len(batch)
+            for row in batch:
+                if (epoch(row.get("date")) or 0) >= cutoff:
+                    plays.add((str(row.get("user_id")), key))
+            if len(batch) < size or (epoch(batch[-1].get("date")) or 0) < cutoff:
+                break
+    return plays, True
+
+
+def read_library_plays(plex, config, cutoff, section_keys, unavailable):
+    """(plays, activity): who played from which library since cutoff, and where that came from."""
+    if config["tautulli"]:
+        print("reading library activity from Tautulli", file=sys.stderr)
+        try:
+            try:
+                plays, complete = tautulli_library_plays(TautulliClient(*config["tautulli"]), cutoff, section_keys)
+            except (AttributeError, KeyError, TypeError, ValueError):
+                raise ReportError("Tautulli sent data in a shape Cinemetric didn't expect.") from None
+            return plays, {"source": "tautulli", "complete": complete}
+        except ReportError as exc:
+            unavailable.append({"part": "Tautulli library activity", "reason": str(exc)})
+    print("reading library activity from Plex", file=sys.stderr)
+    try:
+        try:
+            plays, complete = plex_library_plays(plex, cutoff)
+        except (AttributeError, KeyError, TypeError, ValueError):
+            raise ReportError("Plex sent watch history in an unexpected shape.") from None
+        return plays, {"source": "plex", "complete": complete}
+    except ReportError as exc:
+        unavailable.append({"part": "library activity", "reason": str(exc)})
+    return None, {"source": None, "complete": False}
+
+
 def worth_a_look(people, inactive_days, now):
     items = []
 
@@ -543,19 +613,31 @@ def build_report(config, args):
     people = build_people(shares, users, invites, section_titles)
     add_last_played(people, plex, config, unavailable)
     now = time.time()
+    plays, activity = read_library_plays(plex, config, now - args.inactive_days * DAY,
+                                          list(section_titles), unavailable)
+    activity = {"source": activity["source"], "days": args.inactive_days, "complete": activity["complete"]}
     flags = worth_a_look(people, args.inactive_days, now)
     people.sort(key=lambda p: (KIND_ORDER[p["kind"]], p["name"].lower()))
 
-    libraries = []
+    libraries, unused = [], []
     for s in sections:
         key = str(s.get("key"))
-        names = sorted(
-            p["name"] for p in people
-            if p["status"] == "accepted"
-            and (p["libraries"] == "all" or key in p["_keys"])
-        )
+        can_see = [p for p in people
+                   if p["status"] == "accepted" and (p["libraries"] == "all" or key in p["_keys"])]
+        names = sorted(p["name"] for p in can_see)
+        played = None
+        if plays is not None:
+            played = sorted(p["name"] for p in can_see if (str(p["_user_id"]), key) in plays)
         libraries.append({"title": section_titles[key], "type": clean(s.get("type")),
-                          "shared_with": names, "shared_with_count": len(names)})
+                          "shared_with": names, "shared_with_count": len(names),
+                          "played_by": played, "played_by_count": None if played is None else len(played)})
+        # Only flag a library when the whole window was read and someone who can see it has had
+        # the full window to use it (invited before it started, or invite date unknown).
+        if activity["complete"] and can_see and played == [] and any(
+                not p["invited"] or now - p["invited"] > args.inactive_days * DAY for p in can_see):
+            unused.append(section_titles[key])
+    if unused:
+        flags.append({"kind": "unused_library", "libraries": sorted(unused), "days": args.inactive_days})
 
     totals = {"people": len(people), "by_kind": {}, "by_status": {}}
     for p in people:
@@ -574,6 +656,7 @@ def build_report(config, args):
             for p in people
         ],
         "libraries": libraries,
+        "library_activity": activity,
         "totals": totals,
         "worth_a_look": flags,
         "unavailable": unavailable,

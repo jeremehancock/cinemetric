@@ -152,12 +152,6 @@ change), so check what scheduled runs can do before promising a digest that publ
   v2.18.2), so with `--user` the report leaves it out. It could be worked out from that person's
   history `started` / `stopped` times instead. Only worth it if someone asks.
 
-### `users-and-shares`
-
-**Shared libraries nobody uses:** cross-reference who can see each library with whether they've
-played anything from it lately. "Last played" per person already exists; per-library plays would come
-from watch history. Facts only, no "you should unshare this".
-
 ### `setup`
 
 **More than one server:** save several servers and switch between them, or pass a server name to a

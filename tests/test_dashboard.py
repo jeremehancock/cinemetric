@@ -111,8 +111,18 @@ def sample_data():
                             "unavailable_episodes": 1, "seasons": [
                                 {"season": EVIL, "missing": [[EVIL, EVIL_ATTR]], "unavailable": [EVIL]}]}]}],
     }
+    playback = {
+        "limits": EVIL, "bitrate_limit": None,
+        "totals": {"files": 3, "files_flagged": 1, "image_subtitles": 1},
+        "libraries": [{"name": EVIL_ATTR, "files": 3, "image_subtitles": 1}],
+        "playback_history": {"days": 90, "plays": 4, "transcodes": 2,
+                             "devices": [{"device": EVIL, "app": EVIL_ATTR, "platform": EVIL, "plays": 4,
+                                          "transcodes": 2, "reasons": {"subtitles": 2}}],
+                             "people": [{"person": "alex-test" + EVIL, "plays": 4, "transcodes": 2,
+                                         "reasons": {"audio": 1}}]},
+    }
     return {"library": library, "health": health, "watch": watch, "sharing": sharing, "unwatched": unwatched,
-            "episode_gaps": episode_gaps}
+            "episode_gaps": episode_gaps, "playback": playback}
 
 
 def page(data, errors=None, hide_names=False, snapshot_saved=None):
@@ -128,9 +138,9 @@ class PageSafety(OfflineTestCase):
 
     def test_error_reasons_are_escaped(self):
         html = page({}, {"library": EVIL, "health": EVIL, "watch": EVIL, "sharing": EVIL, "unwatched": EVIL,
-                         "episode_gaps": EVIL})
+                         "episode_gaps": EVIL, "playback": EVIL})
         self.assertNotIn("<script", html)
-        self.assertEqual(html.count("&lt;script&gt;"), 6)
+        self.assertEqual(html.count("&lt;script&gt;"), 7)
 
     def test_page_blocks_scripts_and_outside_requests(self):
         html = page(sample_data())
@@ -238,7 +248,7 @@ class Collecting(OfflineTestCase):
 
     def test_collect_keeps_going_when_one_source_fails(self):
         results = {"library": {"totals": {}}, "health": None, "watch": {"totals": {}}, "sharing": {"people": []},
-                   "unwatched": {"totals": {}}, "episode_gaps": {"totals": {}}}
+                   "unwatched": {"totals": {}}, "episode_gaps": {"totals": {}}, "playback": {"totals": {}}}
         fake = lambda name: (name, results[name], "HTTP 500" if results[name] is None else None)
         with mock.patch.object(db, "run_source", fake):
             data, errors = db.collect()
@@ -581,6 +591,102 @@ class EpisodeGapsSection(OfflineTestCase):
 
     def test_hiding_names_keeps_the_section(self):
         self.assertIn("Show 00", page({"episode_gaps": gaps_report()}, hide_names=True))
+
+
+# ---------------------------------------------------------------- playback section
+
+def playback_report(history=True):
+    report = {
+        "limits": "These are likely causes on common devices, not a promise.",
+        "bitrate_limit": None,
+        "totals": {"titles": 2000, "files": 2000, "files_flagged": 900, "image_subtitles": 600,
+                   "truehd_audio": 100, "dts_audio": 400, "over_bitrate_limit": 0},
+        "libraries": [{"name": "Movies", "type": "movie", "files": 2000, "image_subtitles": 600,
+                       "truehd_audio": 100, "dts_audio": 400, "over_bitrate_limit": 0, "listed": []}],
+    }
+    if history:
+        report["playback_history"] = {
+            "days": 90, "plays": 419, "transcodes": 32,
+            "devices": [
+                {"device": "Sam's iPhone", "app": "Plex for iOS", "platform": "iOS", "plays": 20,
+                 "transcodes": 14, "reasons": {"subtitles": 10, "video": 2, "audio": 3}},
+                {"device": "Den TV", "app": "Plex for Roku", "platform": "Roku", "plays": 10,
+                 "transcodes": 4, "reasons": {"audio": 4}},
+                {"device": "Bedroom TV", "app": "Plex for Roku", "platform": "Roku", "plays": 5,
+                 "transcodes": 2, "reasons": {"video": 2}},
+            ],
+            "people": [{"person": "Sam", "plays": 25, "transcodes": 16, "reasons": {"subtitles": 10}}],
+        }
+    else:
+        report["playback_history"] = None
+        report["playback_history_note"] = "Transcodes by device and person need Tautulli."
+    return report
+
+
+class PlaybackSection(OfflineTestCase):
+    def section(self, html):
+        return html.split("<h2>Playback</h2>")[1].split("</section>")[0]
+
+    def test_runs_with_counts_only(self):
+        self.assertEqual(db.SOURCES["playback"], ("playback-check", "playback_check.py", ["--limit", "0"]))
+        self.assertNotIn("playback", db.SNAPSHOT_AREAS)
+
+    def test_section_is_built(self):
+        html = self.section(page({"playback": playback_report()}))
+        self.assertIn("<strong>900</strong> of 2,000 files are likely to be converted on some devices: "
+                      "600 with image-based subtitles, 100 with TrueHD audio, 400 with DTS audio.", html)
+        self.assertIn("No remote streaming limit is set, so bitrate wasn&#x27;t checked.", html)
+        self.assertIn("In the last 90 days, 32 of 419 plays were transcoded.", html)
+        self.assertIn("Sam&#x27;s iPhone · Plex for iOS", html)
+        self.assertIn("14 of 20 plays (70%), mostly subtitles", html)
+        self.assertIn("People who transcode most", html)
+        self.assertIn("likely causes on common devices", html)
+
+    def test_empty_libraries_are_left_out(self):
+        report = playback_report()
+        report["libraries"].append({"name": "Empty DVR", "type": "movie", "files": 0})
+        self.assertNotIn("Empty DVR", page({"playback": report}))
+
+    def test_bitrate_limit_line(self):
+        report = playback_report()
+        report["bitrate_limit"] = {"kbps": 12000, "source": "server"}
+        self.assertIn("the server&#x27;s remote streaming limit: 12,000 kbps", page({"playback": report}))
+
+    def test_page_stays_healthy(self):
+        html = page({"health": healthy(), "playback": playback_report()})
+        self.assertIn("Healthy", html)
+        self.assertNotIn("Mostly fine", html)
+
+    def test_no_tautulli(self):
+        html = self.section(page({"playback": playback_report(history=False)}))
+        self.assertIn("Transcodes by device and person need Tautulli.", html)
+        self.assertNotIn("transcode most", html)
+
+    def test_names_hidden(self):
+        html = page({"playback": playback_report()}, hide_names=True)
+        self.assertNotIn("Sam", html)
+        self.assertNotIn("Den TV", html)
+        self.assertNotIn("People who transcode most", html)
+        # The two Roku devices are merged by app and platform.
+        self.assertIn("Plex for Roku · Roku<span class=\"transcode-detail\">6 of 15 plays (40%), mostly audio", html)
+
+    def test_no_advice(self):
+        section = self.section(page({"playback": playback_report()})).lower()
+        for word in ("convert your", "remux", "re-encode", "delete", "replace"):
+            self.assertNotIn(word, section)
+
+    def test_no_movie_or_tv_library(self):
+        report = playback_report()
+        report["libraries"] = []
+        self.assertIn("This server has no movie or TV library.", page({"playback": report}))
+
+    def test_failure(self):
+        fake = lambda name: (name, None, "could not reach the server") if name == "playback" \
+            else (name, {"totals": {}}, None)
+        with mock.patch.object(db, "run_source", fake):
+            data, errors = db.collect()
+        self.assertEqual(list(errors), ["playback"])
+        self.assertIn("Couldn't load the playback report: could not reach the server", page(data, errors))
 
 
 # ---------------------------------------------------------------- library growth chart

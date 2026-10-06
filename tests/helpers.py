@@ -30,6 +30,7 @@ SCRIPTS = {
     "dashboard": "dashboard.py",
     "episode-gaps": "episode_gaps.py",
     "library-report": "library_report.py",
+    "playback-check": "playback_check.py",
     "server-health": "server_health.py",
     "setup": "setup.py",
     "unwatched": "unwatched.py",

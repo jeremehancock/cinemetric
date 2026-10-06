@@ -119,7 +119,7 @@
       <div class="wrap">
         <div class="section-head reveal">
           <p class="kicker">The library</p>
-          <h2 id="skills-title">Ten skills. One curious question at a time.</h2>
+          <h2 id="skills-title">Eleven skills. One curious question at a time.</h2>
           <p>Just ask Claude in your own words. Each skill knows when it's needed, runs a small script against your server and turns the result into a clear report.</p>
         </div>
 
@@ -186,6 +186,13 @@
             </span>
             <span class="poster-title">episode-gaps</span>
             <span class="poster-sub">What's missing</span>
+          </a></li>
+          <li class="reveal"><a class="poster" href="#skill-playback" style="--a:#0ea5e9;--b:#082f49">
+            <span class="poster-art" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><path d="M6 10v28l20-14z" fill="currentColor"/><path d="M32 20v8M38 14v20M44 18v12" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" opacity=".7"/></svg>
+            </span>
+            <span class="poster-title">playback-check</span>
+            <span class="poster-sub">Why it transcodes</span>
           </a></li>
           <li class="reveal"><a class="poster" href="#skill-dashboard" style="--a:#8b5cf6;--b:#2a1a4d">
             <span class="poster-art" aria-hidden="true">
@@ -648,13 +655,65 @@
       </div>
     </section>
 
+    <!-- ============ SKILL: PLAYBACK CHECK ============ -->
+    <section class="section feature flip" id="skill-playback" aria-labelledby="f-playback">
+      <div class="wrap feature-grid">
+        <div class="feature-copy reveal">
+          <p class="kicker" style="--k:#38bdf8">playback-check</p>
+          <h2 id="f-playback">Find out why Plex keeps transcoding.</h2>
+          <p>Checks every movie and episode for the usual reasons a file gets converted on the way to your TV, and with Tautulli, shows which devices and people it really happens to.</p>
+          <ul class="ticks">
+            <li>Image-based subtitles (PGS, VobSub), which make Plex redraw the whole picture while subtitles are on.</li>
+            <li>TrueHD and DTS audio that many TVs and streaming sticks can't play, and whether a file has a common track to switch to.</li>
+            <li>Files above your server's remote streaming limit, or a speed you choose.</li>
+            <li>With Tautulli: the devices and people transcoded most, how often, and why.</li>
+            <li>Says "likely", not "will", and never tells you to convert your files.</li>
+          </ul>
+          <p class="ask-line">Ask Claude: <q>Why does Plex keep transcoding?</q> or <q>Which movies won't play directly on my Roku?</q></p>
+        </div>
+
+        <figure class="mock demo reveal" aria-label="Example: files likely to transcode, and who transcodes most">
+          <div class="mock-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><em>Claude Code</em></div>
+          <div class="tabpanel" id="panel-playback-1">
+            <pre class="term"><code><span class="t-you">&gt; Why does Plex keep transcoding?</span>
+<span class="t-dot">⏺</span> Of your 9,942 files, 1,023 are likely
+  to be converted on some devices.
+
+  <b class="t-h">Why</b>
+  628 have image-based subtitles: Plex
+    redraws the picture while they're on.
+  516 have TrueHD or DTS audio: only the
+    sound is converted, which is light.
+  177 are above your 12 Mbps remote limit.
+
+  <b class="t-h">Movies</b>
+  The Long Voyage: English subtitles are
+    image-only, DTS-HD MA audio
+  Harbor Lights: TrueHD audio, has an
+    AC3 track to switch to
+
+  <b class="t-h">Last 90 days</b>
+  64 of 1,146 plays were transcoded.
+  Living Room (Plex for Roku): 23 of 41,
+    mostly for subtitles
+  sam: 27 of 96, mostly for subtitles
+
+  <b class="t-h">Worth knowing</b>
+  These are likely causes, not a promise:
+  each device plays different things.</code></pre>
+          </div>
+          <figcaption>Example reply with made-up data. Claude's wording will vary.</figcaption>
+        </figure>
+      </div>
+    </section>
+
     <!-- ============ SKILL: DASHBOARD ============ -->
-    <section class="section feature flip" id="skill-dashboard" aria-labelledby="f-dash">
+    <section class="section feature" id="skill-dashboard" aria-labelledby="f-dash">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#a382ff">dashboard</p>
           <h2 id="f-dash">Everything, on one good-looking page.</h2>
-          <p>Library stats, server health, watch activity, what nobody has finished in a while, gaps in your TV episodes, and who your server is shared with, together, with charts. Ask Claude to refresh it whenever you like.</p>
+          <p>Library stats, server health, watch activity, what nobody has finished in a while, gaps in your TV episodes, files likely to transcode, and who your server is shared with, together, with charts. Ask Claude to refresh it whenever you like.</p>
           <ul class="ticks">
             <li>Save it <strong>on your computer</strong>, as a <strong>private claude.ai page</strong> you can open from anywhere, or <strong>both</strong>.</li>
             <li>Each refresh updates the same file and the same link, so your bookmarks keep working.</li>
@@ -667,7 +726,7 @@
 
         <figure class="mock demo reveal" aria-label="Example: the dashboard page">
           <div class="mock-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><em>Your browser</em></div>
-          <div class="shot"><img src="screens/dashboard.jpg" width="900" height="4868" loading="lazy" alt="The real Cinemetric dashboard in dark mode: library size, plays and watch time, a section listing what changed since Sep 27: titles added and removed, new episodes, files Plex can't find, a Plex update and sharing changes, a server card with an update notice, a plays-per-day bar chart, top shows, movies, music and viewers, the library table with a storage-added-per-month bar chart, titles nobody has finished in six months, gaps in TV episodes, and who the server is shared with."></div>
+          <div class="shot"><img src="screens/dashboard.jpg" width="900" height="5513" loading="lazy" alt="The real Cinemetric dashboard in dark mode: library size, plays and watch time, a section listing what changed since Sep 27: titles added and removed, new episodes, files Plex can't find, a Plex update and sharing changes, a server card with an update notice, a plays-per-day bar chart, top shows, movies, music and viewers, the library table with a storage-added-per-month bar chart, titles nobody has finished in six months, gaps in TV episodes, files likely to transcode with the devices and people that transcode most, and who the server is shared with."></div>
           <figcaption>The real dashboard, filled with made-up sample data. Scroll inside it to see more.</figcaption>
         </figure>
       </div>

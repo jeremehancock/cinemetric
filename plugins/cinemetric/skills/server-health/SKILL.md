@@ -132,6 +132,9 @@ Keep it readable: plain English, no raw JSON, no file paths.
   interface. Never claim a task failed. Only call a task possibly stuck when its `progress_moved` is
   `false`. If the user asks about failures, say they can't be checked here and suggest looking in
   Plex under **Settings → Troubleshooting** or the logs.
+- This skill only sees what's playing now. If the user asks why transcoding keeps happening, which
+  files cause it, or which devices or people transcode most, use the `cinemetric:playback-check`
+  skill.
 - This skill is read-only. Never offer to stop streams, start scans, change settings or install
   updates as part of this skill; tell the user to do that in Plex itself.
 - Settings are facts, not advice: say what a setting does and what it's set to. Don't tell the user

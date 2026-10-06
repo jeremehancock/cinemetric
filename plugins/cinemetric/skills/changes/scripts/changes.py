@@ -25,7 +25,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.19.0"
+VERSION = "0.20.0"
 SCRIPT_TIMEOUT_SECONDS = 1800
 KEEP_DAYS = 90
 MAX_TITLE_LENGTH = 120

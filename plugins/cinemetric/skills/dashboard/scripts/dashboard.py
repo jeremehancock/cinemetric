@@ -26,7 +26,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.19.0"
+VERSION = "0.20.0"
 SCRIPT_TIMEOUT_SECONDS = 1800
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -41,6 +41,8 @@ SOURCES = {
     "unwatched": ("unwatched", "unwatched.py", ["--limit", "10"]),
     # Same reasoning: each library lists its 10 shows with the most gaps.
     "episode_gaps": ("episode-gaps", "episode_gaps.py", ["--limit", "10"]),
+    # Counts and the transcode history only; the page lists no files.
+    "playback": ("playback-check", "playback_check.py", ["--limit", "0"]),
 }
 # Reports whose snapshot blocks are saved, and whose since_snapshot feeds the "Since" section.
 SNAPSHOT_AREAS = ("library", "health", "sharing")
@@ -48,6 +50,7 @@ CHANGES_SCRIPT = os.path.join(SKILLS_DIR, "changes", "scripts", "changes.py")
 CHANGE_EXAMPLES = 5
 UNWATCHED_TITLES_LIMIT = 10
 GAP_SHOWS_LIMIT = 10
+PLAYBACK_GROUPS_LIMIT = 5
 GAPS_PER_SHOW = 5
 SHARING_PEOPLE_LIMIT = 20
 ERROR_CODE = re.compile(r"^[A-Z_]+: ")
@@ -682,6 +685,103 @@ def episode_gaps_section(gaps, error):
     return card("Episode gaps", f"{headline}{table}{shows_html}{limits}", "wide")
 
 
+# (report key, table heading, words for the headline)
+PLAYBACK_CAUSES = (("image_subtitles", "Image subtitles", "with image-based subtitles"),
+                   ("truehd_audio", "TrueHD audio", "with TrueHD audio"),
+                   ("dts_audio", "DTS audio", "with DTS audio"),
+                   ("over_bitrate_limit", "Above bitrate limit", "above the bitrate limit"))
+REASON_WORDS = {"subtitles": "subtitles", "video": "video", "audio": "audio"}
+
+
+def main_reason(reasons):
+    """The most common known reason, as a word, or None."""
+    known = [(reasons.get(r) or 0, r) for r in REASON_WORDS]
+    count, reason = max(known, key=lambda pair: pair[0]) if known else (0, None)
+    return REASON_WORDS[reason] if count else None
+
+
+def anonymous_devices(devices):
+    """Devices merged by app and platform, for when names are hidden (device names often hold one)."""
+    merged = {}
+    for d in devices:
+        label = " · ".join(x for x in (d.get("app"), d.get("platform")) if x) or "Unknown device"
+        m = merged.setdefault(label, {"name": label, "plays": 0, "transcodes": 0, "reasons": {}})
+        m["plays"] += d.get("plays") or 0
+        m["transcodes"] += d.get("transcodes") or 0
+        for r, n in (d.get("reasons") or {}).items():
+            m["reasons"][r] = m["reasons"].get(r, 0) + (n or 0)
+    return sorted(merged.values(), key=lambda m: (-m["transcodes"], m["name"].lower()))
+
+
+def transcode_list(title, rows):
+    items = []
+    for r in rows[:PLAYBACK_GROUPS_LIMIT]:
+        plays, transcodes = r.get("plays") or 0, r.get("transcodes") or 0
+        share = round(100 * transcodes / plays) if plays else 0
+        reason = main_reason(r.get("reasons") or {})
+        detail = f"{num(transcodes)} of {plural(plays, 'play')} ({share}%)" + (f", mostly {reason}" if reason else "")
+        items.append(f'<li><span class="recent-title">{e(r.get("name"))}'
+                     f'<span class="transcode-detail">{e(detail)}</span></span></li>')
+    return (f'<div class="ranked"><h3>{e(title)}</h3><ul class="recent transcodes">{"".join(items)}</ul></div>'
+            if items else "")
+
+
+def playback_section(playback, hide_names, error):
+    if not playback:
+        reason = ERROR_CODE.sub("", error or "")
+        return card("Playback", unavailable_note("the playback report", reason), "wide")
+    if not playback.get("libraries"):
+        return card("Playback", '<p class="muted">This server has no movie or TV library.</p>', "wide")
+    libraries = [lib for lib in playback["libraries"] if lib.get("files")] or playback["libraries"]
+    limits = f'<p class="muted small">{e(playback.get("limits"))}</p>' if playback.get("limits") else ""
+    totals = playback.get("totals") or {}
+    causes = [f"{num(totals.get(key))} {words}" for key, _, words in PLAYBACK_CAUSES if totals.get(key)]
+    if totals.get("files_flagged"):
+        headline = (f'<p class="unwatched-headline"><strong>{e(num(totals.get("files_flagged")))}</strong> of '
+                    f'{e(plural(totals.get("files"), "file"))} are likely to be converted on some devices: '
+                    f'{e(", ".join(causes))}.</p>')
+    else:
+        headline = (f'<p class="unwatched-headline">None of the {e(plural(totals.get("files"), "file"))} '
+                    f'checked has a common cause of transcoding.</p>')
+
+    rows = "".join(
+        f'<tr><th scope="row">{e(lib.get("name"))}</th><td class="num">{num(lib.get("files"))}</td>'
+        + "".join(f'<td class="num">{num(lib.get(key))}</td>' for key, _, _ in PLAYBACK_CAUSES) + "</tr>"
+        for lib in libraries)
+    heads = "".join(f'<th scope="col" class="num">{e(label)}</th>' for _, label, _ in PLAYBACK_CAUSES)
+    table = (f'<div class="table-wrap"><table><thead><tr><th scope="col">Library</th>'
+             f'<th scope="col" class="num">Files</th>{heads}</tr></thead><tbody>{rows}</tbody></table></div>')
+
+    limit = playback.get("bitrate_limit")
+    if limit:
+        where = "the server's remote streaming limit" if limit.get("source") == "server" else "the limit asked for"
+        bitrate = f"Bitrate is checked against {where}: {num(limit.get('kbps'))} kbps."
+    elif playback.get("bitrate_limit_problem"):
+        bitrate = "The server's remote streaming limit couldn't be read, so bitrate wasn't checked."
+    else:
+        bitrate = "No remote streaming limit is set, so bitrate wasn't checked."
+    bitrate_html = f'<p class="muted small">{e(bitrate)}</p>'
+
+    history = playback.get("playback_history")
+    if history:
+        lead = (f'<p>In the last {e(num(history.get("days")))} days, {e(num(history.get("transcodes")))} of '
+                f'{e(plural(history.get("plays"), "play"))} were transcoded.</p>')
+        devices = history.get("devices") or []
+        if hide_names:
+            device_rows = anonymous_devices(devices)
+        else:
+            device_rows = [dict(d, name=" · ".join(x for x in (d.get("device"), d.get("app")) if x)) for d in devices]
+        lists = transcode_list("Devices that transcode most", device_rows)
+        if not hide_names:
+            lists += transcode_list("People who transcode most",
+                                    [dict(p, name=p.get("person")) for p in history.get("people") or []])
+        history_html = lead + (f'<div class="lists">{lists}</div>' if lists else "")
+    else:
+        note = playback.get("playback_history_error") or playback.get("playback_history_note") or ""
+        history_html = f'<p class="muted">{e(note)}</p>' if note else ""
+    return card("Playback", f"{headline}{table}{bitrate_html}{history_html}{limits}", "wide")
+
+
 KIND_LABEL = {"home": "Plex Home", "managed": "Managed", "friend": "Friend"}
 
 
@@ -1033,6 +1133,8 @@ tbody th { font-weight: 600; white-space: nowrap; }
 .share-kind { display: block; font-size: 12px; font-weight: 400; color: var(--muted); }
 .unwatched-headline { margin: 0; max-width: 60rem; }
 .recent.gaps li { grid-template-columns: 1fr; }
+.recent.transcodes, .recent.transcodes li { grid-template-columns: 1fr; }
+.transcode-detail { display: block; font-size: 13px; color: var(--muted); }
 .gap-list { display: block; font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
 .foot { font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
 @media (max-width: 30rem) { .masthead h1 { font-size: 32px; } .tile-value { font-size: 32px; }
@@ -1065,6 +1167,7 @@ def render(data, errors, hide_names, snapshot_saved=None):
 {library_section(library, errors.get("library"))}
 {unwatched_section(data.get("unwatched"), errors.get("unwatched"))}
 {episode_gaps_section(data.get("episode_gaps"), errors.get("episode_gaps"))}
+{playback_section(data.get("playback"), hide_names, errors.get("playback"))}
 {sharing_section(data.get("sharing"), hide_names, errors.get("sharing"))}
 <footer class="foot"><span>Read-only snapshot made by Cinemetric {e(VERSION)}{" · Plex " + e(version) if version else ""}.</span>
 <span>Numbers come from your server; written notes are rule-based, not AI.</span></footer>

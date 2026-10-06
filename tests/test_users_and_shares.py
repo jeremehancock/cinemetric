@@ -37,47 +37,70 @@ def config(tautulli=None, problem=None, plex=PLEX):
     return {"plex": plex, "tautulli": tautulli, "tautulli_problem": problem}
 
 
-def xml(name):
-    """A plex.tv sample with DAYS:n turned into a timestamp n days ago."""
+def xml(name, replace=()):
+    """A plex.tv sample with each (old, new) in `replace` applied, then DAYS:n turned into a
+    timestamp n days ago."""
     with open(os.path.join(FIXTURES_DIR, "users-and-shares", name), encoding="utf-8") as fh:
         text = fh.read()
+    for old, new in replace:
+        text = text.replace(old, new)
     now = int(time.time())
     text = re.sub(r"DAYS:(\d+)", lambda m: str(now - int(m.group(1)) * DAY), text)
     return text.replace("LASTSEEN", str(now))
 
 
-def history_route(days_ago):
-    """Plex watch history: the newest play for the requested account, if any."""
+def history_route(days_ago, plays=()):
+    """Plex watch history: the newest play for one account when asked for one, otherwise every play
+    in `plays` ([account id, library key, days ago]), newest first, one page at a time."""
     now = int(time.time())
+    sweep = sorted(({"viewedAt": now - d * DAY, "accountID": int(a), "librarySectionID": k}
+                    for a, k, d in plays), key=lambda v: -v["viewedAt"])
 
     def answer(seen):
+        if "accountID" not in seen.query:
+            start = int(seen.headers["x-plex-container-start"])
+            size = int(seen.headers["x-plex-container-size"])
+            return {"MediaContainer": {"Metadata": sweep[start:start + size]}}
         days = days_ago.get(seen.query.get("accountID"))
         views = [] if days is None else [{"viewedAt": now - days * DAY, "accountID": seen.query["accountID"]}]
         return {"MediaContainer": {"Metadata": views}}
     return answer
 
 
-def tautulli_route(days_ago):
+def tautulli_route(days_ago, plays=(), broken=()):
+    """Tautulli's users table, and its history (filtered by `after` like the real one, newest first)."""
     now = int(time.time())
     rows = [{"user_id": int(uid), "friendly_name": "x", "last_seen": None if d is None else now - d * DAY}
             for uid, d in days_ago.items()]
+    # Like the real one, get_history rows don't say which library a play came from; the library
+    # is only a filter.
+    history = sorted(((k, {"user_id": int(a), "date": now - d * DAY}) for a, k, d in plays),
+                     key=lambda pair: -pair[1]["date"])
 
     def answer(seen):
-        if seen.query.get("cmd") != "get_users_table":
+        cmd = seen.query.get("cmd")
+        if cmd in broken or cmd not in ("get_users_table", "get_history"):
             return {"response": {"result": "error", "message": "unexpected command"}}
-        return {"response": {"result": "success", "message": None,
-                             "data": {"recordsTotal": len(rows), "data": rows}}}
+        if cmd == "get_users_table":
+            data = {"recordsTotal": len(rows), "data": rows}
+        else:
+            after = time.mktime(time.strptime(seen.query["after"], "%Y-%m-%d"))
+            start, length = int(seen.query["start"]), int(seen.query["length"])
+            data = {"data": [r for k, r in history
+                             if r["date"] >= after and k == seen.query["section_id"]][start:start + length]}
+        return {"response": {"result": "success", "message": None, "data": data}}
     return answer
 
 
 def routes():
     activity = fixture("users-and-shares", "activity.json")
     r = dict(fixture("users-and-shares", "server.json"))
-    r["/status/sessions/history/all"] = history_route(activity["plex"])
+    plays = activity["library_plays"]
+    r["/status/sessions/history/all"] = history_route(activity["plex"], plays["plex"])
     r[USERS_URL] = Reply(xml("users.xml"))
     r[SHARED_URL] = Reply(xml("shared_servers.xml"))
     r[INVITES_URL] = Reply(xml("invites.xml"))
-    r["/api/v2"] = tautulli_route(activity["tautulli"])
+    r["/api/v2"] = tautulli_route(activity["tautulli"], plays["tautulli"])
     return r
 
 
@@ -128,7 +151,7 @@ class Requests(Base):
                 else:
                     self.assertIn(seen.path, allowed_paths)
                 if seen.path == "/api/v2":
-                    self.assertEqual(seen.query["cmd"], "get_users_table")
+                    self.assertIn(seen.query["cmd"], {"get_users_table", "get_history"})
 
     def test_token_only_in_header_for_plex_tv(self):
         self.report()
@@ -345,8 +368,8 @@ class People(Base):
 
 class LastPlayed(Base):
     def history_accounts(self):
-        return [s.query.get("accountID") for s in self.net.server.requests
-                if s.path == "/status/sessions/history/all"]
+        return [s.query["accountID"] for s in self.net.server.requests
+                if s.path == "/status/sessions/history/all" and "accountID" in s.query]
 
     def test_tautulli_knows_the_person(self):
         report = self.report(cfg=config(tautulli=TAUTULLI))
@@ -370,7 +393,8 @@ class LastPlayed(Base):
         report = self.report(r, cfg=config(tautulli=TAUTULLI))
         accepted = [p for p in report["people"] if p["status"] == "accepted"]
         self.assertTrue(all(p["last_played_source"] in ("plex", None) for p in accepted))
-        self.assertEqual([u["part"] for u in report["unavailable"]], ["Tautulli last played dates"])
+        self.assertEqual([u["part"] for u in report["unavailable"]],
+                         ["Tautulli last played dates", "Tautulli library activity"])
 
     def test_no_requests_for_pending_people(self):
         self.report()
@@ -385,8 +409,103 @@ class LastPlayed(Base):
         r = routes()
         r["/status/sessions/history/all"] = Reply("", status=500)
         report = self.report(r)
-        self.assertEqual([u["part"] for u in report["unavailable"]], ["Plex watch history"])
+        self.assertEqual([u["part"] for u in report["unavailable"]], ["Plex watch history", "library activity"])
         self.assertIsNone(self.flag(report, "inactive"))
+
+
+# ---------------------------------------------------------------- library activity
+
+class LibraryActivity(Base):
+    def libraries(self, report):
+        return {l["title"]: l for l in report["libraries"]}
+
+    def sweeps(self):
+        return [s for s in self.net.server.requests
+                if (s.path == "/status/sessions/history/all" and "accountID" not in s.query)
+                or s.query.get("cmd") == "get_history"]
+
+    def test_friend_only_watches_tv(self):
+        libraries = self.libraries(self.report())
+        self.assertEqual(libraries["TV Shows"]["played_by"], ["alex", "casey"])
+        self.assertEqual(libraries["TV Shows"]["played_by_count"], 2)
+        self.assertNotIn("alex", libraries["Movies"]["played_by"])
+        self.assertEqual(libraries["Movies"]["played_by"], ["Kids"])  # blair's play is 200 days old
+
+    def test_owner_deleted_library_and_missing_key_are_ignored(self):
+        libraries = self.libraries(self.report())
+        self.assertEqual((libraries["Home Videos"]["played_by"], libraries["Home Videos"]["played_by_count"]),
+                         ([], 0))
+        self.assertEqual(libraries["Music"]["played_by"], [])  # casey's play is 150 days old
+
+    def test_plex_source(self):
+        activity = self.report()["library_activity"]
+        self.assertEqual(activity, {"source": "plex", "days": 90, "complete": True})
+
+    def test_tautulli_source_counts_unfinished_plays(self):
+        report = self.report(cfg=config(tautulli=TAUTULLI))
+        libraries = self.libraries(report)
+        self.assertEqual(report["library_activity"]["source"], "tautulli")
+        self.assertEqual(libraries["Movies"]["played_by"], ["Kids", "alex"])
+        self.assertEqual(libraries["Music"]["played_by"], ["casey"])
+        self.assertEqual(libraries["Home Videos"]["played_by"], [])
+        # One read per library, filtered by library.
+        self.assertEqual([s.query["section_id"] for s in self.sweeps()], ["1", "2", "3", "4"])
+        self.assertEqual({s.query["after"] for s in self.sweeps()},
+                         {time.strftime("%Y-%m-%d", time.localtime(time.time() - 90 * DAY))})
+
+    def test_tautulli_history_fails(self):
+        activity = fixture("users-and-shares", "activity.json")
+        r = routes()
+        r["/api/v2"] = tautulli_route(activity["tautulli"], broken={"get_history"})
+        report = self.report(r, cfg=config(tautulli=TAUTULLI))
+        self.assertEqual(report["library_activity"]["source"], "plex")
+        self.assertEqual([u["part"] for u in report["unavailable"]], ["Tautulli library activity"])
+        self.assertEqual(self.libraries(report)["TV Shows"]["played_by"], ["alex", "casey"])
+
+    def test_no_history_at_all(self):
+        r = routes()
+        r["/status/sessions/history/all"] = Unreachable("timed out")
+        report = self.report(r)
+        self.assertTrue(all(l["played_by"] is None and l["played_by_count"] is None
+                            for l in report["libraries"]))
+        self.assertEqual(report["library_activity"], {"source": None, "days": 90, "complete": False})
+        self.assertIn("library activity", [u["part"] for u in report["unavailable"]])
+        self.assertIsNone(self.flag(report, "unused_library"))
+        self.assertEqual(len(report["people"]), 8)
+
+    def test_reading_stops_at_the_window(self):
+        self.report()
+        self.assertEqual(len(self.sweeps()), 1)
+
+    def test_paging(self):
+        with mock.patch.object(us, "HISTORY_PAGE_SIZE", 2):
+            report = self.report()
+        self.assertEqual(len(self.sweeps()), 4)  # 8 plays, the 4th page reaches past the window
+        self.assertEqual(self.libraries(report)["TV Shows"]["played_by"], ["alex", "casey"])
+        self.assertTrue(report["library_activity"]["complete"])
+
+    def test_tautulli_paging_and_cap(self):
+        with mock.patch.object(us, "HISTORY_PAGE_SIZE", 1):
+            report = self.report(cfg=config(tautulli=TAUTULLI))
+        self.assertEqual(self.libraries(report)["Movies"]["played_by"], ["Kids", "alex"])
+        self.assertTrue(report["library_activity"]["complete"])
+        with mock.patch.object(us, "HISTORY_PAGE_SIZE", 1), mock.patch.object(us, "HISTORY_CAP", 2):
+            report = self.report(cfg=config(tautulli=TAUTULLI))
+        self.assertFalse(report["library_activity"]["complete"])
+        self.assertIsNone(self.flag(report, "unused_library"))
+
+    def test_cap_reached(self):
+        with mock.patch.object(us, "HISTORY_PAGE_SIZE", 1), mock.patch.object(us, "HISTORY_CAP", 2):
+            report = self.report()
+        self.assertFalse(report["library_activity"]["complete"])
+        self.assertIsNone(self.flag(report, "unused_library"))
+
+    def test_window_follows_inactive_days(self):
+        report = self.report(inactive_days=160)
+        self.assertEqual(self.libraries(report)["Music"]["played_by"], ["casey"])
+        self.assertEqual(report["library_activity"]["days"], 160)
+        report = self.report(inactive_days=4)
+        self.assertEqual(self.libraries(report)["Movies"]["played_by"], [])  # Kids played 5 days ago
 
 
 # ---------------------------------------------------------------- worth a look
@@ -400,6 +519,29 @@ class WorthALook(Base):
         self.assertEqual(self.flag(report, "downloads_allowed")["people"], ["alex", "blair"])
         kinds = [f["kind"] for f in report["worth_a_look"]]
         self.assertEqual(len(kinds), len(set(kinds)))
+
+    def test_unused_library(self):
+        report = self.report()
+        self.assertEqual(self.flag(report, "unused_library"),
+                         {"kind": "unused_library", "libraries": ["Home Videos", "Music"], "days": 90})
+        report = self.report(cfg=config(tautulli=TAUTULLI))
+        self.assertEqual(self.flag(report, "unused_library")["libraries"], ["Home Videos"])
+
+    def test_shared_only_recently_is_not_unused(self):
+        r = routes()
+        r[SHARED_URL] = Reply(xml("shared_servers.xml", [('acceptedAt="DAYS:500" invitedAt="DAYS:501"',
+                                                           'acceptedAt="DAYS:9" invitedAt="DAYS:10"')]))
+        report = self.report(r)
+        # Home Videos is only shared with blair, who joined 10 days ago; casey can still see Music.
+        self.assertEqual(self.flag(report, "unused_library")["libraries"], ["Music"])
+
+    def test_private_library_is_not_unused(self):
+        r = routes()
+        r[SHARED_URL] = Reply(xml("shared_servers.xml").replace('allLibraries="1"', 'allLibraries="0"')
+                              .replace('key="4" title="Home Videos" type="movie" shared="1"',
+                                       'key="4" title="Home Videos" type="movie" shared="0"'))
+        report = self.report(r)
+        self.assertNotIn("Home Videos", self.flag(report, "unused_library")["libraries"])
 
     def test_custom_inactive_threshold(self):
         report = self.report(inactive_days=4)

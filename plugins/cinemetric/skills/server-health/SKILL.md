@@ -12,7 +12,7 @@ Produce a clear, friendly health check of the user's Plex server using the bundl
 ## 1. Run the script
 
 ```
-python3 ${CLAUDE_SKILL_DIR}/scripts/server_health.py [--stale-days N] [--stuck-wait SECONDS]
+python3 ${CLAUDE_SKILL_DIR}/scripts/server_health.py [--stale-days N] [--stuck-wait SECONDS] [--since DAYS]
 ```
 
 - `--stale-days N` sets how many days without a library scan counts as overdue (default 7).
@@ -21,6 +21,9 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/server_health.py [--stale-days N] [--stuck-w
   task is running, so the report then takes about 15 seconds longer; if you run it while something is
   in progress, tell the user it'll take a moment. If the user wants a surer answer about a task that
   looked stuck, run again with a longer wait, such as `--stuck-wait 60`.
+- `--since DAYS` picks which saved snapshot `since_snapshot` compares with (the newest one at least
+  that many days old). Use it when the user asks what changed on the server this week or month.
+  Never pass `--snapshot-items`; it's for the changes skill and the dashboard.
 - Use `--check` alone to test the connection without building a report.
 - It is a snapshot of this moment. Streams and running tasks may be different a minute later.
 
@@ -54,11 +57,20 @@ quietly, or mention once that a part couldn't be checked. If the reason is "only
 server owner's account", the user is probably connected to a server someone shared with them; say
 that those parts need the owner's account, not that anything is broken.
 
+`since_snapshot` compares with a snapshot Cinemetric saved on an earlier day: `snapshot_date`,
+`days_ago` and `changes`, each with `kind` (`version`, `update_version` or `remote_access`), `from`
+and `to`. For `update_version`, `false` means "no update waiting", so a version → `false` usually
+means the update was installed. When `since_snapshot` is `null`, there is no earlier snapshot for this
+server. Don't mention it, unless the user asked what changed: then say the `cinemetric:changes` skill
+(or building the dashboard) saves a snapshot each time it runs, and changes show from a later day's
+run.
+
 Present, in this order:
 
 1. **Headline**: one line on overall health, e.g. "Your server is up to date and running smoothly" or
    "Mostly fine, but there's an update waiting and remote access is down". Base it on `worth_a_look`.
-2. **Server**: name, version, platform; whether an update is available (and which version); remote
+2. **Server**: if `since_snapshot.changes` isn't empty, start with what changed since that date
+   (for example "Plex updated from 1.40.5 to 1.41.0 since Tuesday"). Then name, version, platform; whether an update is available (and which version); remote
    access state; CPU and memory (latest and average over the sample, as percentages).
 3. **Right now**: number of streams with the direct play / direct stream / transcode split and total
    bandwidth (show Mbps: kbps ÷ 1000). Then a short list: user, what they're watching, device, method,

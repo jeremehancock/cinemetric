@@ -2,7 +2,7 @@
  {
   "title": "Pilot",
   "grandparentTitle": "The Show",
-  "grandparentRatingKey": "10",
+  "grandparentRatingKey": "200",
   "parentIndex": 1,
   "index": 1,
   "guid": "plex://episode/e1-test",
@@ -29,12 +29,13 @@
      }
     ]
    }
-  ]
+  ],
+  "ratingKey": "300"
  },
  {
   "title": "Second",
   "grandparentTitle": "The Show",
-  "grandparentRatingKey": "10",
+  "grandparentRatingKey": "200",
   "parentIndex": 1,
   "index": 2,
   "guid": "plex://episode/e2-test",
@@ -51,12 +52,13 @@
      }
     ]
    }
-  ]
+  ],
+  "ratingKey": "301"
  },
  {
   "title": "Unknown",
   "grandparentTitle": "Mystery Show",
-  "grandparentRatingKey": "11",
+  "grandparentRatingKey": "201",
   "parentIndex": 1,
   "index": 1,
   "guid": "local://7",
@@ -72,6 +74,7 @@
      }
     ]
    }
-  ]
+  ],
+  "ratingKey": "302"
  }
 ]

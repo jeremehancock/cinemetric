@@ -1,12 +1,15 @@
 """library-report (openspec/specs/library-report/spec.md)."""
 
 import argparse
+import copy
 import io
 import re
+import sys
 import time
 from unittest import mock
 
-from helpers import FAKE_TOKEN, FakeServer, OfflineTestCase, fixture, load_script, plex_container
+from helpers import (FAKE_TOKEN, FakeServer, OfflineTestCase, fixture, load_script, plex_container,
+                     write_snapshot)
 
 lr = load_script("library-report")
 GB = 1000 ** 3
@@ -28,7 +31,8 @@ def media(resolution="1080", codec="h264", gb=1.0, parts=1, **extra):
 
 def args(**overrides):
     values = {"library": None, "recent": 10, "large_gb": 40.0, "duplicate_examples": 15,
-              "upgrade_examples": 15, "growth_months": 12, "music_examples": 15}
+              "upgrade_examples": 15, "growth_months": 12, "music_examples": 15,
+              "since": None, "snapshot_items": False}
     values.update(overrides)
     return argparse.Namespace(**values)
 
@@ -676,3 +680,108 @@ class WholeReport(OfflineTestCase):
     def test_progress_goes_to_stderr(self):
         self.report(fake_plex())
         self.assertIn("reading library: Movies", self.stderr.getvalue())
+
+
+# ---------------------------------------------------------------- snapshots
+
+class LibrarySnapshot(OfflineTestCase):
+    report = WholeReport.report
+
+    def area(self):
+        return self.report(fake_plex(), snapshot_items=True)["snapshot"]["area"]
+
+    def test_snapshot_area(self):
+        report = self.report(fake_plex(), snapshot_items=True)
+        self.assertEqual(report["snapshot"]["server_id"], "machineidfortests")
+        area = report["snapshot"]["area"]
+        self.assertEqual(sorted(area), ["1", "2", "3", "4"])
+        movies, tv = area["1"], area["2"]
+        self.assertEqual(movies["items"], {"101": "Arrival (2016)", "102": "Heat (1995)",
+                                           "103": "Home Video", "104": "Lost Film (2001)"})
+        self.assertEqual(movies["unavailable"], {"104": "Lost Film (2001)"})
+        self.assertEqual((movies["name"], movies["type"], movies["counts"]), ("Movies", "movie", {"movies": 4}))
+        self.assertEqual(tv["items"], {"200": "The Show", "201": "Mystery Show"})
+        self.assertEqual(tv["episodes"], {"200": 2, "201": 1})
+        self.assertEqual(area["4"]["items"], {})
+
+    def test_no_snapshot_block_without_the_flag(self):
+        self.assertNotIn("snapshot", self.report(fake_plex()))
+
+    def test_no_snapshot_yet(self):
+        self.assertIsNone(self.report(fake_plex())["since_snapshot"])
+
+    def test_snapshot_items_refused_with_library(self):
+        argv = ["library_report.py", "--snapshot-items", "--library", "Movies"]
+        with mock.patch.object(sys, "argv", argv), mock.patch.object(lr, "PlexClient") as client:
+            self.assertEqual(lr.main(), 1)
+        client.assert_not_called()
+        self.assertIn("--library", self.stderr.getvalue())
+
+    def test_changes(self):
+        old = copy.deepcopy(self.area())
+        movies, tv, kids = old["1"], old["2"], old["3"]
+        del movies["items"]["101"]                       # Arrival is new since then
+        movies["items"]["999"] = "Gone Film (1990)"      # this one was removed
+        movies["unavailable"] = {}                       # Lost Film became unavailable
+        movies["size_gb"] = 100.0
+        tv["episodes"]["200"] = 1                        # The Show got one more episode
+        tv["episodes"]["298"] = 4                        # a show that was removed, with 4 episodes
+        tv["items"]["298"] = "Old Show"
+        tv["unavailable"] = {"300": "The Show S01E01"}  # back now
+        kids["name"] = "Children"
+        del old["4"]                                     # Photos is a new library
+        old["9"] = {"name": "Music", "type": "artist", "counts": {"albums": 3}, "size_gb": 2.5}
+        write_snapshot(self.tmp, 2, library=old)
+
+        since = self.report(fake_plex())["since_snapshot"]
+        self.assertEqual((since["days_ago"], len(since["snapshot_date"])), (2, 10))
+        by_name = {lib["name"]: lib for lib in since["libraries"]}
+        m = by_name["Movies"]
+        self.assertEqual((m["status"], m["added"], m["added_count"]), ("same", ["Arrival (2016)"], 1))
+        self.assertEqual((m["removed"], m["became_unavailable"]), (["Gone Film (1990)"], ["Lost Film (2001)"]))
+        self.assertEqual((m["size_gb_change"], m["counts_change"]), (26.0, {"movies": 0}))
+        t = by_name["TV"]
+        self.assertEqual(t["episodes_added"], [{"show": "The Show", "count": 1}])
+        self.assertEqual(t["episodes_removed"], [{"show": "Old Show", "count": 4}])
+        self.assertEqual((t["episodes_added_count"], t["episodes_removed_count"]), (1, 4))
+        self.assertEqual(t["available_again"], ["The Show S01E01"])
+        self.assertEqual(by_name["Kids Movies"]["renamed_from"], "Children")
+        self.assertEqual(by_name["Photos"]["status"], "new")
+        self.assertEqual((by_name["Music"]["status"], by_name["Music"]["size_gb"]), ("removed", 2.5))
+        totals = since["totals"]
+        self.assertEqual((totals["added"], totals["removed"], totals["episodes_added"],
+                          totals["became_unavailable"], totals["available_again"]), (1, 2, 1, 1, 1))
+
+    def test_no_change(self):
+        write_snapshot(self.tmp, 1, library=self.area())
+        since = self.report(fake_plex())["since_snapshot"]
+        self.assertTrue(all(lib["status"] == "same" for lib in since["libraries"]))
+        self.assertEqual(since["totals"], {"added": 0, "removed": 0, "episodes_added": 0, "episodes_removed": 0,
+                                           "became_unavailable": 0, "available_again": 0, "size_gb_change": 0.0})
+
+    def test_examples_are_capped_but_counted(self):
+        old = copy.deepcopy(self.area())
+        old["1"]["items"].update({f"9{n:03d}": f"Old Movie {n:03d}" for n in range(40)})
+        write_snapshot(self.tmp, 1, library=old)
+        movies = self.report(fake_plex())["since_snapshot"]["libraries"][0]
+        self.assertEqual((movies["removed_count"], len(movies["removed"])), (40, 25))
+        self.assertEqual(movies["removed"][0], "Old Movie 000")
+
+    def test_library_filter_compares_only_those(self):
+        old = copy.deepcopy(self.area())
+        old["9"] = {"name": "Music", "type": "artist", "counts": {}, "size_gb": 1.0}
+        write_snapshot(self.tmp, 1, library=old)
+        since = self.report(fake_plex(), library=["TV"])["since_snapshot"]
+        self.assertEqual([lib["name"] for lib in since["libraries"]], ["TV"])
+
+    def test_since_option(self):
+        write_snapshot(self.tmp, 3, library=self.area())
+        write_snapshot(self.tmp, 10, library=self.area())
+        self.assertEqual(self.report(fake_plex())["since_snapshot"]["days_ago"], 3)
+        self.assertEqual(self.report(fake_plex(), since=7)["since_snapshot"]["days_ago"], 10)
+
+    def test_bad_snapshot_area_never_stops_the_report(self):
+        write_snapshot(self.tmp, 1, library={"1": {"items": ["not", "a", "map"], "counts": "x", "size_gb": "big"},
+                                             "2": "nonsense"})
+        report = self.report(fake_plex())
+        self.assertEqual(report["since_snapshot"]["libraries"][0]["added_count"], 4)

@@ -10,6 +10,7 @@ Safety rules: see openspec/specs/security/spec.md in the Cinemetric repository.
 """
 
 import argparse
+import datetime
 import ipaddress
 import json
 import os
@@ -22,7 +23,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.17.0"
+VERSION = "0.18.0"
 TIMEOUT_SECONDS = 30
 MAX_TITLE_LENGTH = 120
 
@@ -211,6 +212,104 @@ def clean(text):
     """Titles and names are untrusted data: strip control characters and cap the length."""
     text = re.sub(r"[\x00-\x1f\x7f]", " ", str(text or "")).strip()
     return text[:MAX_TITLE_LENGTH]
+
+
+# ---------------------------------------------------------------- snapshots
+#
+# Shared helper: the same code is in library_report.py, server_health.py, users_and_shares.py and
+# changes.py. Keep every copy in step. Snapshot files are untrusted data: anything odd is skipped,
+# and every text value is cleaned again on the way in.
+
+SNAPSHOT_FORMAT = 1
+SNAPSHOT_MAX_BYTES = 50 * 1000 * 1000
+SNAPSHOT_NAME = re.compile(r"^(\d{4}-\d{2}-\d{2})\.json$")
+SERVER_ID = re.compile(r"^[A-Za-z0-9]{1,128}$")
+
+
+def data_dir():
+    if os.environ.get("CINEMETRIC_DATA_DIR"):
+        return os.environ["CINEMETRIC_DATA_DIR"]
+    if os.name == "nt":
+        base = os.environ.get("LOCALAPPDATA") or os.path.join(os.path.expanduser("~"), "AppData", "Local")
+    else:
+        base = os.environ.get("XDG_DATA_HOME") or os.path.join(os.path.expanduser("~"), ".local", "share")
+    return os.path.join(base, "cinemetric")
+
+
+def snapshots_dir():
+    return os.path.join(data_dir(), "snapshots")
+
+
+def snapshot_files(server_id):
+    """(date, path) of each snapshot file for a server, newest first. Other names are ignored."""
+    if not SERVER_ID.match(str(server_id or "")):
+        return []
+    folder = os.path.join(snapshots_dir(), server_id)
+    try:
+        names = os.listdir(folder)
+    except OSError:
+        return []
+    found = []
+    for name in names:
+        match = SNAPSHOT_NAME.match(name)
+        if not match:
+            continue
+        try:
+            found.append((datetime.date.fromisoformat(match.group(1)), os.path.join(folder, name)))
+        except ValueError:
+            continue
+    return sorted(found, reverse=True)
+
+
+def clean_tree(value):
+    if isinstance(value, dict):
+        return {clean(k): clean_tree(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [clean_tree(v) for v in value]
+    if isinstance(value, str):
+        return clean(value)
+    return value
+
+
+def read_snapshot(path):
+    """A snapshot's contents with text cleaned, or None if it isn't a sound format 1 snapshot."""
+    try:
+        info = os.lstat(path)
+        if not stat.S_ISREG(info.st_mode) or info.st_size > SNAPSHOT_MAX_BYTES:
+            return None
+        with open(path, encoding="utf-8") as fh:
+            data = json.loads(fh.read(SNAPSHOT_MAX_BYTES + 1))
+    except (OSError, ValueError, RecursionError):
+        return None
+    if not isinstance(data, dict) or data.get("format") != SNAPSHOT_FORMAT:
+        return None
+    return clean_tree(data)
+
+
+def choose_snapshot(server_id, area, since_days=None, today=None):
+    """The snapshot area to compare with, and {"snapshot_date", "days_ago"}; or None.
+
+    The newest snapshot from before today that has this area. With since_days, the newest that is
+    at least that old, or the oldest one when none is.
+    """
+    today = today or datetime.date.today()
+    earlier = [(day, path) for day, path in snapshot_files(server_id) if day < today]
+    if since_days:
+        old_enough = [f for f in earlier if (today - f[0]).days >= since_days]
+        younger = [f for f in earlier if (today - f[0]).days < since_days]
+        earlier = old_enough + younger[::-1]  # newest old-enough first, then oldest younger first
+    for day, path in earlier:
+        data = read_snapshot(path)
+        if data and isinstance(data.get(area), dict):
+            return data[area], {"snapshot_date": day.isoformat(), "days_ago": (today - day).days}
+    return None
+
+
+def as_count(value):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
 
 
 def as_int(value, default=0):
@@ -610,6 +709,46 @@ def worth_a_look(report, stale_days, stuck_wait=0):
     return notes
 
 
+# ---------------------------------------------------------------- since the last snapshot
+
+def health_area(server):
+    """This run's part of a snapshot. update_version is false when Plex says there's no update and
+    null when the update check failed, so an unknown value is never mistaken for a change."""
+    update = server.get("update")
+    if update is None:
+        update_version = None
+    elif update.get("update_available"):
+        update_version = clean(update.get("available_version")) or None
+    else:
+        update_version = False
+    return {
+        "version": clean(server.get("version")) or None,
+        "update_version": update_version,
+        "remote_access": clean((server.get("remote_access") or {}).get("state")) or None,
+    }
+
+
+def health_changes(old, new):
+    changes = []
+    for kind in ("version", "update_version", "remote_access"):
+        before, after = old.get(kind), new[kind]
+        if before is None or after is None or not isinstance(before, (str, bool)) or before == after:
+            continue
+        changes.append({"kind": kind, "from": before, "to": after})
+    return changes
+
+
+def since_snapshot(server_id, area, args):
+    try:
+        found = choose_snapshot(server_id, "health", args.since)
+        if not found:
+            return None
+        old, when = found
+        return dict(when, changes=health_changes(old, area))
+    except Exception:  # a bad snapshot never stops the report
+        return None
+
+
 def build_report(client, args):
     now = int(time.time())
     root = client.get("/")
@@ -647,6 +786,11 @@ def build_report(client, args):
     }
     report["worth_a_look"] = worth_a_look(report, args.stale_days, args.stuck_wait)
     report["unavailable"] = unavailable
+    server_id = str(root.get("machineIdentifier") or "")
+    area = health_area(server)
+    report["since_snapshot"] = since_snapshot(server_id, area, args)
+    if args.snapshot_items:
+        report["snapshot"] = {"server_id": clean(server_id), "area": area}
     return report
 
 
@@ -657,7 +801,12 @@ def main():
                         help="flag libraries not scanned in this many days")
     parser.add_argument("--stuck-wait", type=int, default=15,
                         help="seconds to wait before checking running tasks again (0 turns it off)")
+    parser.add_argument("--since", type=int, help="compare with a snapshot at least this many days old (1-90)")
+    parser.add_argument("--snapshot-items", action="store_true",
+                        help="add this run's part of a snapshot (used by the changes skill and dashboard)")
     args = parser.parse_args()
+    if args.since is not None:
+        args.since = max(1, min(args.since, 90))
     args.stale_days = max(1.0, args.stale_days)
     args.stuck_wait = min(300, max(0, args.stuck_wait))
 

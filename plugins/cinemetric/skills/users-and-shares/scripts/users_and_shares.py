@@ -14,6 +14,7 @@ Safety rules: see openspec/specs/security/spec.md in the Cinemetric repository.
 """
 
 import argparse
+import datetime
 import ipaddress
 import json
 import os
@@ -27,7 +28,7 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 
-VERSION = "0.17.0"
+VERSION = "0.18.0"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 MAX_PLEX_TV_BYTES = 5 * 1024 * 1024
@@ -301,6 +302,104 @@ def clean(text):
     """Titles and names are untrusted data: strip control characters and cap the length."""
     text = re.sub(r"[\x00-\x1f\x7f]", " ", str(text or "")).strip()
     return text[:MAX_TITLE_LENGTH]
+
+
+# ---------------------------------------------------------------- snapshots
+#
+# Shared helper: the same code is in library_report.py, server_health.py, users_and_shares.py and
+# changes.py. Keep every copy in step. Snapshot files are untrusted data: anything odd is skipped,
+# and every text value is cleaned again on the way in.
+
+SNAPSHOT_FORMAT = 1
+SNAPSHOT_MAX_BYTES = 50 * 1000 * 1000
+SNAPSHOT_NAME = re.compile(r"^(\d{4}-\d{2}-\d{2})\.json$")
+SERVER_ID = re.compile(r"^[A-Za-z0-9]{1,128}$")
+
+
+def data_dir():
+    if os.environ.get("CINEMETRIC_DATA_DIR"):
+        return os.environ["CINEMETRIC_DATA_DIR"]
+    if os.name == "nt":
+        base = os.environ.get("LOCALAPPDATA") or os.path.join(os.path.expanduser("~"), "AppData", "Local")
+    else:
+        base = os.environ.get("XDG_DATA_HOME") or os.path.join(os.path.expanduser("~"), ".local", "share")
+    return os.path.join(base, "cinemetric")
+
+
+def snapshots_dir():
+    return os.path.join(data_dir(), "snapshots")
+
+
+def snapshot_files(server_id):
+    """(date, path) of each snapshot file for a server, newest first. Other names are ignored."""
+    if not SERVER_ID.match(str(server_id or "")):
+        return []
+    folder = os.path.join(snapshots_dir(), server_id)
+    try:
+        names = os.listdir(folder)
+    except OSError:
+        return []
+    found = []
+    for name in names:
+        match = SNAPSHOT_NAME.match(name)
+        if not match:
+            continue
+        try:
+            found.append((datetime.date.fromisoformat(match.group(1)), os.path.join(folder, name)))
+        except ValueError:
+            continue
+    return sorted(found, reverse=True)
+
+
+def clean_tree(value):
+    if isinstance(value, dict):
+        return {clean(k): clean_tree(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [clean_tree(v) for v in value]
+    if isinstance(value, str):
+        return clean(value)
+    return value
+
+
+def read_snapshot(path):
+    """A snapshot's contents with text cleaned, or None if it isn't a sound format 1 snapshot."""
+    try:
+        info = os.lstat(path)
+        if not stat.S_ISREG(info.st_mode) or info.st_size > SNAPSHOT_MAX_BYTES:
+            return None
+        with open(path, encoding="utf-8") as fh:
+            data = json.loads(fh.read(SNAPSHOT_MAX_BYTES + 1))
+    except (OSError, ValueError, RecursionError):
+        return None
+    if not isinstance(data, dict) or data.get("format") != SNAPSHOT_FORMAT:
+        return None
+    return clean_tree(data)
+
+
+def choose_snapshot(server_id, area, since_days=None, today=None):
+    """The snapshot area to compare with, and {"snapshot_date", "days_ago"}; or None.
+
+    The newest snapshot from before today that has this area. With since_days, the newest that is
+    at least that old, or the oldest one when none is.
+    """
+    today = today or datetime.date.today()
+    earlier = [(day, path) for day, path in snapshot_files(server_id) if day < today]
+    if since_days:
+        old_enough = [f for f in earlier if (today - f[0]).days >= since_days]
+        younger = [f for f in earlier if (today - f[0]).days < since_days]
+        earlier = old_enough + younger[::-1]  # newest old-enough first, then oldest younger first
+    for day, path in earlier:
+        data = read_snapshot(path)
+        if data and isinstance(data.get(area), dict):
+            return data[area], {"snapshot_date": day.isoformat(), "days_ago": (today - day).days}
+    return None
+
+
+def as_count(value):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
 
 
 def epoch(value):
@@ -582,6 +681,82 @@ def worth_a_look(people, inactive_days, now):
     return items
 
 
+# ---------------------------------------------------------------- since the last snapshot
+
+SNAPSHOT_FIELDS = ("name", "kind", "status", "libraries", "allow_downloads")
+EMAIL_INVITE = "invited by email"
+
+
+def sharing_area(people):
+    """This run's part of a snapshot: only the details the report already shows about each person."""
+    return {"people": [{k: p[k] for k in SNAPSHOT_FIELDS} for p in people]}
+
+
+def known_libraries(value):
+    """A person's libraries from a snapshot: "all", a sorted list of names, or None when unknown."""
+    if value == "all":
+        return value
+    if isinstance(value, list) and all(isinstance(v, str) for v in value):
+        return sorted(value)
+    return None
+
+
+def by_person(area):
+    """{(name, kind): person} for everyone except the email invites, plus the email invite count."""
+    people, email_invites = {}, 0
+    for p in area.get("people") or []:
+        if not isinstance(p, dict) or not isinstance(p.get("name"), str):
+            continue
+        if p["name"] == EMAIL_INVITE:
+            email_invites += 1
+        else:
+            people[(p["name"], p.get("kind"))] = p
+    return people, email_invites
+
+
+def sharing_changes(old_area, new_area):
+    old, old_invites = by_person(old_area)
+    new, new_invites = by_person(new_area)
+    brief = lambda p: {"name": p["name"], "kind": p.get("kind"), "status": p.get("status")}
+    out = {
+        "added": [brief(p) for key, p in new.items() if key not in old],
+        "removed": [brief(p) for key, p in old.items() if key not in new],
+        "accepted": [], "libraries_changed": [], "downloads_changed": [],
+        "email_invites_change": new_invites - old_invites,
+    }
+    for key, now in new.items():
+        before = old.get(key)
+        if before is None:
+            continue
+        if before.get("status") == "pending" and now["status"] == "accepted":
+            out["accepted"].append(now["name"])
+        was, is_ = known_libraries(before.get("libraries")), known_libraries(now["libraries"])
+        if was is not None and is_ is not None and was != is_:
+            if isinstance(was, list) and isinstance(is_, list):
+                out["libraries_changed"].append({"name": now["name"], "gained": sorted(set(is_) - set(was)),
+                                                 "lost": sorted(set(was) - set(is_))})
+            else:
+                out["libraries_changed"].append({"name": now["name"], "from": was, "to": is_})
+        if isinstance(before.get("allow_downloads"), bool) and isinstance(now["allow_downloads"], bool) \
+                and before["allow_downloads"] != now["allow_downloads"]:
+            out["downloads_changed"].append({"name": now["name"], "to": now["allow_downloads"]})
+    for name in ("added", "removed"):
+        out[name].sort(key=lambda p: p["name"].lower())
+    out["accepted"].sort(key=str.lower)
+    return out
+
+
+def since_snapshot(server_id, area, args):
+    try:
+        found = choose_snapshot(server_id, "sharing", args.since)
+        if not found:
+            return None
+        old, when = found
+        return dict(when, **sharing_changes(old, area))
+    except Exception:  # a bad snapshot never stops the report
+        return None
+
+
 def build_report(config, args):
     plex = PlexClient(*config["plex"])
     root = plex.get("/")
@@ -644,7 +819,8 @@ def build_report(config, args):
         totals["by_kind"][p["kind"]] = totals["by_kind"].get(p["kind"], 0) + 1
         totals["by_status"][p["status"]] = totals["by_status"].get(p["status"], 0) + 1
 
-    return {
+    area = sharing_area(people)
+    report = {
         "cinemetric_version": VERSION,
         "generated_at": time.strftime("%Y-%m-%d %H:%M %Z"),
         "inactive_days": args.inactive_days,
@@ -660,7 +836,11 @@ def build_report(config, args):
         "totals": totals,
         "worth_a_look": flags,
         "unavailable": unavailable,
+        "since_snapshot": since_snapshot(machine_id, area, args),
     }
+    if args.snapshot_items:
+        report["snapshot"] = {"server_id": machine_id, "area": area}
+    return report
 
 
 def check(config):
@@ -675,7 +855,12 @@ def main():
     parser.add_argument("--check", action="store_true", help="only test the connections")
     parser.add_argument("--inactive-days", type=int, default=90,
                         help="days without a play that count as inactive (default 90)")
+    parser.add_argument("--since", type=int, help="compare with a snapshot at least this many days old (1-90)")
+    parser.add_argument("--snapshot-items", action="store_true",
+                        help="add this run's part of a snapshot (used by the changes skill and dashboard)")
     args = parser.parse_args()
+    if args.since is not None:
+        args.since = max(1, min(args.since, 90))
     args.inactive_days = max(1, args.inactive_days)
 
     try:

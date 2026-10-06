@@ -11,7 +11,7 @@ import time
 from unittest import mock
 
 from helpers import (FAKE_API_KEY, FAKE_TOKEN, FIXTURES_DIR, FakeServer, OfflineTestCase, Reply,
-                     Unreachable, fixture, load_script)
+                     Unreachable, fixture, load_script, write_snapshot)
 
 us = load_script("users-and-shares")
 
@@ -28,7 +28,7 @@ SECRETS = ["@example.com", "friend-token-", "SECRET", "avatar", "contentRating",
 
 
 def args(**overrides):
-    values = {"inactive_days": 90}
+    values = {"inactive_days": 90, "since": None, "snapshot_items": False}
     values.update(overrides)
     return argparse.Namespace(**values)
 
@@ -575,3 +575,69 @@ class Options(Base):
         with self.assertRaises(us.ReportError) as caught:
             us.load_config()
         self.assertTrue(str(caught.exception).startswith("NOT_CONFIGURED"))
+
+
+# ---------------------------------------------------------------- snapshots
+
+class SharingSnapshot(Base):
+    def area(self):
+        return self.report(snapshot_items=True)["snapshot"]["area"]
+
+    def test_snapshot_area_keeps_only_allowed_details(self):
+        report = self.report(snapshot_items=True)
+        self.assertEqual(report["snapshot"]["server_id"], MACHINE_ID)
+        for person in report["snapshot"]["area"]["people"]:
+            with self.subTest(person=person["name"]):
+                self.assertEqual(set(person), {"name", "kind", "status", "libraries", "allow_downloads"})
+        text = json.dumps(report["snapshot"])
+        for secret in SECRETS:
+            self.assertNotIn(secret, text)
+
+    def test_no_snapshot_block_without_the_flag(self):
+        report = self.report()
+        self.assertNotIn("snapshot", report)
+        self.assertIsNone(report["since_snapshot"])
+
+    def test_changes(self):
+        old = self.area()
+        people = {p["name"]: p for p in old["people"]}
+        del people["emery"]                                  # a new friend since then
+        people["gone"] = {"name": "gone", "kind": "friend", "status": "accepted",
+                          "libraries": ["Movies"], "allow_downloads": False}
+        people["alex"]["libraries"] = ["Movies"]             # alex was given TV Shows
+        people["blair"]["libraries"] = ["Movies"]            # blair was given every library
+        people["casey"]["allow_downloads"] = False           # casey can download now
+        people["drew"]["status"] = "pending"
+        old["people"] = list(people.values())
+        old["people"].append({"name": "invited by email", "kind": "friend", "status": "pending",
+                              "libraries": None, "allow_downloads": None})
+        write_snapshot(self.tmp, 5, server_id=MACHINE_ID, sharing=old)
+
+        since = self.report()["since_snapshot"]
+        self.assertEqual(since["days_ago"], 5)
+        self.assertEqual(since["added"], [{"name": "emery", "kind": "friend", "status": "accepted"}])
+        self.assertEqual(since["removed"], [{"name": "gone", "kind": "friend", "status": "accepted"}])
+        self.assertEqual(since["libraries_changed"], [
+            {"name": "alex", "gained": ["TV Shows"], "lost": []},
+            {"name": "blair", "from": ["Movies"], "to": "all"},
+        ])
+        self.assertEqual(since["downloads_changed"], [{"name": "casey", "to": True}])
+        self.assertEqual(since["accepted"], [])
+        self.assertEqual(since["email_invites_change"], -1)
+
+    def test_invite_accepted(self):
+        old = self.area()
+        for p in old["people"]:
+            if p["name"] == "emery":
+                p.update(status="pending", libraries=None, allow_downloads=None)
+        write_snapshot(self.tmp, 1, server_id=MACHINE_ID, sharing=old)
+        since = self.report()["since_snapshot"]
+        self.assertEqual(since["accepted"], ["emery"])
+        self.assertEqual(since["libraries_changed"], [])  # unknown before, so not a change
+
+    def test_nothing_changed(self):
+        write_snapshot(self.tmp, 1, server_id=MACHINE_ID, sharing=self.area())
+        since = self.report()["since_snapshot"]
+        for name in ("added", "removed", "accepted", "libraries_changed", "downloads_changed"):
+            self.assertEqual(since[name], [], name)
+        self.assertEqual(since["email_invites_change"], 0)

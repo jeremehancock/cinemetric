@@ -39,7 +39,8 @@
      }
     ]
    }
-  ]
+  ],
+  "ratingKey": "101"
  },
  {
   "title": "Heat",
@@ -61,7 +62,8 @@
      }
     ]
    }
-  ]
+  ],
+  "ratingKey": "102"
  },
  {
   "title": "Home Video",
@@ -79,7 +81,8 @@
      }
     ]
    }
-  ]
+  ],
+  "ratingKey": "103"
  },
  {
   "title": "Lost Film",
@@ -99,6 +102,7 @@
      }
     ]
    }
-  ]
+  ],
+  "ratingKey": "104"
  }
 ]

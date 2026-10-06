@@ -45,8 +45,9 @@ address. Two scripts SHALL additionally contact plex.tv, and only at the address
   `https://plex.tv/api/invites/requested`, because who a server is shared with is only stored on
   plex.tv.
 
-There SHALL be no analytics, update checks or other third-party services. Pages Cinemetric creates
-SHALL NOT make any network requests when opened.
+The dashboard and changes scripts SHALL contact nothing themselves; they only run other Cinemetric
+scripts. There SHALL be no analytics, update checks or other third-party services. Pages Cinemetric
+creates SHALL NOT make any network requests when opened.
 
 #### Scenario: Building a report
 - **WHEN** `library-report`, `server-health`, `watch-activity`, `unwatched` or `dashboard` runs
@@ -64,6 +65,10 @@ SHALL NOT make any network requests when opened.
 #### Scenario: Opening the dashboard
 - **WHEN** the user opens the dashboard page in a browser
 - **THEN** the browser makes no network requests
+
+#### Scenario: Saving, listing or forgetting snapshots
+- **WHEN** `changes.py save`, `changes.py list` or `changes.py forget` runs
+- **THEN** no network connection is opened
 
 ### Requirement: No redirects
 Scripts SHALL NOT follow HTTP redirects. A redirect SHALL stop the script with an error asking the
@@ -96,16 +101,21 @@ real terminal, so Claude can't run it.
 - **THEN** it refuses and tells the user to run it in their own terminal
 
 ### Requirement: Private files
-Cinemetric's config folder SHALL be created readable only by the user (`700`), and every file holding settings or
-report data (config, in-progress sign-in, Tautulli form status, dashboard page and dashboard state)
-SHALL be created readable only by the user (`600`) from the start, with no
-moment where looser permissions apply. On Linux and macOS, a config file owned by another user or
-accessible to other users SHALL be refused, with the `chmod 600` command that fixes it. The
-in-progress sign-in file SHALL be deleted once a server is selected or setup is cancelled.
+Cinemetric's config folder, data folder and snapshots folders SHALL be created readable only by the
+user (`700`), and every file holding settings or report data (config, in-progress sign-in, Tautulli
+form status, dashboard page, dashboard state and snapshots) SHALL be created readable only by the user
+(`600`) from the start, with no moment where looser permissions apply. On Linux and macOS, a config
+file owned by another user or accessible to other users SHALL be refused, with the `chmod 600`
+command that fixes it. The in-progress sign-in file SHALL be deleted once a server is selected or
+setup is cancelled.
 
 #### Scenario: Config readable by others
 - **WHEN** a script finds `config.json` with group or other permissions
 - **THEN** it refuses to read it and prints `chmod 600 <path>` as the fix
+
+#### Scenario: A new snapshot
+- **WHEN** `changes.py` saves the first snapshot for a server
+- **THEN** the `snapshots` folder and the server's folder are `700` and the file is `600`
 
 ### Requirement: Encrypted connections by default
 HTTPS certificates SHALL be checked unless the user explicitly turned checking off: `"verify_tls":
@@ -174,4 +184,22 @@ about each person are kept.
 #### Scenario: plex.tv returns a friend's token
 - **WHEN** a plex.tv response lists a friend with their `accessToken` and `email`
 - **THEN** neither appears in the script's output, its progress messages or any error
+
+### Requirement: Snapshots are read as data
+A snapshot file SHALL be treated as untrusted data when read. Scripts SHALL skip, without failing, a
+file that is larger than 50 MB, is not valid JSON, is not a JSON object, has a `format` other than 1,
+or is not a regular file (for example a symbolic link). Server ids used as folder names SHALL contain
+only letters and digits, and file names SHALL match `YYYY-MM-DD.json`; anything else is ignored.
+Every text value taken from a snapshot (titles, library names, people's names, versions) SHALL have
+control characters removed and be cut to 120 characters before it is printed, and the dashboard
+SHALL HTML-escape it.
+
+#### Scenario: A damaged snapshot
+- **WHEN** yesterday's snapshot is cut off halfway and so isn't valid JSON
+- **THEN** the report skips it, compares with the next older snapshot, and still succeeds
+
+#### Scenario: A snapshot with a crafted title
+- **WHEN** a snapshot's title contains a newline and is 500 characters long
+- **THEN** a title from it in `since_snapshot` has the newline replaced with a space and is cut to
+  120 characters
 

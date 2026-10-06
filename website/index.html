@@ -119,7 +119,7 @@
       <div class="wrap">
         <div class="section-head reveal">
           <p class="kicker">The library</p>
-          <h2 id="skills-title">Eight skills. One curious question at a time.</h2>
+          <h2 id="skills-title">Nine skills. One curious question at a time.</h2>
           <p>Just ask Claude in your own words. Each skill knows when it's needed, runs a small script against your server and turns the result into a clear report.</p>
         </div>
 
@@ -172,6 +172,13 @@
             </span>
             <span class="poster-title">what-to-watch</span>
             <span class="poster-sub">What to watch tonight</span>
+          </a></li>
+          <li class="reveal"><a class="poster" href="#skill-changes" style="--a:#ef5350;--b:#4a1515">
+            <span class="poster-art" aria-hidden="true">
+              <svg viewBox="0 0 48 48"><path d="M38 17A15 15 0 1 0 39 29" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M40 8v10h-10" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 24h12M24 18v12" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" opacity=".7"/></svg>
+            </span>
+            <span class="poster-title">changes</span>
+            <span class="poster-sub">What's new since</span>
           </a></li>
           <li class="reveal"><a class="poster" href="#skill-dashboard" style="--a:#8b5cf6;--b:#2a1a4d">
             <span class="poster-art" aria-hidden="true">
@@ -535,8 +542,58 @@
       </div>
     </section>
 
+    <!-- ============ SKILL: CHANGES ============ -->
+    <section class="section feature flip" id="skill-changes" aria-labelledby="f-changes">
+      <div class="wrap feature-grid">
+        <div class="feature-copy reveal">
+          <p class="kicker" style="--k:#f87171">changes</p>
+          <h2 id="f-changes">See what changed since last time.</h2>
+          <p>Each time you ask what changed (or build the dashboard), Cinemetric saves a small snapshot on your computer. The next time, on another day, it tells you what arrived, what went missing and who got access since then.</p>
+          <ul class="ticks">
+            <li>Titles added and removed in each library, and new episodes by show.</li>
+            <li>Files Plex can no longer find, and ones that came back.</li>
+            <li>Plex updates, remote access changes, and people given or losing access.</li>
+            <li>The library, server and sharing reports and the dashboard show the same "since last time" changes.</li>
+            <li>Nothing runs in the background: a snapshot is only saved when you ask. Ask a week apart and you see the whole week.</li>
+            <li>Snapshots stay private on your computer, hold no emails or watch history, and are deleted after 90 days.</li>
+          </ul>
+          <p class="ask-line">Ask Claude: <q>What changed on my Plex this week?</q> or <q>Did anything go missing from Plex?</q></p>
+        </div>
+
+        <figure class="mock demo reveal" aria-label="Example: what changed on the server this week">
+          <div class="mock-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><em>Claude Code</em></div>
+          <div class="tabpanel" id="panel-changes-1">
+            <pre class="term"><code><span class="t-you">&gt; What changed on my Plex this week?</span>
+<span class="t-dot">⏺</span> Since last Tuesday: 9 new movies,
+  23 new episodes, and Plex updated
+  itself to 1.41.2.
+
+  <b class="t-h">Library</b>
+  <table class="t-table"><thead><tr><th>Library</th><th>Added</th><th>Removed</th><th>Size</th></tr></thead><tbody><tr><td>Movies</td><td>9</td><td>1</td><td>+212 GB</td></tr><tr><td>TV Shows</td><td>23 eps</td><td>0</td><td>+96 GB</td></tr></tbody></table>
+  New movies include Glass Orchard (2019),
+  The Salt Road (2016) and Paper Lanterns
+  (2014). Most new episodes are Northern
+  Static (12) and Lanterns (8).
+
+  4 episodes of Low Tide can't be found
+  now. That usually means a drive wasn't
+  mounted, or files were moved outside
+  Plex.
+
+  <b class="t-h">Server</b>
+  Plex went from 1.41.0 to 1.41.2.
+
+  <b class="t-h">People</b>
+  jordan accepted your invite, and riley
+  can now see Kids Movies.</code></pre>
+          </div>
+          <figcaption>Example reply with made-up data. Claude's wording will vary.</figcaption>
+        </figure>
+      </div>
+    </section>
+
     <!-- ============ SKILL: DASHBOARD ============ -->
-    <section class="section feature flip" id="skill-dashboard" aria-labelledby="f-dash">
+    <section class="section feature" id="skill-dashboard" aria-labelledby="f-dash">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#a382ff">dashboard</p>
@@ -554,7 +611,7 @@
 
         <figure class="mock demo reveal" aria-label="Example: the dashboard page">
           <div class="mock-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><em>Your browser</em></div>
-          <div class="shot"><img src="screens/dashboard.jpg" width="900" height="4020" loading="lazy" alt="The real Cinemetric dashboard in dark mode: library size, plays and watch time, a server card with an update notice, a plays-per-day bar chart, top shows, movies, music and viewers, the library table with a storage-added-per-month bar chart, titles nobody has finished in six months, and who the server is shared with."></div>
+          <div class="shot"><img src="screens/dashboard.jpg" width="900" height="4433" loading="lazy" alt="The real Cinemetric dashboard in dark mode: library size, plays and watch time, a section listing what changed since Sep 27: titles added and removed, new episodes, files Plex can't find, a Plex update and sharing changes, a server card with an update notice, a plays-per-day bar chart, top shows, movies, music and viewers, the library table with a storage-added-per-month bar chart, titles nobody has finished in six months, and who the server is shared with."></div>
           <figcaption>The real dashboard, filled with made-up sample data. Scroll inside it to see more.</figcaption>
         </figure>
       </div>

@@ -26,6 +26,7 @@ FIXTURES_DIR = os.path.join(ROOT, "tests", "fixtures")
 
 # Skill folder -> script file name.
 SCRIPTS = {
+    "changes": "changes.py",
     "dashboard": "dashboard.py",
     "library-report": "library_report.py",
     "server-health": "server_health.py",
@@ -207,3 +208,29 @@ class OfflineTestCase(unittest.TestCase):
             json.dump(data, fh)
         os.chmod(path, mode)
         return path
+
+
+# ---------------------------------------------------------------- snapshots
+
+TEST_SERVER_ID = "machineidfortests"
+
+
+def snapshot_path(home, day, server_id=TEST_SERVER_ID):
+    """Where a snapshot for `day` (a datetime.date) lives under the test's temporary folder."""
+    return os.path.join(home, "data", "cinemetric", "snapshots", server_id, f"{day.isoformat()}.json")
+
+
+def write_snapshot(home, days_ago, server_id=TEST_SERVER_ID, raw=None, **areas):
+    """Save a format 1 snapshot dated `days_ago` days before today, with the given areas.
+
+    `raw` writes that exact text instead, for testing damaged files. Returns the file's path.
+    """
+    import datetime
+    day = datetime.date.today() - datetime.timedelta(days=days_ago)
+    path = snapshot_path(home, day, server_id)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    if raw is None:
+        raw = json.dumps(dict({"format": 1, "date": day.isoformat(), "server_name": "Test Server"}, **areas))
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(raw)
+    return path

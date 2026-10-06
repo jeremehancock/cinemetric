@@ -128,6 +128,24 @@ sharing = {
     ],
 }
 
+# What changed since a snapshot a week earlier (the dashboard's "Since" section).
+since = {"snapshot_date": "2026-09-27", "days_ago": 7}
+library["since_snapshot"] = dict(since, libraries=[
+    {"name": "Movies", "type": "movie", "status": "same", "added_count": 9,
+     "added": ["Midnight Orchard (2020)", "Paper Lanterns (2014)", "The Long Voyage (2022)"],
+     "removed_count": 1, "removed": ["Old Copy (1998)"]},
+    {"name": "TV Shows", "type": "show", "status": "same", "episodes_added_count": 23,
+     "episodes_added": [{"show": "Harbor Lights", "count": 12}, {"show": "Quiet Hours", "count": 8},
+                        {"show": "North of Nowhere", "count": 3}],
+     "became_unavailable_count": 4, "became_unavailable": ["Low Tide S01E01", "Low Tide S01E02"]},
+], totals={"added": 9, "removed": 1, "episodes_added": 23, "episodes_removed": 0, "became_unavailable": 4,
+           "available_again": 0, "size_gb_change": 308.0})
+health["since_snapshot"] = dict(since, changes=[{"kind": "version", "from": "1.41.0", "to": "1.41.1"}])
+sharing["since_snapshot"] = dict(since, added=[], removed=[], accepted=["jordan"],
+                                 libraries_changed=[{"name": "riley", "gained": ["Music"], "lost": []}],
+                                 downloads_changed=[], email_invites_change=0)
+
+
 def title(name, gb, added, last=None, episodes=None):
     t = {"title": name, "added": added, "gb": gb, "last_finished": last}
     if episodes:

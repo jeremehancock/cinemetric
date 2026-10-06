@@ -13,7 +13,7 @@ see, using the bundled read-only script.
 ## 1. Run the script
 
 ```
-python3 ${CLAUDE_SKILL_DIR}/scripts/users_and_shares.py [--inactive-days N]
+python3 ${CLAUDE_SKILL_DIR}/scripts/users_and_shares.py [--inactive-days N] [--since DAYS]
 ```
 
 - `--inactive-days N`: how many days without a play count as inactive (default 90). It is also the
@@ -22,6 +22,10 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/users_and_shares.py [--inactive-days N]
 - Use `--check` alone to test the connections to the server and to plex.tv.
 - Who a server is shared with is stored in the owner's plex.tv account, not on the server, so the
   script also reads it from plex.tv (read-only). If the user asks, say so plainly.
+
+- `--since DAYS` picks which saved snapshot `since_snapshot` compares with (the newest one at least
+  that many days old). Use it when the user asks who was added or removed this week or month. Never
+  pass `--snapshot-items`; it's for the changes skill and the dashboard.
 
 ## 2. If it fails
 
@@ -66,11 +70,21 @@ The owner's own plays aren't counted. `played_by` is `null` when watch history c
 only finished ones, like `last_played_source`), how many `days` it covers, and whether the whole
 window was read (`complete`).
 
+`since_snapshot` compares with a snapshot Cinemetric saved on an earlier day: `snapshot_date`,
+`days_ago`, `added` and `removed` (people, with `kind`), `accepted` (invites accepted),
+`libraries_changed` (`gained` and `lost`, or `from` / `to` when either side is "all"),
+`downloads_changed` (`to` is the new setting) and `email_invites_change`. When `since_snapshot` is
+`null`, there is no earlier snapshot for this server. Don't mention it, unless the user asked what
+changed: then say the `cinemetric:changes` skill (or building the dashboard) saves a snapshot each
+time it runs, and changes show from a later day's run.
+
 If the user asked a specific question ("what can Alex see?", "who can see my Kids library?", "who has
 pending invites?"), answer that first and directly, then offer the full overview. Otherwise present,
 in this order:
 
 1. **Headline**: one line, e.g. "Your server is shared with 9 people; 2 invites are still waiting".
+   If `since_snapshot` has any change, add one line after it, e.g. "Since Oct 1: alex was added and
+   blair can now see TV Shows." Facts only: don't comment on why someone was added or removed.
 2. **People**: grouped as Plex Home, managed users, then friends. For each: name, libraries (or "all
    libraries"), whether they can download, content restrictions if set, and last played (as "3 days
    ago" style, or "no plays found"). Pending people: say they haven't accepted yet and when they were

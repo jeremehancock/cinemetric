@@ -34,8 +34,8 @@ CSS and JavaScript with no build step, ready for any static host.
 | `what-to-watch` | Finds something to watch tonight in your own library: by genre, length, decade, rating or content rating, unwatched only, shuffled for fresh ideas each time. Suggests a few titles with a reason for each, or picks up where you left off. Only titles already on your server |
 | `episode-gaps` | Gaps in your TV shows: episode numbers missing between ones you have (E01, E02 and E04 are there, so E03 is probably missing), seasons that start late, seasons missing between others, and episodes whose files Plex can't find. Specials, two-episode files and shows numbered straight on across seasons aren't counted as gaps. Uses only what's on your server, so it can't see episodes after the last one you have |
 | `playback-check` | Files likely to be transcoded (converted on the fly) on common devices, and why: image-based subtitles (PGS, VobSub), TrueHD or DTS audio, and bitrates above your remote streaming limit or a speed you choose. With Tautulli, also which devices and people transcode most, how often, and why. Checks every movie and episode in about a minute; facts only, it never tells you to convert files |
-| `changes` | What changed since yesterday, last week or last month: titles added and removed, new episodes, files Plex can no longer find, Plex updates, and people given or losing access. Each time you run it (or build the dashboard) it saves a small private snapshot on your computer, at most one per day, kept 90 days, to compare with next time. Nothing runs in the background; the library, server and sharing reports and the dashboard show the same "since last time" changes |
-| `dashboard` | One page with library, server, watch, unwatched, episode gaps, playback and sharing stats and charts. Saved on your computer, as a private claude.ai page you can open anywhere, or both; each refresh updates the same file and link |
+| `changes` | What changed since yesterday, last week or last month: titles added and removed, new episodes, files Plex can no longer find, Plex updates, and people given or losing access. Each time you run it (or build the dashboard) it saves a small private snapshot on your computer, at most one per day, kept 90 days, to compare with next time. Nothing runs in the background; the library, server and sharing reports and the dashboard show the same "since last time" changes. It can also say how the library and sharing moved across all the saved snapshots |
+| `dashboard` | One page with library, server, watch, unwatched, episode gaps, playback and sharing stats and charts, plus trends over the saved snapshots (storage, titles per library and people with access). Saved on your computer, as a private claude.ai page you can open anywhere, or both; each refresh updates the same file and link |
 
 More skills are planned, and ideas are welcome; see [Roadmap](#roadmap).
 
@@ -141,8 +141,6 @@ Updates to existing skills:
 
 - [ ] **Weekly digest**: a scheduled weekly run that only mentions what changed, using the snapshots
       the `changes` skill already saves
-- [ ] **Trends on the dashboard**: charts of how the library and sharing changed over the saved
-      snapshots
 - [ ] **`setup`**: remember more than one server and switch between them
 
 ## Support Development

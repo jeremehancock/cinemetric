@@ -10,6 +10,7 @@ only gathers, saves, prunes, lists and deletes snapshots. Uses only the Python s
   changes.py save             save a snapshot from reports given as JSON on stdin (no network)
   changes.py list             list saved snapshots
   changes.py forget           delete every saved snapshot
+  changes.py trends           counts and sizes from every saved snapshot, for charts (no network)
 """
 
 import argparse
@@ -25,7 +26,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.20.0"
+VERSION = "0.21.0"
 SCRIPT_TIMEOUT_SECONDS = 1800
 KEEP_DAYS = 90
 MAX_TITLE_LENGTH = 120
@@ -106,8 +107,9 @@ def clean_tree(value):
     return value
 
 
-def read_snapshot(path):
-    """A snapshot's contents with text cleaned, or None if it isn't a sound format 1 snapshot."""
+def load_snapshot(path):
+    """A snapshot's contents as saved (text not cleaned yet), or None if it isn't a sound format 1
+    snapshot. Clean any text taken from it before showing it; read_snapshot does that for all of it."""
     try:
         info = os.lstat(path)
         if not stat.S_ISREG(info.st_mode) or info.st_size > SNAPSHOT_MAX_BYTES:
@@ -118,7 +120,13 @@ def read_snapshot(path):
         return None
     if not isinstance(data, dict) or data.get("format") != SNAPSHOT_FORMAT:
         return None
-    return clean_tree(data)
+    return data
+
+
+def read_snapshot(path):
+    """A snapshot's contents with text cleaned, or None if it isn't a sound format 1 snapshot."""
+    data = load_snapshot(path)
+    return clean_tree(data) if data is not None else None
 
 
 def choose_snapshot(server_id, area, since_days=None, today=None):
@@ -326,6 +334,91 @@ def cmd_forget(args):
     return {"files_removed": count}
 
 
+# ---------------------------------------------------------------- trends
+
+def newest_server():
+    """The server id whose folder has the most recent snapshot, or None."""
+    try:
+        folders = os.listdir(snapshots_dir())
+    except OSError:
+        return None
+    newest = [(files[0][0], server_id) for server_id in folders
+              if SERVER_ID.match(server_id) for files in [snapshot_files(server_id)] if files]
+    return max(newest)[1] if newest else None
+
+
+def count_or_none(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    return value
+
+
+def library_trends(days):
+    """Per-library series, for the libraries in the newest snapshot that has a library area."""
+    areas = [data.get("library") if isinstance(data.get("library"), dict) else None for _, data in days]
+    newest = next((a for a in reversed(areas) if a is not None), None)
+    total, libraries = [], []
+    for area in areas:
+        if area is None:
+            total.append(None)
+            continue
+        sizes = [count_or_none(lib.get("size_gb")) for lib in area.values() if isinstance(lib, dict)]
+        total.append(round(sum(s for s in sizes if s is not None), 1))
+    for key, lib in (newest or {}).items():
+        if not isinstance(lib, dict):
+            continue
+        names = [n for n, v in (lib.get("counts") or {}).items() if count_or_none(v) is not None] \
+            if isinstance(lib.get("counts"), dict) else []
+        rows = [(area or {}).get(key) for area in areas]
+        rows = [row if isinstance(row, dict) else None for row in rows]
+        libraries.append({
+            "key": clean(key),
+            "name": clean(lib.get("name")),
+            "type": clean(lib.get("type")),
+            "size_gb": [count_or_none(row.get("size_gb")) if row else None for row in rows],
+            "counts": {clean(name): [count_or_none((row.get("counts") or {}).get(name))
+                              if row and isinstance(row.get("counts"), dict) else None for row in rows]
+                       for name in names},
+        })
+    return {"total_size_gb": total, "libraries": libraries}
+
+
+def sharing_trends(days):
+    """How many people could reach the server each day, by kind, and how many invites were pending."""
+    series = {name: [] for name in ("people", "home", "managed", "friend", "pending")}
+    for _, data in days:
+        area = data.get("sharing")
+        people = area.get("people") if isinstance(area, dict) else None
+        if not isinstance(people, list):
+            for values in series.values():
+                values.append(None)
+            continue
+        people = [p for p in people if isinstance(p, dict)]
+        series["people"].append(len(people))
+        for kind in ("home", "managed", "friend"):
+            series[kind].append(sum(1 for p in people if p.get("kind") == kind))
+        series["pending"].append(sum(1 for p in people if p.get("status") == "pending"))
+    return series
+
+
+def cmd_trends(args, today=None):
+    today = today or datetime.date.today()
+    server_id = args.server_id if args.server_id is not None else newest_server()
+    days = []
+    for day, path in reversed(snapshot_files(server_id)):  # oldest first
+        if 0 <= (today - day).days <= KEEP_DAYS:
+            data = load_snapshot(path)  # only counts and library names are kept; names are cleaned
+            if data:
+                days.append((day, data))
+    return {
+        "server_id": server_id if server_id and SERVER_ID.match(str(server_id)) else None,
+        "days": KEEP_DAYS,
+        "dates": [day.isoformat() for day, _ in days],
+        "library": library_trends(days),
+        "sharing": sharing_trends(days),
+    }
+
+
 # ---------------------------------------------------------------- main
 
 def main():
@@ -335,11 +428,13 @@ def main():
     sub.add_parser("save", help="save a snapshot from reports given as JSON on stdin")
     sub.add_parser("list", help="list saved snapshots")
     sub.add_parser("forget", help="delete every saved snapshot")
+    trends = sub.add_parser("trends", help="counts and sizes from every saved snapshot, oldest first")
+    trends.add_argument("--server-id", help="the server's snapshot folder (default: the one saved to most recently)")
     args = parser.parse_args()
     if args.since is not None:
         args.since = max(1, min(args.since, KEEP_DAYS))
 
-    commands = {"save": cmd_save, "list": cmd_list, "forget": cmd_forget}
+    commands = {"save": cmd_save, "list": cmd_list, "forget": cmd_forget, "trends": cmd_trends}
     try:
         result = commands.get(args.command, cmd_changes)(args)
     except ChangesError as exc:

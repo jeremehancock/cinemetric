@@ -108,8 +108,8 @@ class SnapshotHelperEveryCopy(OfflineTestCase):
 
     def test_copies_are_identical(self):
         import inspect
-        names = ("data_dir", "snapshots_dir", "snapshot_files", "clean_tree", "read_snapshot",
-                 "choose_snapshot", "as_count")
+        names = ("data_dir", "snapshots_dir", "snapshot_files", "clean_tree", "load_snapshot",
+                 "read_snapshot", "choose_snapshot", "as_count")
         for name in names:
             first = inspect.getsource(getattr(ch, name))
             for script, module in READERS[1:]:
@@ -176,7 +176,7 @@ class Saving(OfflineTestCase):
 # ---------------------------------------------------------------- commands
 
 def no_subprocess(*args, **kwargs):
-    raise AssertionError("save, list and forget must not run other scripts")
+    raise AssertionError("save, list, forget and trends must not run other scripts")
 
 
 class Commands(OfflineTestCase):
@@ -223,6 +223,96 @@ class Commands(OfflineTestCase):
         self.assertEqual(result, {"files_removed": 2})
         self.assertFalse(os.path.exists(os.path.join(self.tmp, "data", "cinemetric", "snapshots")))
         self.assertTrue(os.path.exists(dashboard))
+
+
+# ---------------------------------------------------------------- trends
+
+def lib(name, size_gb, **counts):
+    return {"name": name, "type": "movie", "size_gb": size_gb, "counts": counts,
+            "items": {"9": "A Title Nobody Should See"}}
+
+
+def person(name, kind="friend", status="accepted"):
+    return {"name": name, "kind": kind, "status": status, "libraries": "all", "allow_downloads": False}
+
+
+class Trends(OfflineTestCase):
+    def trends(self, server_id=TEST_SERVER_ID):
+        return ch.cmd_trends(argparse.Namespace(server_id=server_id))
+
+    def test_lists_line_up_with_dates(self):
+        for days, movies in ((10, 5), (3, 6), (0, 8)):
+            write_snapshot(self.tmp, days, library={"1": lib("Movies", movies * 10.0, movies=movies)},
+                           sharing={"people": [person("Sam"), person("Kim", "home"),
+                                               person("Lee", status="pending")][:movies - 5]})
+        result = self.trends()
+        self.assertEqual(result["dates"], [(TODAY - datetime.timedelta(days=d)).isoformat() for d in (10, 3, 0)])
+        self.assertEqual(result["library"]["total_size_gb"], [50.0, 60.0, 80.0])
+        [movies] = result["library"]["libraries"]
+        self.assertEqual((movies["key"], movies["name"], movies["type"]), ("1", "Movies", "movie"))
+        self.assertEqual(movies["size_gb"], [50.0, 60.0, 80.0])
+        self.assertEqual(movies["counts"], {"movies": [5, 6, 8]})
+        self.assertEqual(result["sharing"], {"people": [0, 1, 3], "home": [0, 0, 1], "managed": [0, 0, 0],
+                                             "friend": [0, 1, 2], "pending": [0, 0, 1]})
+
+    def test_day_without_an_area(self):
+        write_snapshot(self.tmp, 2, library={"1": lib("Movies", 1.0, movies=1)}, sharing={"people": [person("Sam")]})
+        write_snapshot(self.tmp, 1, library={"1": lib("Movies", 2.0, movies=2)}, health={})
+        write_snapshot(self.tmp, 0, health={}, sharing={"people": []})
+        result = self.trends()
+        self.assertEqual(result["sharing"]["people"], [1, None, 0])
+        self.assertEqual(result["library"]["total_size_gb"], [1.0, 2.0, None])
+        self.assertEqual(result["library"]["libraries"][0]["counts"]["movies"], [1, 2, None])
+
+    def test_renamed_and_removed_libraries(self):
+        write_snapshot(self.tmp, 2, library={"3": lib("Films", 10.0, movies=1), "4": lib("Old", 5.0, movies=9)})
+        write_snapshot(self.tmp, 0, library={"3": lib("Movies", 12.0, movies=2), "5": lib("New", 1.0, movies=1)})
+        result = self.trends()["library"]
+        self.assertEqual([(l["key"], l["name"]) for l in result["libraries"]], [("3", "Movies"), ("5", "New")])
+        self.assertEqual(result["libraries"][0]["counts"]["movies"], [1, 2])
+        self.assertEqual(result["libraries"][1]["size_gb"], [None, 1.0])
+        self.assertEqual(result["total_size_gb"], [15.0, 13.0])  # the removed library still counts then
+
+    def test_old_and_damaged_files_are_skipped(self):
+        write_snapshot(self.tmp, 95, health={})
+        write_snapshot(self.tmp, 4, raw='{"format": 1, "library": {')
+        write_snapshot(self.tmp, 1, health={})
+        self.assertEqual(self.trends()["dates"], [(TODAY - datetime.timedelta(days=1)).isoformat()])
+
+    def test_no_titles_or_names(self):
+        write_snapshot(self.tmp, 1, library={"1": lib("Movies", 1.0, movies=1)},
+                       sharing={"people": [person("Sam")]})
+        text = json.dumps(self.trends())
+        self.assertNotIn("Sam", text)
+        self.assertNotIn("A Title Nobody Should See", text)
+
+    def test_printed_text_is_cleaned(self):
+        write_snapshot(self.tmp, 1, library={"1\n": dict(lib("Evil\nName " + "x" * 500, 1.0), counts={"mo\nvies": 1})})
+        [entry] = self.trends()["library"]["libraries"]
+        self.assertEqual(entry["key"], "1")
+        self.assertEqual(len(entry["name"]), 120)
+        self.assertNotIn("\n", entry["name"])
+        self.assertEqual(list(entry["counts"]), ["mo vies"])
+
+    def test_strange_server_id(self):
+        write_snapshot(self.tmp, 1, health={})
+        for bad in ("../" + TEST_SERVER_ID, "a/b", ""):
+            with self.subTest(server_id=bad):
+                result = self.trends(bad)
+                self.assertEqual((result["server_id"], result["dates"]), (None, []))
+                self.assertEqual(result["library"], {"total_size_gb": [], "libraries": []})
+
+    def test_defaults_to_the_newest_server(self):
+        write_snapshot(self.tmp, 5, server_id="abc123", health={})
+        write_snapshot(self.tmp, 1, server_id="def456", health={})
+        write_snapshot(self.tmp, 3, server_id="def456", health={})
+        result = self.trends(None)
+        self.assertEqual((result["server_id"], len(result["dates"])), ("def456", 2))
+
+    def test_no_network_or_scripts(self):
+        write_snapshot(self.tmp, 1, health={})
+        code, result = Commands.run_main(self, "trends", "--server-id", TEST_SERVER_ID)
+        self.assertEqual((code, len(result["dates"])), (0, 1))
 
 
 class DefaultRun(OfflineTestCase):

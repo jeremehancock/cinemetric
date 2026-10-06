@@ -26,7 +26,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.20.0"
+VERSION = "0.21.0"
 SCRIPT_TIMEOUT_SECONDS = 1800
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -53,6 +53,9 @@ GAP_SHOWS_LIMIT = 10
 PLAYBACK_GROUPS_LIMIT = 5
 GAPS_PER_SHOW = 5
 SHARING_PEOPLE_LIMIT = 20
+TRENDS_TIMEOUT_SECONDS = 120
+# The count drawn for each library in Trends: the first of these the library has.
+TREND_COUNTS = (("movies", "movie"), ("episodes", "episode"), ("albums", "album"), ("photos", "photo"))
 ERROR_CODE = re.compile(r"^[A-Z_]+: ")
 
 
@@ -132,6 +135,28 @@ def save_snapshot(data):
         if isinstance(report, dict):
             report.pop("snapshot", None)
     return saved if isinstance(saved, str) else None
+
+
+def snapshot_server_id(data):
+    """The server id the reports' snapshot blocks agree on, or None. Read before they are dropped."""
+    ids = {str((data[area].get("snapshot") or {}).get("server_id") or "") for area in SNAPSHOT_AREAS
+           if isinstance(data.get(area), dict) and isinstance(data[area].get("snapshot"), dict)}
+    return ids.pop() if len(ids) == 1 and "" not in ids else None
+
+
+def load_trends(server_id):
+    """Counts and sizes from every saved snapshot, from the changes script. None if unavailable."""
+    if not server_id or not os.path.exists(CHANGES_SCRIPT):
+        return None
+    try:
+        proc = subprocess.run([sys.executable, CHANGES_SCRIPT, "trends", "--server-id", server_id],
+                              capture_output=True, text=True, timeout=TRENDS_TIMEOUT_SECONDS)
+        if proc.returncode != 0:
+            return None
+        trends = json.loads(proc.stdout)
+    except (OSError, ValueError, subprocess.TimeoutExpired):
+        return None
+    return trends if isinstance(trends, dict) else None
 
 
 # ---------------------------------------------------------------- formatting helpers
@@ -411,6 +436,74 @@ def bar_chart(bars, w, h, label_count, css_class, aria, tick=num, left=36):
                 label, shown_year = b["year_label"], b["year"]
             parts.append(f'<text class="tick" x="{x + bar_w / 2:.1f}" y="{h - 6}" text-anchor="middle">'
                          f'{label}</text>')
+    parts.append("</svg>")
+    return "".join(parts)
+
+
+def day_number(iso):
+    """Days since 1970 for a YYYY-MM-DD date, so points can be placed by date. None if not a date."""
+    try:
+        return int(time.mktime(time.strptime(str(iso)[:10], "%Y-%m-%d")) // 86400 + 0.5)
+    except (TypeError, ValueError, OverflowError):
+        return None
+
+
+def trend_scale(values):
+    """Round axis bounds and step around the values, which needn't start at zero."""
+    lo, hi = min(values), max(values)
+    step = nice_step(hi - lo, ticks=3) if hi > lo else nice_step(max(abs(hi) / 10, 1), ticks=1)
+    ymin = (lo // step) * step
+    steps = max(1, -(-(hi - ymin) // step))
+    return ymin, ymin + step * steps, step, int(steps)
+
+
+def line_chart(points, w, h, css_class, aria, tick=num, left=44, labels=3):
+    """An inline SVG line chart. points: dicts with "day" (day number), "date", "value" (or None)
+    and "tip", oldest first, with at least two values.
+
+    Points are placed by date, so a longer gap between snapshots is a longer gap on the chart.
+    A None value has no point and breaks the line. Each point has a tooltip."""
+    bottom, top, right = 24, 10, 12
+    plot_w, plot_h = w - left - right, h - bottom - top
+    first, last = points[0]["day"], points[-1]["day"]
+    ymin, ymax, step, steps = trend_scale([p["value"] for p in points if p["value"] is not None])
+    x = lambda p: left + plot_w * (p["day"] - first) / max(last - first, 1)
+    y = lambda v: top + plot_h - plot_h * (v - ymin) / (ymax - ymin)
+    parts = [f'<svg class="{css_class}" viewBox="0 0 {w} {h}" role="img" aria-label="{e(aria)}">']
+    for i in range(steps + 1):
+        value = ymin + step * i
+        cls = "baseline" if i == 0 else "grid"
+        parts.append(f'<line class="{cls}" x1="{left}" x2="{w - right}" y1="{y(value):.1f}" y2="{y(value):.1f}"/>')
+        parts.append(f'<text class="tick" x="{left - 6}" y="{y(value) + 4:.1f}" text-anchor="end">{tick(value)}</text>')
+    path, drawing = [], False
+    for p in points:
+        if p["value"] is None:
+            drawing = False
+            continue
+        path.append(f'{"L" if drawing else "M"}{x(p):.1f},{y(p["value"]):.1f}')
+        drawing = True
+    parts.append(f'<path class="trend-line" d="{" ".join(path)}"/>')
+    for i, p in enumerate(points):
+        if p["value"] is None:
+            continue
+        cx, cy = f"{x(p):.1f}", f'{y(p["value"]):.1f}'
+        last_cls = " trend-last" if i == len(points) - 1 else ""
+        parts.append(f'<circle class="trend-dot{last_cls}" cx="{cx}" cy="{cy}" r="2.5"/>')
+        # A larger, invisible hit area so the tooltip is easy to reach.
+        parts.append(f'<circle class="hit" cx="{cx}" cy="{cy}" r="8"><title>{e(p["tip"])}</title></circle>')
+    # Date labels: the first and last, then evenly spaced ones that don't crowd those.
+    wanted = [0, len(points) - 1]
+    for k in range(1, labels - 1):
+        target = first + (last - first) * k / (labels - 1)
+        wanted.append(min(range(len(points)), key=lambda i: abs(points[i]["day"] - target)))
+    placed = []
+    for i in wanted:
+        if all(abs(x(points[i]) - x(points[j])) >= plot_w / (labels * 1.6) for j in placed):
+            placed.append(i)
+    for i in placed:
+        anchor = "start" if i == 0 else "end" if i == len(points) - 1 else "middle"
+        parts.append(f'<text class="tick" x="{x(points[i]):.1f}" y="{h - 6}" text-anchor="{anchor}">'
+                     f'{short_date(points[i]["date"])}</text>')
     parts.append("</svg>")
     return "".join(parts)
 
@@ -999,6 +1092,91 @@ def changes_section(data, hide_names, snapshot_saved):
     return card(title, f'{counts_block}<div class="lists">{lists}</div>', "wide", aside)
 
 
+def trend_values(values, count):
+    """A list of numbers or None, exactly count long, from untrusted output."""
+    values = values if isinstance(values, list) else []
+    values = [v if isinstance(v, (int, float)) and not isinstance(v, bool) else None for v in values]
+    return (values + [None] * count)[:count]
+
+
+def trend_change(values, fmt, word=""):
+    """'first → latest (+change)' for a heading, from the first and last values that exist."""
+    present = [v for v in values if v is not None]
+    first, latest = present[0], present[-1]
+    diff = latest - first
+    change = "no change" if abs(diff) < 1e-9 else ("+" if diff > 0 else "-") + fmt(abs(diff))
+    return f"{fmt(first)} → {fmt(latest)}{' ' + word if word else ''} ({change})"
+
+
+def trend_block(title, points, change, aria, tick=num, small=False):
+    if small:
+        chart = line_chart(points, 360, 120, "chart", aria, tick=tick, labels=2)
+    else:
+        chart = (line_chart(points, 720, 180, "chart chart-wide", aria, tick=tick, left=52, labels=5)
+                 + line_chart(points, 360, 160, "chart chart-narrow", aria, tick=tick, left=52, labels=3))
+    return (f'<div class="chart-block"><div class="chart-head"><h3>{e(title)}</h3>'
+            f'<span class="muted">{e(change)}</span></div>{chart}</div>')
+
+
+def trends_section(trends):
+    """Charts of library size, titles per library and people with access across the snapshots."""
+    if not isinstance(trends, dict):
+        return ""
+    dates = [d for d in trends.get("dates") or [] if isinstance(d, str) and day_number(d) is not None]
+    if len(dates) != len(trends.get("dates") or []):
+        return ""  # dates the page can't place; leave the section out rather than draw it wrong
+    n = len(dates)
+    days = [day_number(d) for d in dates]
+    library = trends.get("library") if isinstance(trends.get("library"), dict) else {}
+    sharing = trends.get("sharing") if isinstance(trends.get("sharing"), dict) else {}
+
+    def points(values, tip):
+        return [{"day": days[i], "date": dates[i], "value": v, "tip": tip(i, v)} for i, v in enumerate(values)]
+
+    def enough(values):
+        return sum(v is not None for v in values) >= 2
+
+    blocks = []
+    total = trend_values(library.get("total_size_gb"), n)
+    if enough(total):
+        blocks.append(trend_block(
+            "Storage over time", points(total, lambda i, v: f"{short_date(dates[i])}: {size(v)}"),
+            trend_change(total, size), "Total library size on each snapshot day", tick=size))
+
+    small = []
+    for lib in library.get("libraries") or []:
+        if not isinstance(lib, dict) or not isinstance(lib.get("counts"), dict):
+            continue
+        found = next(((key, word) for key, word in TREND_COUNTS if key in lib["counts"]), None)
+        if not found:
+            continue
+        key, word = found
+        values = trend_values(lib["counts"][key], n)
+        if not enough(values) or not any(values):
+            continue  # too few days, or an empty library: a flat line at zero says nothing
+        name = lib.get("name") or "Library"
+        small.append(trend_block(
+            name, points(values, lambda i, v, w=word: f"{short_date(dates[i])}: {plural(v, w)}"),
+            trend_change(values, num, key), f"{name}: {key} on each snapshot day", small=True))
+    if small:
+        blocks.append(f'<div class="trend-grid">{"".join(small)}</div>')
+
+    people = trend_values(sharing.get("people"), n)
+    pending = trend_values(sharing.get("pending"), n)
+    if enough(people):
+        def people_tip(i, v):
+            tip = f"{short_date(dates[i])}: {people_count(v)}"
+            return tip + f", {plural(pending[i], 'pending invite')}" if pending[i] else tip
+        blocks.append(trend_block("People with access", points(people, people_tip),
+                                  trend_change(people, num), "People with access on each snapshot day"))
+
+    if not blocks:
+        body = '<p class="muted">Trends will show here once there are snapshots from two different days.</p>'
+        return card("Trends", body, "wide")
+    aside = e(f"{plural(n, 'snapshot day')}, {short_date(dates[0])} to {short_date(dates[-1])}")
+    return card("Trends", "".join(blocks), "wide", aside)
+
+
 # ---------------------------------------------------------------- page
 
 CSS = """
@@ -1096,6 +1274,11 @@ ul, ol { list-style: none; margin: 0; padding: 0; }
 .chart .bar-peak { fill: var(--q-4k); }
 .chart .hit { fill: transparent; }
 .chart .hit:hover { fill: var(--accent-soft); fill-opacity: .35; }
+.chart .trend-line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .trend-dot { fill: var(--accent); }
+.chart .trend-last { fill: var(--q-4k); }
+.trend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 16px 24px; }
+.trend-grid .chart-head h3 { overflow-wrap: anywhere; }
 .lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 20px 24px; }
 .ranked { min-width: 0; }
 .ranked ol { display: grid; gap: 8px; }
@@ -1146,7 +1329,7 @@ CSP = ('<meta http-equiv="Content-Security-Policy" '
        'content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data:">')
 
 
-def render(data, errors, hide_names, snapshot_saved=None):
+def render(data, errors, hide_names, snapshot_saved=None, trends=None):
     library, health, watch = data.get("library"), data.get("health"), data.get("watch")
     server = ((health or {}).get("server") or {}).get("name") or ((library or {}).get("server") or {}).get("name") \
         or "Plex"
@@ -1162,6 +1345,7 @@ def render(data, errors, hide_names, snapshot_saved=None):
 </header>
 {kpi_row(library, health, watch)}
 {changes_section(data, hide_names, snapshot_saved)}
+{trends_section(trends)}
 {server_card(health, items, errors.get("health"))}
 {watch_section(watch, hide_names, errors.get("watch"))}
 {library_section(library, errors.get("library"))}
@@ -1254,8 +1438,10 @@ def build(args):
     hide_names = bool(state.get("hide_names", False))
 
     data, errors = collect()
+    server_id = snapshot_server_id(data)  # before save_snapshot drops the snapshot blocks
     snapshot_saved = save_snapshot(data)
-    title, body = render(data, errors, hide_names, snapshot_saved)
+    trends = load_trends(server_id)
+    title, body = render(data, errors, hide_names, snapshot_saved, trends)
     output = os.path.abspath(os.path.expanduser(args.output))
     write_page(output, full_page(title, body))
 

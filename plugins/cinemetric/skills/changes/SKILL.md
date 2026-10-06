@@ -1,7 +1,7 @@
 ---
 name: changes
-description: "Say what changed on a Plex Media Server since last time: titles added and removed in each library, new episodes, files Plex can no longer find (and ones that came back), new, removed or renamed libraries, Plex updates and remote access changes, and people who were given or lost access, accepted an invite, or can now see different libraries. Each run saves a small private snapshot on this computer (at most one per day, kept 90 days) to compare with next time; nothing runs in the background. Read-only toward Plex. Use when the user asks what changed on Plex, what's new since yesterday or last week or this month, whether anything went missing or disappeared from Plex, whether Plex updated, who was added to or removed from their Plex lately, or to list or delete Cinemetric's saved snapshots."
-argument-hint: "[--since DAYS] | list | forget"
+description: "Say what changed on a Plex Media Server since last time: titles added and removed in each library, new episodes, files Plex can no longer find (and ones that came back), new, removed or renamed libraries, Plex updates and remote access changes, and people who were given or lost access, accepted an invite, or can now see different libraries. Each run saves a small private snapshot on this computer (at most one per day, kept 90 days) to compare with next time; nothing runs in the background. Read-only toward Plex. Can also show how the library size, each library's titles and the number of people with access moved across the saved snapshots. Use when the user asks what changed on Plex, what's new since yesterday or last week or this month, how their library has grown over the last few weeks or months, whether anything went missing or disappeared from Plex, whether Plex updated, who was added to or removed from their Plex lately, or to list or delete Cinemetric's saved snapshots."
+argument-hint: "[--since DAYS] | trends | list | forget"
 allowed-tools: Read, Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/changes.py *), Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/changes.py), Bash(python ${CLAUDE_SKILL_DIR}/scripts/changes.py *), Bash(python ${CLAUDE_SKILL_DIR}/scripts/changes.py)
 ---
 
@@ -25,6 +25,7 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/changes.py [--since DAYS]
 - It reads every library, like the library report, so on a big server it can take a minute or two.
   Say so before running it.
 - `list` shows which snapshots are saved; `forget` deletes all of them (see "Snapshots" below).
+- For "how has it changed over time" questions, use `trends` instead (see "Trends" below).
 
 ## 2. If it fails
 
@@ -86,6 +87,28 @@ snapshot is only saved when they ask what changed or build the dashboard. Offer 
 
 Keep it short and readable: plain English, no raw JSON, no file paths. Mention once, only on a first
 run, that the dashboard saves snapshots too and shows the same changes.
+
+## Trends
+
+When the user asks how things moved over a longer stretch ("how much has my library grown over the
+last two months?", "have I been sharing with more people lately?"), run:
+
+```
+python3 ${CLAUDE_SKILL_DIR}/scripts/changes.py trends
+```
+
+It reads only the saved snapshots for the current server (no network, nothing saved, quick) and
+prints `dates` (one per snapshot day, oldest first, up to 90 days back) and lists lined up with them:
+`library.total_size_gb`, `library.libraries` (each with `name`, `type`, `size_gb` and `counts`, for
+example `movies`, `episodes`, `albums`) and `sharing` (`people`, `home`, `managed`, `friend`,
+`pending`). A `null` means that day's snapshot didn't have that part.
+
+Answer with the first and latest values and the change ("Your TV library went from 18,771 to 19,011
+episodes between Aug 7 and Oct 6, 240 more, about 4 a day"), naming the period. Mention the busiest
+stretch only if it stands out. If `dates` has fewer than two entries, say there isn't enough history
+yet: a snapshot is saved each day the user asks what changed or builds the dashboard. Snapshots only
+exist for days one of those ran, so don't describe gaps between dates as anything happening. Facts
+only, as everywhere else.
 
 ## Snapshots
 

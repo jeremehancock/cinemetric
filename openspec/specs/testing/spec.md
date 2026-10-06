@@ -69,7 +69,8 @@ the specs leave open. At least the following SHALL be covered:
   snapshot area and `since_snapshot`.
 - `watch-activity`: choosing a source and the report built from each source.
 - `dashboard`: HTML escaping of every value from a report, handling a report source that failed,
-  saving a snapshot through the changes script, and the changes section (including names hidden).
+  saving a snapshot through the changes script, the changes section (including names hidden), and
+  the Trends section (too few days, gaps between dates, `null` values, a failed trends run).
 - `setup`: Tautulli address cleaning and private file permissions.
 - `users-and-shares`: the plex.tv address rules, the owner-only error, dropping emails and access
   tokens, the people and libraries in the report, the "things worth a look" flags, the snapshot area
@@ -89,7 +90,8 @@ the specs leave open. At least the following SHALL be covered:
   totals.
 - `changes`: choosing which snapshot to compare with (earlier day, `--since`, missing area, other
   server), saving and merging the same day, pruning after 90 days, `save` without network, `list`,
-  `forget`, file permissions, and a report that fails.
+  `forget`, file permissions, a report that fails, and `trends` (lining up with `dates`, missing areas,
+  renamed and removed libraries, old and damaged files, no names, a bad server id).
 
 #### Scenario: A shared helper is fixed in one script only
 - **WHEN** a fix to `validate_url`, `clean` or the snapshot reading helper is applied to one script

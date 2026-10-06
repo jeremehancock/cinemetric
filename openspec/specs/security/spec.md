@@ -76,7 +76,7 @@ creates SHALL NOT make any network requests when opened.
 - **THEN** the browser makes no network requests
 
 #### Scenario: Saving, listing or forgetting snapshots
-- **WHEN** `changes.py save`, `changes.py list` or `changes.py forget` runs
+- **WHEN** `changes.py save`, `changes.py list`, `changes.py forget` or `changes.py trends` runs
 - **THEN** no network connection is opened
 
 ### Requirement: No redirects

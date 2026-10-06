@@ -36,15 +36,16 @@ These came out of an explore session on 2026-10-05 and apply to every idea below
 
   The ideas below fall into three groups:
     1. Join areas together     (playback-check)
-    2. Remember over time      (snapshots, weekly digest, dashboard trends)
+    2. Remember over time      (weekly digest, dashboard trends; snapshots are done)
     3. Go one level deeper     (per-item details: subtitles, audio, episode gaps)
 ```
 
-Suggested order: snapshots next. (The `server-health` settings checks, the `watch-activity` one
-person, busiest moment and unfinished titles additions, the `unwatched` skill, `library-report`
-growth by month with its dashboard chart, and the `what-to-watch` skill were done on 2026-10-05;
-`library-report` music details (lossless vs lossy, missing artwork) on 2026-10-06. Hi-res music
-(bit depth, sample rate) was left out: it isn't in the track listing and needs a request per track.)
+Suggested order: open. (Snapshots and "what changed" were done on 2026-10-06. The `server-health`
+settings checks, the `watch-activity` one person, busiest moment and unfinished titles additions, the
+`unwatched` skill, `library-report` growth by month with its dashboard chart, and the `what-to-watch`
+skill were done on 2026-10-05; `library-report` music details (lossless vs lossy, missing artwork) on
+2026-10-06. Hi-res music (bit depth, sample rate) was left out: it isn't in the track listing and
+needs a request per track.)
 
 ---
 
@@ -116,35 +117,24 @@ singles people out reads differently from a stats report, especially if the page
 
 ## Updates to existing skills
 
-### Snapshots and "what changed"
+### Weekly digest and dashboard trends (built on snapshots)
 
-**What:** after each run, save a small summary of the results. The next run compares against it:
-items added and removed, files that became unavailable, new or removed shares, Plex version changes.
-Enables trends on the dashboard and an optional weekly digest.
+Snapshots themselves were done on 2026-10-06 (the `changes` skill, `since_snapshot` in the library,
+server and sharing reports, and the dashboard's "Since" section). One file per server per day, kept 90
+days, in `<data folder>/snapshots/<server id>/`. See `openspec/specs/changes`.
 
-```
-  last week ──snapshot──┐
-                        ├──▶  +34 items, -2 items, 3 files now unavailable,
-  today ────snapshot────┘     1 new share, Plex 1.40 → 1.41
-```
+**Weekly digest:** pairs with Claude Code's `/schedule` skill: a routine that runs
+`changes.py --since 7` and only mentions what changed. The dashboard previously tried scheduled runs
+and hit a limit (background mode couldn't publish claude.ai pages on the test account; see the
+archived `dashboard-local-or-online` change), so check what scheduled runs can do before promising a
+digest that publishes anything.
 
-**Where:** the dashboard's data folder, `$XDG_DATA_HOME/cinemetric` (default
-`~/.local/share/cinemetric`, `%LOCALAPPDATA%\cinemetric` on Windows), per the "Settings location"
-requirement in the conventions spec. Files should be private (like the config file).
+**Trends on the dashboard:** the snapshots already hold per-library counts and sizes for each day, so
+a chart of library size or people with access over the last 90 days needs no new data. Reading 90
+files on each build is the cost to check.
 
-**Weekly digest:** pairs with Claude Code's `/schedule` skill: a routine that runs the reports and only
-mentions what changed. The dashboard previously tried scheduled runs and hit a limit (background mode
-couldn't publish claude.ai pages on the test account; see the archived `dashboard-local-or-online`
-change), so check what scheduled runs can do before promising a digest that publishes anything.
-
-**Catches:**
-- The "Self-contained scripts" rule means snapshot read/write code gets copied into every script that
-  uses it, and every copy must be kept in step. Keep it small.
-- Decide what *not* to store. Titles are fine; anything about other people beyond what reports
-  already show should stay out.
-- How many snapshots to keep, and how to handle a snapshot from an older Cinemetric version.
-
-**Open questions:** one snapshot file per skill, or one combined file? Opt-in or always on?
+**Open questions:** should the dashboard's "Since" section compare with about a week ago instead of
+the previous day? Should snapshots be opt-out for people who don't want anything saved?
 
 ### `watch-activity`
 

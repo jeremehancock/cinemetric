@@ -31,6 +31,7 @@ CSS and JavaScript with no build step, ready for any static host.
 | `users-and-shares` | Who your server is shared with (friends, Plex Home, managed users, pending invites), which libraries each person can see, who can download, when each person last played something, and which shared libraries nobody has played from lately. Reads the share list from your plex.tv account; only the server owner can use it |
 | `unwatched` | Movies and shows nobody has finished in a while (added more than 6 months ago, no finished play by anyone since), largest first, with how much space they use and when each was last finished. Facts only: it never suggests deleting anything. Uses Tautulli if you have it, otherwise Plex's own history |
 | `what-to-watch` | Finds something to watch tonight in your own library: by genre, length, decade, rating or content rating, unwatched only, shuffled for fresh ideas each time. Suggests a few titles with a reason for each, or picks up where you left off. Only titles already on your server |
+| `show-progress` | Where each person is in each TV show: the furthest episode they finished, how many are left and the next one, and whether they're caught up, have new episodes waiting, are partway through, or stopped (nothing played from the show in 3 months). Rewatching early episodes or starting partway in doesn't count as falling behind. Also which shows got new episodes lately and whether the people following them have watched them. For everyone, one person or one show; "caught up" means with what's on your server. Uses Tautulli if you have it, otherwise Plex's own history |
 | `episode-gaps` | Gaps in your TV shows: episode numbers missing between ones you have (E01, E02 and E04 are there, so E03 is probably missing), seasons that start late, seasons missing between others, and episodes whose files Plex can't find. Specials, two-episode files and shows numbered straight on across seasons aren't counted as gaps. Uses only what's on your server, so it can't see episodes after the last one you have |
 | `playback-check` | Files likely to be transcoded (converted on the fly) on common devices, and why: image-based subtitles (PGS, VobSub), TrueHD or DTS audio, and bitrates above your remote streaming limit or a speed you choose. With Tautulli, also which devices and people transcode most, how often, and why. Checks every movie and episode in about a minute; facts only, it never tells you to convert files |
 | `subtitles-and-languages` | Movies and episodes with audio in another language and no subtitles in yours, titles with no subtitles in a language you name (such as Spanish), and tracks with no language set, so Plex can't pick the right one. Also how many files have audio and subtitles in each language. Goes by each track's language label, checked against your libraries' language unless you name another; forced subtitles, which usually only cover a few lines, don't count as full subtitles. Facts only: it never tells you to download or replace anything |
@@ -136,7 +137,7 @@ where you can revoke it at any time.
 Then try: *"Give me a Plex library report"*, *"What's been added to my Movies library recently?"*,
 *"How's my Plex server doing?"*, *"What's been watched on Plex this month?"*,
 *"Who have I shared my Plex server with?"*, *"What on my Plex server has nobody watched in months?"*,
-*"Find me a comedy under 2 hours I haven't seen"*, *"Am I missing any episodes on Plex?"*,
+*"Find me a comedy under 2 hours I haven't seen"*, *"Who's caught up on Severance?"*, *"Am I missing any episodes on Plex?"*,
 *"Why does Plex keep transcoding?"*, *"Tell me about Blade Runner 2049 on my Plex"* or
 *"Build my Plex dashboard"*
 
@@ -213,7 +214,7 @@ each idea below might be built are in [openspec/ideas.md](openspec/ideas.md).
 - **`library-report`:** count Dolby Vision and HDR10+ separately from other HDR.
 - **`what-to-watch`:** something several people at home haven't seen yet, and "more like this" for a
   title you liked.
-- **`unwatched`:** what one person hasn't watched, and shows people stopped watching partway through.
+- **`unwatched`:** what one person hasn't watched.
 - **`changes`:** how fast the library is growing, for example "about 1.2 TB a month".
 - **`year-in-review`:** favorite genres, and a comparison with the year before.
 

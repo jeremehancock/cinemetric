@@ -40,7 +40,8 @@ These came out of an explore session on 2026-10-05 and apply to every idea below
     3. Go one level deeper     (subtitles and audio per file are done in playback-check)
 ```
 
-Suggested order: open. (`title-lookup` and `subtitles-and-languages` were done on 2026-10-07. A server
+Suggested order: open. (`show-progress`, `title-lookup` and `subtitles-and-languages` were done on
+2026-10-07; `show-progress` also covers the old "shows people stopped watching partway" idea. A server
 check for the latter found that Plex keeps each person's preferred languages on plex.tv, not on the
 server, so it checks against each library's own language unless one is named. Snapshots and "what changed" were done on 2026-10-06, and so were `year-in-review`, dashboard
 trends, `episode-gaps`, the former `tv-completeness` idea, and `playback-check`, which turned out cheap: Plex
@@ -109,12 +110,13 @@ separately, since Dolby Vision is the format most likely to look wrong or transc
 - **More like this:** Plex's own list of similar titles for one title
   (`/library/metadata/{id}/similar` **(to verify)**), limited to titles on the server.
 
-### `unwatched`: per person, and shows people stopped watching
+### `unwatched`: per person
 
 - **Per person:** "what Sam hasn't touched" as well as "what nobody has touched". Same rules, history
   filtered to one person, as `watch-activity --user` does.
-- **Stopped partway:** shows where someone finished some episodes of a season and played nothing from
-  the show for months. Needs per-episode history, so probably Tautulli only.
+- Shows people stopped watching partway through are covered by `show-progress` (see
+  `openspec/specs/show-progress`). It turned out Plex's own history is enough too, since a person's
+  place only needs finished episodes.
 
 ### `changes`: growth rate
 

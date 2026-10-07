@@ -1,0 +1,1429 @@
+{
+ "/": {
+  "MediaContainer": {
+   "friendlyName": "Test Server",
+   "version": "1.43.4.0000"
+  }
+ },
+ "/library/sections": {
+  "MediaContainer": {
+   "Directory": [
+    {
+     "key": "1",
+     "title": "TV Shows",
+     "type": "show"
+    },
+    {
+     "key": "2",
+     "title": "Kids TV",
+     "type": "show"
+    },
+    {
+     "key": "3",
+     "title": "Movies",
+     "type": "movie"
+    },
+    {
+     "key": "4",
+     "title": "Music",
+     "type": "artist"
+    }
+   ]
+  }
+ },
+ "shows": [
+  {
+   "ratingKey": "101",
+   "type": "show",
+   "librarySectionID": "1",
+   "title": "Harbor Lights",
+   "year": 2019
+  },
+  {
+   "ratingKey": "102",
+   "type": "show",
+   "librarySectionID": "1",
+   "title": "The Clockmakers",
+   "year": 2020
+  },
+  {
+   "ratingKey": "103",
+   "type": "show",
+   "librarySectionID": "1",
+   "title": "Night Garden",
+   "year": 2021
+  },
+  {
+   "ratingKey": "104",
+   "type": "show",
+   "librarySectionID": "1",
+   "title": "Copper Valley",
+   "year": 2022
+  },
+  {
+   "ratingKey": "105",
+   "type": "show",
+   "librarySectionID": "1",
+   "title": "Office Hours (US)",
+   "year": 2018
+  },
+  {
+   "ratingKey": "106",
+   "type": "show",
+   "librarySectionID": "1",
+   "title": "Office Hours (UK)",
+   "year": 2016
+  },
+  {
+   "ratingKey": "201",
+   "type": "show",
+   "librarySectionID": "2",
+   "title": "Puddle Patrol",
+   "year": 2023
+  }
+ ],
+ "episodes": [
+  {
+   "ratingKey": "1001",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 1,
+   "index": 1,
+   "title": "Episode 1",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1001,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1002",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 1,
+   "index": 2,
+   "title": "Episode 2",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1002,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1003",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 1,
+   "index": 3,
+   "title": "Episode 3",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1003,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1004",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 1,
+   "index": 4,
+   "title": "Episode 4",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1004,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1005",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 1,
+   "index": 5,
+   "title": "Episode 5",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1005,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1006",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 1,
+   "index": 6,
+   "title": "Episode 6",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1006,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1007",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 1,
+   "index": 7,
+   "title": "Episode 7",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1007,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1008",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 1,
+   "index": 8,
+   "title": "Episode 8",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1008,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1009",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 1,
+   "index": 9,
+   "title": "Episode 9",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1009,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1010",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 1,
+   "index": 10,
+   "title": "Episode 10",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1010,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1011",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 2,
+   "index": 1,
+   "title": "Episode 1",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1011,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1012",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 2,
+   "index": 2,
+   "title": "Episode 2",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1012,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1013",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 2,
+   "index": 3,
+   "title": "Episode 3",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1013,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1014",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 2,
+   "index": 4,
+   "title": "Episode 4",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1014,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1015",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 2,
+   "index": 5,
+   "title": "Episode 5",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1015,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1016",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 2,
+   "index": 6,
+   "title": "Episode 6",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1016,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1017",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 2,
+   "index": 7,
+   "title": "Episode 7",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1017,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1018",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 2,
+   "index": 8,
+   "title": "Episode 8",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1018,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1019",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 2,
+   "index": 9,
+   "title": "Episode 9",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1019,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1020",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 2,
+   "index": 10,
+   "title": "Episode 10",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1020,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1021",
+   "type": "episode",
+   "grandparentRatingKey": "101",
+   "grandparentKey": "/library/metadata/101",
+   "parentIndex": 0,
+   "index": 1,
+   "title": "Behind the Scenes",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1021,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1022",
+   "type": "episode",
+   "grandparentRatingKey": "102",
+   "grandparentKey": "/library/metadata/102",
+   "parentIndex": 1,
+   "index": 1,
+   "title": "Episode 1",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1022,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1023",
+   "type": "episode",
+   "grandparentRatingKey": "102",
+   "grandparentKey": "/library/metadata/102",
+   "parentIndex": 1,
+   "index": 2,
+   "title": "Episode 2",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1023,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1024",
+   "type": "episode",
+   "grandparentRatingKey": "102",
+   "grandparentKey": "/library/metadata/102",
+   "parentIndex": 1,
+   "index": 3,
+   "title": "Episode 3",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1024,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1025",
+   "type": "episode",
+   "grandparentRatingKey": "102",
+   "grandparentKey": "/library/metadata/102",
+   "parentIndex": 1,
+   "index": 4,
+   "title": "Episode 4",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1025,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1026",
+   "type": "episode",
+   "grandparentRatingKey": "102",
+   "grandparentKey": "/library/metadata/102",
+   "parentIndex": 1,
+   "index": 5,
+   "title": "Episode 5",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1026,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1027",
+   "type": "episode",
+   "grandparentRatingKey": "102",
+   "grandparentKey": "/library/metadata/102",
+   "parentIndex": 1,
+   "index": 6,
+   "title": "Episode 6",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1027,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1028",
+   "type": "episode",
+   "grandparentRatingKey": "102",
+   "grandparentKey": "/library/metadata/102",
+   "parentIndex": 1,
+   "index": 7,
+   "title": "Episode 7",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1028,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1029",
+   "type": "episode",
+   "grandparentRatingKey": "102",
+   "grandparentKey": "/library/metadata/102",
+   "parentIndex": 1,
+   "index": 8,
+   "title": "Episode 8",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1029,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1030",
+   "type": "episode",
+   "grandparentRatingKey": "102",
+   "grandparentKey": "/library/metadata/102",
+   "parentIndex": 2,
+   "index": 1,
+   "title": "New Season Part 1",
+   "addedAt": 1779278400,
+   "Media": [
+    {
+     "id": 1030,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1031",
+   "type": "episode",
+   "grandparentRatingKey": "102",
+   "grandparentKey": "/library/metadata/102",
+   "parentIndex": 2,
+   "index": 2,
+   "title": "New Season Part 2",
+   "addedAt": 1779278400,
+   "Media": [
+    {
+     "id": 1031,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1032",
+   "type": "episode",
+   "grandparentRatingKey": "102",
+   "grandparentKey": "/library/metadata/102",
+   "parentIndex": 2,
+   "index": 3,
+   "title": "New Season Part 3",
+   "addedAt": 1779278400,
+   "Media": [
+    {
+     "id": 1032,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1033",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 1,
+   "index": 1,
+   "title": "Episode 1",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1033,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1034",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 1,
+   "index": 2,
+   "title": "Episode 2",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1034,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1035",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 1,
+   "index": 3,
+   "title": "Episode 3",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1035,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1036",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 1,
+   "index": 4,
+   "title": "Episode 4",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1036,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1037",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 1,
+   "index": 5,
+   "title": "Episode 5",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1037,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1038",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 1,
+   "index": 6,
+   "title": "Episode 6",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1038,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1039",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 1,
+   "index": 7,
+   "title": "Episode 7",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1039,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1040",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 1,
+   "index": 8,
+   "title": "Episode 8",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1040,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1041",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 1,
+   "index": 9,
+   "title": "Episode 9",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1041,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1042",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 1,
+   "index": 10,
+   "title": "Episode 10",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1042,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1043",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 2,
+   "index": 1,
+   "title": "Episode 1",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1043,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1044",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 2,
+   "index": 2,
+   "title": "Episode 2",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1044,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1045",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 2,
+   "index": 3,
+   "title": "Episode 3",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1045,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1046",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 2,
+   "index": 4,
+   "title": "Episode 4",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1046,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1047",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 2,
+   "index": 5,
+   "title": "Episode 5",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1047,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1048",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 2,
+   "index": 6,
+   "title": "Episode 6",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1048,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1049",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 2,
+   "index": 7,
+   "title": "Episode 7",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1049,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1050",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 2,
+   "index": 8,
+   "title": "Episode 8",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1050,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1051",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 2,
+   "index": 9,
+   "title": "Episode 9",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1051,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1052",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 2,
+   "index": 10,
+   "title": "Episode 10",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1052,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1053",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 3,
+   "index": 1,
+   "title": "Episode 1",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1053,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1054",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 3,
+   "index": 2,
+   "title": "Episode 2",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1054,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1055",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 3,
+   "index": 3,
+   "title": "Episode 3",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1055,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1056",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 3,
+   "index": 4,
+   "title": "Episode 4",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1056,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1057",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 3,
+   "index": 5,
+   "title": "Episode 5",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1057,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1058",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 3,
+   "index": 6,
+   "title": "Episode 6",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1058,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1059",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 3,
+   "index": 7,
+   "title": "Episode 7",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1059,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1060",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 3,
+   "index": 8,
+   "title": "Episode 8",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1060,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1061",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 3,
+   "index": 9,
+   "title": "Episode 9",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1061,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1062",
+   "type": "episode",
+   "grandparentRatingKey": "103",
+   "grandparentKey": "/library/metadata/103",
+   "parentIndex": 3,
+   "index": 10,
+   "title": "Episode 10",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1062,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1063",
+   "type": "episode",
+   "grandparentRatingKey": "104",
+   "grandparentKey": "/library/metadata/104",
+   "parentIndex": 1,
+   "index": 1,
+   "title": "Episode 1",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1063,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1064",
+   "type": "episode",
+   "grandparentRatingKey": "104",
+   "grandparentKey": "/library/metadata/104",
+   "parentIndex": 1,
+   "index": 2,
+   "title": "Episode 2",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1064,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1065",
+   "type": "episode",
+   "grandparentRatingKey": "104",
+   "grandparentKey": "/library/metadata/104",
+   "parentIndex": 1,
+   "index": 3,
+   "title": "Episode 3",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1065,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1066",
+   "type": "episode",
+   "grandparentRatingKey": "104",
+   "grandparentKey": "/library/metadata/104",
+   "parentIndex": 1,
+   "index": 4,
+   "title": "Episode 4",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1,
+     "deletedAt": 1748779200
+    }
+   ]
+  },
+  {
+   "ratingKey": "1067",
+   "type": "episode",
+   "grandparentRatingKey": "104",
+   "grandparentKey": "/library/metadata/104",
+   "parentIndex": 1,
+   "index": 5,
+   "title": "Episode 5",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1067,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1068",
+   "type": "episode",
+   "grandparentRatingKey": "104",
+   "grandparentKey": "/library/metadata/104",
+   "parentIndex": 1,
+   "index": 6,
+   "title": "Episode 6",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1068,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1069",
+   "type": "episode",
+   "grandparentRatingKey": "104",
+   "grandparentKey": "/library/metadata/104",
+   "parentIndex": 1,
+   "index": 5,
+   "title": "Episode 5 (second copy)",
+   "addedAt": 1780315200,
+   "Media": [
+    {
+     "id": 1069,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1070",
+   "type": "episode",
+   "grandparentRatingKey": "104",
+   "title": "Unnumbered Extra",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 9
+    }
+   ]
+  },
+  {
+   "ratingKey": "1071",
+   "type": "episode",
+   "grandparentRatingKey": "105",
+   "grandparentKey": "/library/metadata/105",
+   "parentIndex": 1,
+   "index": 1,
+   "title": "Episode 1",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1071,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1072",
+   "type": "episode",
+   "grandparentRatingKey": "106",
+   "grandparentKey": "/library/metadata/106",
+   "parentIndex": 1,
+   "index": 1,
+   "title": "Episode 1",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1072,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1073",
+   "type": "episode",
+   "grandparentRatingKey": "105",
+   "grandparentKey": "/library/metadata/105",
+   "parentIndex": 1,
+   "index": 2,
+   "title": "Episode 2",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1073,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1074",
+   "type": "episode",
+   "grandparentRatingKey": "106",
+   "grandparentKey": "/library/metadata/106",
+   "parentIndex": 1,
+   "index": 2,
+   "title": "Episode 2",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1074,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1075",
+   "type": "episode",
+   "grandparentRatingKey": "105",
+   "grandparentKey": "/library/metadata/105",
+   "parentIndex": 1,
+   "index": 3,
+   "title": "Episode 3",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1075,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1076",
+   "type": "episode",
+   "grandparentRatingKey": "106",
+   "grandparentKey": "/library/metadata/106",
+   "parentIndex": 1,
+   "index": 3,
+   "title": "Episode 3",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1076,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1077",
+   "type": "episode",
+   "grandparentRatingKey": "201",
+   "grandparentKey": "/library/metadata/201",
+   "parentIndex": 1,
+   "index": 1,
+   "title": "Episode 1",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1077,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1078",
+   "type": "episode",
+   "grandparentRatingKey": "201",
+   "grandparentKey": "/library/metadata/201",
+   "parentIndex": 1,
+   "index": 2,
+   "title": "Episode 2",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1078,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1079",
+   "type": "episode",
+   "grandparentRatingKey": "201",
+   "grandparentKey": "/library/metadata/201",
+   "parentIndex": 1,
+   "index": 3,
+   "title": "Episode 3",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1079,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1080",
+   "type": "episode",
+   "grandparentRatingKey": "201",
+   "grandparentKey": "/library/metadata/201",
+   "parentIndex": 1,
+   "index": 4,
+   "title": "Episode 4",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1080,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1081",
+   "type": "episode",
+   "grandparentRatingKey": "201",
+   "grandparentKey": "/library/metadata/201",
+   "parentIndex": 1,
+   "index": 5,
+   "title": "Episode 5",
+   "addedAt": 1736510400,
+   "Media": [
+    {
+     "id": 1081,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1082",
+   "type": "episode",
+   "grandparentRatingKey": "201",
+   "grandparentKey": "/library/metadata/201",
+   "parentIndex": 2,
+   "index": 1,
+   "title": "Episode 1",
+   "addedAt": 1780660800,
+   "Media": [
+    {
+     "id": 1082,
+     "videoResolution": "1080"
+    }
+   ]
+  },
+  {
+   "ratingKey": "1083",
+   "type": "episode",
+   "grandparentRatingKey": "201",
+   "grandparentKey": "/library/metadata/201",
+   "parentIndex": 2,
+   "index": 2,
+   "title": "Episode 2",
+   "addedAt": 1780660800,
+   "Media": [
+    {
+     "id": 1083,
+     "videoResolution": "1080"
+    }
+   ]
+  }
+ ],
+ "accounts": [
+  {
+   "id": 11,
+   "name": "Sam Tester"
+  },
+  {
+   "id": 12,
+   "name": "Alex Example"
+  },
+  {
+   "id": 13,
+   "name": "Jo Sample"
+  },
+  {
+   "id": 14,
+   "name": "Samuel Other"
+  }
+ ]
+}

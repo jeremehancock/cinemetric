@@ -34,6 +34,7 @@ SCRIPTS = {
     "playback-check": "playback_check.py",
     "server-health": "server_health.py",
     "setup": "setup.py",
+    "show-progress": "show_progress.py",
     "subtitles-and-languages": "subtitles_and_languages.py",
     "title-lookup": "title_lookup.py",
     "unwatched": "unwatched.py",

@@ -120,7 +120,7 @@
       <div class="wrap">
         <div class="section-head reveal">
           <p class="kicker">The library</p>
-          <h2 id="skills-title">Fourteen skills. One curious question at a time.</h2>
+          <h2 id="skills-title">Fifteen skills. One curious question at a time.</h2>
           <p>Just ask Claude in your own words. Each skill knows when it's needed, runs a small script against your server and turns the result into a clear report.</p>
         </div>
 
@@ -164,6 +164,11 @@
                 <span class="skill-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M4 24s7-12 20-12 20 12 20 12-7 12-20 12S4 24 4 24z" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="24" r="6" fill="currentColor"/></svg></span>
                 <span class="skill-name">watch-activity</span>
                 <span class="skill-sub">Who watched what</span>
+              </a></li>
+              <li><a class="skill-row" href="#skill-progress" style="--a:#d946b0;--b:#45123a">
+                <span class="skill-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="4" y="9" width="40" height="7" rx="3.5" fill="currentColor"/><rect x="4" y="21" width="40" height="7" rx="3.5" fill="currentColor" opacity=".3"/><rect x="4" y="21" width="26" height="7" rx="3.5" fill="currentColor" opacity=".85"/><rect x="4" y="33" width="40" height="7" rx="3.5" fill="currentColor" opacity=".3"/><rect x="4" y="33" width="12" height="7" rx="3.5" fill="currentColor" opacity=".7"/></svg></span>
+                <span class="skill-name">show-progress</span>
+                <span class="skill-sub">Where everyone is</span>
               </a></li>
               <li><a class="skill-row" href="#skill-pick" style="--a:#84cc16;--b:#25380a">
                 <span class="skill-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M7 19h34l-5 23H12z" fill="currentColor"/><path d="M18 19l2 23M30 19l-2 23" stroke="#0d0e10" stroke-width="3" opacity=".45"/><circle cx="12" cy="16" r="6" fill="currentColor" opacity=".7"/><circle cx="24" cy="11" r="7.5" fill="currentColor" opacity=".85"/><circle cx="36" cy="16" r="6" fill="currentColor" opacity=".7"/></svg></span>
@@ -568,8 +573,53 @@
       </div>
     </section>
 
+    <!-- ============ SKILL: SHOW PROGRESS ============ -->
+    <section class="section feature flip" id="skill-progress" aria-labelledby="f-progress">
+      <div class="wrap feature-grid">
+        <div class="feature-copy reveal">
+          <p class="kicker" style="--k:#f472d0">show-progress</p>
+          <h2 id="f-progress">Know where everyone is in every show.</h2>
+          <p>Follow each person through a series, not just single plays: who's caught up, who has new episodes waiting, and which shows people stopped partway through.</p>
+          <ul class="ticks">
+            <li>Each person's place in a show: the furthest episode they finished, how many are left and what's next.</li>
+            <li>Caught up, new episodes waiting, partway through, or stopped (nothing played in 3 months, or any number you choose).</li>
+            <li>Rewatching early episodes or starting at season 3 doesn't count as falling behind.</li>
+            <li>Which shows got new episodes lately, and whether the people following them have watched them.</li>
+            <li>Uses <strong>Tautulli</strong> if you have it; otherwise Plex's own watch history.</li>
+          </ul>
+          <p class="ask-line">Ask Claude: <q>Where is everyone in our shows?</q> or <q>Which shows did people stop watching partway through?</q></p>
+        </div>
+
+        <figure class="mock demo reveal" aria-label="Example: where each person is in each show">
+          <div class="mock-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><em>Claude Code</em></div>
+          <div class="tabpanel" id="panel-progress-1">
+            <pre class="term"><code><span class="t-you">&gt; Where is everyone in our shows?</span>
+<span class="t-dot">⏺</span> Across 23 shows, people are partway
+  through 9, caught up on 6, have new
+  episodes waiting on 3, and stopped
+  partway through 5.
+
+  <b class="t-h">Recently watched</b>
+  <table class="t-table"><thead><tr><th>Show</th><th>Who</th><th>At</th><th>Status</th></tr></thead><tbody><tr><td>Northern Static</td><td>sam</td><td>S02E05</td><td>5 left</td></tr><tr><td>Northern Static</td><td>alex</td><td>S01E02</td><td>stopped Jan</td></tr><tr><td>Lanterns</td><td>jo</td><td>S03E08</td><td>3 new</td></tr><tr><td>The Salt Road</td><td>alex</td><td>S01E06</td><td>caught up</td></tr><tr><td>Quiet Harbor</td><td>jo</td><td>S01E03</td><td>7 left</td></tr></tbody></table>
+  …and 18 more shows; ask about any one.
+
+  <b class="t-h">New episodes nobody has watched</b>
+  Lanterns season 4 (3 episodes, added
+  May 20): jo was following it and
+  hasn't started them yet.
+
+  <b class="t-h">About the history</b>
+  Plays come from Tautulli, going back to
+  March 2022. "Caught up" means with
+  what's on your server.</code></pre>
+          </div>
+          <figcaption>Example reply with made-up data. Claude's wording will vary.</figcaption>
+        </figure>
+      </div>
+    </section>
+
     <!-- ============ SKILL: CHANGES ============ -->
-    <section class="section feature flip" id="skill-changes" aria-labelledby="f-changes">
+    <section class="section feature" id="skill-changes" aria-labelledby="f-changes">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#f87171">changes</p>
@@ -619,7 +669,7 @@
     </section>
 
     <!-- ============ SKILL: EPISODE GAPS ============ -->
-    <section class="section feature" id="skill-gaps" aria-labelledby="f-gaps">
+    <section class="section feature flip" id="skill-gaps" aria-labelledby="f-gaps">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#e879f9">episode-gaps</p>
@@ -668,7 +718,7 @@
     </section>
 
     <!-- ============ SKILL: PLAYBACK CHECK ============ -->
-    <section class="section feature flip" id="skill-playback" aria-labelledby="f-playback">
+    <section class="section feature" id="skill-playback" aria-labelledby="f-playback">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#38bdf8">playback-check</p>
@@ -720,7 +770,7 @@
     </section>
 
     <!-- ============ SKILL: SUBTITLES AND LANGUAGES ============ -->
-    <section class="section feature" id="skill-languages" aria-labelledby="f-languages">
+    <section class="section feature flip" id="skill-languages" aria-labelledby="f-languages">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#5eead4">subtitles-and-languages</p>
@@ -771,7 +821,7 @@
     </section>
 
     <!-- ============ SKILL: TITLE LOOKUP ============ -->
-    <section class="section feature flip" id="skill-lookup" aria-labelledby="f-lookup">
+    <section class="section feature" id="skill-lookup" aria-labelledby="f-lookup">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#facc15">title-lookup</p>
@@ -823,7 +873,7 @@
     </section>
 
     <!-- ============ SKILL: YEAR IN REVIEW ============ -->
-    <section class="section feature" id="skill-recap" aria-labelledby="f-recap">
+    <section class="section feature flip" id="skill-recap" aria-labelledby="f-recap">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#818cf8">year-in-review</p>
@@ -847,7 +897,7 @@
     </section>
 
     <!-- ============ SKILL: DASHBOARD ============ -->
-    <section class="section feature flip" id="skill-dashboard" aria-labelledby="f-dash">
+    <section class="section feature" id="skill-dashboard" aria-labelledby="f-dash">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#a382ff">dashboard</p>

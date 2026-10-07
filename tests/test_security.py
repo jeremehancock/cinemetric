@@ -24,6 +24,7 @@ checker = load_script("playback-check")
 recap = load_script("year-in-review")
 lookup = load_script("title-lookup")
 languages = load_script("subtitles-and-languages")
+progress = load_script("show-progress")
 
 # (script name, address check, error it raises). Each check takes just the address.
 ADDRESS_CHECKS = [
@@ -38,20 +39,21 @@ ADDRESS_CHECKS = [
     ("year-in-review", lambda url: recap.validate_url(url, "plex_url"), recap.ReportError),
     ("title-lookup", lambda url: lookup.validate_url(url, "plex_url"), lookup.ReportError),
     ("subtitles-and-languages", lambda url: languages.validate_url(url, "plex_url"), languages.ReportError),
+    ("show-progress", lambda url: progress.validate_url(url, "plex_url"), progress.ReportError),
     ("setup", setup.clean_tautulli_url, setup.SetupError),
 ]
-WARNS_ABOUT_PLAIN_HTTP = ADDRESS_CHECKS[:11]
+WARNS_ABOUT_PLAIN_HTTP = ADDRESS_CHECKS[:12]
 LOOKS_LOCAL = [("library-report", library.looks_local), ("server-health", health.looks_local),
                ("watch-activity", watch.looks_local), ("users-and-shares", shares.looks_local),
                ("unwatched", unwatched.looks_local), ("what-to-watch", picker.looks_local),
                ("episode-gaps", gaps.looks_local), ("playback-check", checker.looks_local),
                ("year-in-review", recap.looks_local), ("title-lookup", lookup.looks_local),
-               ("subtitles-and-languages", languages.looks_local)]
+               ("subtitles-and-languages", languages.looks_local), ("show-progress", progress.looks_local)]
 CLEANERS = [("library-report", library.clean), ("server-health", health.clean),
             ("watch-activity", watch.clean), ("users-and-shares", shares.clean),
             ("unwatched", unwatched.clean), ("what-to-watch", picker.clean), ("episode-gaps", gaps.clean),
             ("playback-check", checker.clean), ("year-in-review", recap.clean), ("title-lookup", lookup.clean),
-            ("subtitles-and-languages", languages.clean), ("setup", setup.clean)]
+            ("subtitles-and-languages", languages.clean), ("show-progress", progress.clean), ("setup", setup.clean)]
 
 
 class AddressChecks(OfflineTestCase):
@@ -157,7 +159,7 @@ def plex_clients():
                                  ("unwatched", unwatched), ("what-to-watch", picker),
                                  ("episode-gaps", gaps), ("playback-check", checker),
                                  ("year-in-review", recap), ("title-lookup", lookup),
-                                 ("subtitles-and-languages", languages))]
+                                 ("subtitles-and-languages", languages), ("show-progress", progress))]
 
 
 class PlexClientRules(OfflineTestCase):
@@ -298,6 +300,11 @@ class YearInReviewTautulliClient(WatchActivityTautulliClient):
 
 class TitleLookupTautulliClient(WatchActivityTautulliClient):
     module = lookup
+    allowed = "get_history"
+
+
+class ShowProgressTautulliClient(WatchActivityTautulliClient):
+    module = progress
     allowed = "get_history"
 
 

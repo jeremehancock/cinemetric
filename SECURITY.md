@@ -28,9 +28,11 @@ The full list of safety rules, and exactly how each one is enforced, is in
 Cinemetric also comes with a mod, the read-only guard, that is on by default. It checks the commands
 Claude writes on its own, outside Cinemetric's skills, and stops any that would change something on
 your Plex server, Tautulli or plex.tv. It reads only the server and Tautulli addresses (never the token
-or API key) and makes no network requests. Only you can switch it off, with `/cinemetric-mods guard off`
-or in Claude Code's `/config` menu. It is a safety net, not a guarantee: it reads each command before it
-runs, so it can't see inside a program Claude saves to a file and runs later. Its rules are in
+or API key) and makes no network requests. It's meant to be switched off only by you, with
+`/cinemetric-mods guard off` or in Claude Code's `/config` menu, and it refuses Claude's usual ways of
+switching it off. It is a safety net, not a guarantee: it reads each command before it runs, so it
+can't see inside a program Claude saves to a file and runs later, whether that program writes to the
+server or changes the setting that switches the guard off. Its rules are in
 [openspec/specs/read-only-guard/spec.md](openspec/specs/read-only-guard/spec.md).
 
 ## What the skills do not protect against

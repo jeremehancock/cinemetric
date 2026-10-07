@@ -92,13 +92,16 @@ class WebsiteMods(unittest.TestCase):
         text = self.site.text["mods"]
         for words in ("Claude Code", "nothing extra to install", "Read-only guard", "On by default",
                       "Library status line", "Off by default", "status", "safety net", "/config",
-                      "only you can turn it off", "2.1.260"):
+                      "meant to be turned off only by you", "usual ways", "2.1.260"):
             self.assertIn(words, text)
+        # The settings check can be worked around, so the site mustn't promise more.
+        for words in ("never Claude", "only you can turn it off"):
+            self.assertNotIn(words, text)
 
     def test_mods_commands_can_be_copied(self):
         self.assertIn("/cinemetric-mods", self.site.copy)
         self.assertIn("/cinemetric-mods status on", self.site.copy)
-        # The guard can't be switched off by Claude, so it isn't the switching example.
+        # The guard is meant to be switched off only by the user, so it isn't the switching example.
         self.assertNotIn("/cinemetric-mods guard off", self.site.copy)
 
     def test_nav_and_privacy_link_to_mods(self):

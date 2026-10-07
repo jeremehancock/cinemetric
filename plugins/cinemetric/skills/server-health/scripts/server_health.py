@@ -23,7 +23,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.23.1"
+VERSION = "0.23.2"
 TIMEOUT_SECONDS = 30
 MAX_TITLE_LENGTH = 120
 

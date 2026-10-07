@@ -10,8 +10,14 @@ const SETTINGS = '/home/u/.config/cinemetric/config.json'
 const TOKEN = 'secret-token-123'
 
 // Stands in for the world beneath the plugin: a home folder, and a settings
-// file when one is given. Tool calls that get past the guard are recorded.
-function world(on: On, settings?: string, environment: Record<string, string> = {}) {
+// file when one is given. Tool calls that get past the guard are recorded,
+// and answered with `answer` when one is given.
+function world(
+  on: On,
+  settings?: string,
+  environment: Record<string, string> = {},
+  answer?: (tool: string) => object,
+) {
   const ran: string[] = []
   mock.env(on, { HOME: '/home/u', ...environment })
   on('fs.stat', ($, e) => {
@@ -25,7 +31,7 @@ function world(on: On, settings?: string, environment: Record<string, string> = 
   on('ui.toast', () => ({ value: undefined }))
   on('tool.call', ($, e) => {
     ran.push(e.tool)
-    return { result: {} as never }
+    return (answer?.(e.tool) ?? { result: {} }) as never
   })
   return ran
 }
@@ -329,5 +335,225 @@ describe('when the guard itself fails', () => {
     await $.tool.call({ tool: 'Bash', command: 'curl -X DELETE "http://192.168.1.20:32400/x"' })
     expect(ran).toEqual(['Bash'])
     expect(toasts.join(' ')).toContain("couldn't check")
+  })
+})
+
+// The token and API key: openspec/specs/read-only-guard/spec.md, "Which
+// secrets the guard protects" and the requirements after it.
+const API_KEY = 'tautulli-secret'
+const OTHER_TOKEN = 'environment-token-456'
+
+function bashPrints(stdout: string) {
+  return () => ({ result: { stdout, stderr: '', interrupted: false } })
+}
+
+describe('which secrets are protected', () => {
+  test('the token and API key from the settings file', async ($, on) => {
+    world(on, CONFIGURED, {}, bashPrints(`a=${TOKEN} b=${API_KEY}`))
+    const answer = await $.tool.call({ tool: 'Bash', command: 'some-tool --show' })
+    expect(JSON.stringify(answer.result)).not.toContain(TOKEN)
+    expect(JSON.stringify(answer.result)).not.toContain(API_KEY)
+  })
+
+  test('PLEX_TOKEN and the settings file, when they differ', async ($, on) => {
+    world(on, CONFIGURED, { PLEX_TOKEN: OTHER_TOKEN }, bashPrints(`${TOKEN} ${OTHER_TOKEN}`))
+    const answer = await $.tool.call({ tool: 'Bash', command: 'some-tool --show' })
+    expect(JSON.stringify(answer.result)).toContain(
+      '[Plex token hidden by Cinemetric] [Plex token hidden by Cinemetric]',
+    )
+  })
+
+  test('a new token after setup is protected without a restart', async ($, on) => {
+    let settings = CONFIGURED
+    let mtimeMs = 1
+    mock.env(on, { HOME: '/home/u' })
+    on('fs.stat', () => ({ value: { kind: 'file' as const, size: 1, mtimeMs, isLink: false } }))
+    on('fs.read', () => ({ value: settings }))
+    on('ui.toast', () => ({ value: undefined }))
+    on('tool.call', bashPrints('new-token-789-abc') as never)
+    await $.tool.call({ tool: 'Bash', command: 'some-tool' })
+    settings = JSON.stringify({ plex_url: 'http://192.168.1.20:32400', plex_token: 'new-token-789-abc' })
+    mtimeMs = 2
+    const answer = await $.tool.call({ tool: 'Bash', command: 'some-tool' })
+    expect(JSON.stringify(answer.result)).toContain('[Plex token hidden by Cinemetric]')
+  })
+
+  test('nothing set up: nothing is hidden or refused', async ($, on) => {
+    const ran = world(on, undefined, {}, bashPrints('PATH=/usr/bin'))
+    const answer = await $.tool.call({ tool: 'Bash', command: 'env' })
+    expect(JSON.stringify(answer.result)).toContain('PATH=/usr/bin')
+    expect(ran).toEqual(['Bash'])
+  })
+
+  test('a short placeholder value is ignored', async ($, on) => {
+    const ran = world(on, JSON.stringify({ plex_token: 'x' }), {}, bashPrints('x marks the spot'))
+    const answer = await $.tool.call({ tool: 'Write', file_path: '/work/notes.md', content: 'x' })
+    expect(refusal(answer)).toBeUndefined()
+    const shown = await $.tool.call({ tool: 'Bash', command: 'echo hi' })
+    expect(JSON.stringify(shown.result)).toContain('x marks the spot')
+    expect(ran).toEqual(['Write', 'Bash'])
+  })
+})
+
+describe('hiding the secrets in what Claude sees', () => {
+  test('printing the environment', async ($, on) => {
+    world(on, CONFIGURED, { PLEX_TOKEN: TOKEN }, bashPrints(`HOME=/home/u\nPLEX_TOKEN=${TOKEN}\n`))
+    const answer = await $.tool.call({ tool: 'Bash', command: 'env' })
+    const stdout = (answer.result as { stdout: string }).stdout
+    expect(stdout).toBe('HOME=/home/u\nPLEX_TOKEN=[Plex token hidden by Cinemetric]\n')
+  })
+
+  test('a roundabout read of the settings file', async ($, on) => {
+    world(on, CONFIGURED, {}, bashPrints(CONFIGURED))
+    const answer = await $.tool.call({
+      tool: 'Bash',
+      command: `python3 -c "print(open('/home/u/.conf' + 'ig/cinemetric/config.json').read())"`,
+    })
+    const stdout = (answer.result as { stdout: string }).stdout
+    expect(stdout).toContain('[Plex token hidden by Cinemetric]')
+    expect(stdout).toContain('[Tautulli API key hidden by Cinemetric]')
+    expect(stdout).toContain('http://192.168.1.20:32400')
+  })
+
+  test('a log file read with the Read tool', async ($, on) => {
+    world(on, CONFIGURED, {}, () => ({
+      result: {
+        type: 'text',
+        file: {
+          filePath: '/var/log/app.log',
+          content: `GET /library?X-Plex-Token=${TOKEN} 200`,
+          numLines: 1,
+          startLine: 1,
+          totalLines: 1,
+        },
+      },
+    }))
+    const answer = await $.tool.call({ tool: 'Read', file_path: '/var/log/app.log' })
+    expect(JSON.stringify(answer.result)).toContain('X-Plex-Token=[Plex token hidden by Cinemetric] 200')
+  })
+
+  test('a tool that reports an error has its error text hidden too', async ($, on) => {
+    world(on, CONFIGURED, {}, () => ({ isError: true, result: `failed for ${TOKEN}`, text: `failed for ${TOKEN}` }))
+    const answer = await $.tool.call({ tool: 'Bash', command: 'some-tool' })
+    expect(refusal(answer)).toBe('failed for [Plex token hidden by Cinemetric]')
+  })
+
+  test('ordinary output is unchanged', async ($, on) => {
+    world(on, CONFIGURED, {}, bashPrints('On branch main\n'))
+    const answer = await $.tool.call({ tool: 'Bash', command: 'git status' })
+    expect(answer.result).toEqual({ stdout: 'On branch main\n', stderr: '', interrupted: false })
+  })
+})
+
+describe('blocking reads of the settings file', () => {
+  test('the Read tool on the settings file is refused', async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    const answer = await $.tool.call({ tool: 'Read', file_path: SETTINGS })
+    expect(refusal(answer)).toContain("Cinemetric's settings file holds the user's Plex token")
+    expect(refusal(answer)).toContain('setup.py status')
+    expect(ran).toEqual([])
+  })
+
+  test('the settings file under XDG_CONFIG_HOME is refused too', async ($, on) => {
+    const ran = world(on, undefined, { XDG_CONFIG_HOME: '/srv/conf' })
+    const answer = await $.tool.call({ tool: 'Read', file_path: '/srv/conf/cinemetric/config.json' })
+    expect(refusal(answer)).toContain("Cinemetric's settings file")
+    const shell = await $.tool.call({ tool: 'Bash', command: 'cat "$XDG_CONFIG_HOME/cinemetric/config.json"' })
+    expect(refusal(shell)).toContain("Cinemetric's settings file")
+    expect(ran).toEqual([])
+  })
+
+  test('printing it from the shell is refused', async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    const answer = await $.tool.call({ tool: 'Bash', command: 'cat ~/.config/cinemetric/config.json' })
+    expect(refusal(answer)).toContain("Cinemetric's settings file")
+    const jq = await $.tool.call({ tool: 'Bash', command: 'ls -l ~/.config/cinemetric/config.json && jq . ~/.config/cinemetric/config.json' })
+    expect(refusal(jq)).toContain("Cinemetric's settings file")
+    expect(ran).toEqual([])
+  })
+
+  test("checking the file's details, and setup status, run", async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    await $.tool.call({ tool: 'Bash', command: 'ls -l ~/.config/cinemetric/config.json' })
+    await $.tool.call({ tool: 'Bash', command: 'stat /home/u/.config/cinemetric/config.json' })
+    await $.tool.call({ tool: 'Bash', command: 'python3 /plugins/cinemetric/skills/setup/scripts/setup.py status' })
+    await $.tool.call({ tool: 'Bash', command: 'grep -rn "cinemetric/config.json" plugins' })
+    expect(ran).toEqual(['Bash', 'Bash', 'Bash', 'Bash'])
+  })
+})
+
+describe('refusing to pass the secrets on', () => {
+  test('filing an issue with the token is refused', async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    const answer = await $.tool.call({
+      tool: 'Bash',
+      command: `gh issue create --title "Broken" --body "my token is ${TOKEN}"`,
+    })
+    expect(refusal(answer)).toContain("it contains the user's Plex token")
+    expect(refusal(answer)).not.toContain(TOKEN)
+    expect(ran).toEqual([])
+  })
+
+  test('writing the API key into a file is refused', async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    const answer = await $.tool.call({ tool: 'Write', file_path: '/work/notes.md', content: `key: ${API_KEY}` })
+    expect(refusal(answer)).toContain("it contains the user's Tautulli API key")
+    expect(refusal(answer)).not.toContain(API_KEY)
+    expect(ran).toEqual([])
+  })
+
+  test('publishing a page with the token through an MCP tool is refused', async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    const answer = await $.tool.call({
+      tool: 'mcp__docs__publish',
+      page: { title: 'Notes', body: [`token ${TOKEN}`] },
+    } as never)
+    expect(refusal(answer)).toContain("it contains the user's Plex token")
+    expect(ran).toEqual([])
+  })
+
+  test("a read from the user's own server with the token runs", async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    await $.tool.call({
+      tool: 'Bash',
+      command: `curl -H "X-Plex-Token: ${TOKEN}" "http://192.168.1.20:32400/identity"`,
+    })
+    await $.tool.call({ tool: 'Bash', command: `curl "http://192.168.1.20:8181/api/v2?apikey=${API_KEY}&cmd=get_activity"` })
+    await $.tool.call({ tool: 'WebFetch', url: `http://192.168.1.20:32400/identity?X-Plex-Token=${TOKEN}`, prompt: 'x' })
+    expect(ran).toEqual(['Bash', 'Bash', 'WebFetch'])
+  })
+
+  test("a write to the user's own server with the token names the write", async ($, on) => {
+    world(on, CONFIGURED)
+    const answer = await $.tool.call({
+      tool: 'Bash',
+      command: `curl -X DELETE "http://192.168.1.20:32400/library/metadata/1?X-Plex-Token=${TOKEN}"`,
+    })
+    expect(refusal(answer)).toContain('uses the DELETE method')
+  })
+})
+
+describe('when hiding fails', () => {
+  test('the result comes back unchanged, the tool runs once, and the user is told', async ($, on) => {
+    const toasts: string[] = []
+    let runs = 0
+    mock.env(on, { HOME: '/home/u' })
+    on('fs.stat', () => ({ value: { kind: 'file' as const, size: 1, mtimeMs: 1, isLink: false } }))
+    on('fs.read', () => ({ value: CONFIGURED }))
+    on('ui.toast', ($, e) => {
+      toasts.push(e.text)
+      return { value: undefined }
+    })
+    // A result the guard can't turn into text (JSON has no big integers), so
+    // looking through it throws.
+    on('tool.call', () => {
+      runs++
+      return { result: { stdout: 'ok', size: 1n } } as never
+    })
+    const answer = await $.tool.call({ tool: 'Bash', command: 'some-tool' })
+    expect(runs).toBe(1)
+    expect((answer.result as { stdout: string }).stdout).toBe('ok')
+    expect(toasts.join(' ')).toContain("couldn't check a tool's output")
+    expect(toasts.join(' ')).not.toContain(TOKEN)
   })
 })

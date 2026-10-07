@@ -1,6 +1,6 @@
 {
   "name": "cinemetric",
-  "version": "0.23.2",
+  "version": "0.24.0",
   "description": "Claude skills for your Plex server. Read-only reports on your media and server, plus mods for Claude Code: a read-only guard and a library status line.",
   "author": {
     "name": "Jereme Hancock"
@@ -13,7 +13,7 @@
     "read_only_guard": {
       "type": "boolean",
       "title": "Read-only guard",
-      "description": "Stops Claude from running its own commands that would change your Plex server, Tautulli or plex.tv. Meant to be switched off only by you.",
+      "description": "Stops Claude from running its own commands that would change your Plex server, Tautulli or plex.tv, and keeps your Plex token and Tautulli API key out of what Claude sees and sends. Meant to be switched off only by you.",
       "default": true
     },
     "library_status_line": {

@@ -19,7 +19,7 @@ export const MODS: readonly Mod[] = [
     name: 'guard',
     setting: GUARD_SETTING,
     description:
-      "Read-only guard: stops Claude from running its own commands that would change your Plex server, Tautulli or plex.tv.",
+      "Read-only guard: stops Claude from running its own commands that would change your Plex server, Tautulli or plex.tv, and keeps your Plex token and Tautulli API key out of what Claude sees and sends.",
     isUserOnlyOff: true,
   },
   {

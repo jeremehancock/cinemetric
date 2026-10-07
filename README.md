@@ -49,13 +49,15 @@ come with Cinemetric, so there's nothing extra to install, and each one has its 
 
 | Mod | Starts | What it does |
 |---|---|---|
-| `guard` | On | **Read-only guard.** Checks the commands Claude writes on its own, outside Cinemetric's skills. If one would change something on your Plex server, Tautulli or plex.tv (deleting a title, starting a library scan, marking something watched, stopping someone's stream, running a Tautulli command that isn't a read), the guard stops it before it runs and tells Claude why |
+| `guard` | On | **Read-only guard.** Checks the commands Claude writes on its own, outside Cinemetric's skills. If one would change something on your Plex server, Tautulli or plex.tv (deleting a title, starting a library scan, marking something watched, stopping someone's stream, running a Tautulli command that isn't a read), the guard stops it before it runs and tells Claude why. It also keeps your Plex token and Tautulli API key out of Claude's sight: it hides them in anything a command prints, stops Claude reading Cinemetric's settings file, and stops Claude putting them in a file, an issue or a page |
 | `status` | Off | **Library status line.** A dim line just above the prompt such as `Plex: 1,970 movies · 417 shows · 59.4 TB · checked 3 days ago`, read from the newest snapshot Cinemetric saved when you asked what changed or refreshed the dashboard. It never contacts your server, and updates after each turn, so a fresh snapshot shows straight away |
 
 > [!IMPORTANT]
 > **The guard is a safety net, not a guarantee.** It reads each command before it runs, so it catches the
 > common ways of changing things, but it can't see inside a program Claude saves to a file and runs
-> later.
+> later. The same goes for your Plex token and Tautulli API key: a program like that could send them
+> somewhere without printing them. And if you type or paste either one into the chat yourself, Claude
+> sees it; the guard can only stop Claude passing it on.
 
 **Switching mods on and off.** Type `/cinemetric-mods` in Claude Code to see every mod and whether it's
 on, and `/cinemetric-mods <name> on` or `off` to switch one:

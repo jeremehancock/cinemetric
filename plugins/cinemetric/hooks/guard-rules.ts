@@ -47,18 +47,93 @@ export function hostOf(address: unknown): string | undefined {
   }
 }
 
-// Reads Cinemetric's settings file text and keeps only the two hosts. The
-// token and API key are never copied out of the parsed object.
-export function hostsFromSettings(text: string): string[] {
+// A Plex token or Tautulli API key the guard keeps out of Claude's sight,
+// and the label that stands in for it.
+export type Secret = { value: string; label: string; name: string }
+
+export const PLEX_TOKEN_LABEL = '[Plex token hidden by Cinemetric]'
+export const TAUTULLI_KEY_LABEL = '[Tautulli API key hidden by Cinemetric]'
+
+// Shorter values are ignored, so a damaged or placeholder value such as "x"
+// can't make the guard hide or block ordinary text.
+const SHORTEST_SECRET = 8
+
+export function plexToken(value: unknown): Secret | undefined {
+  return secretOf(value, PLEX_TOKEN_LABEL, 'Plex token')
+}
+
+function secretOf(value: unknown, label: string, name: string): Secret | undefined {
+  if (typeof value !== 'string') return undefined
+  const trimmed = value.trim()
+  return trimmed.length >= SHORTEST_SECRET ? { value: trimmed, label, name } : undefined
+}
+
+// Puts secrets together without repeats, longest first, so hiding a longer
+// one never leaves part of it behind because a shorter one went first.
+export function combineSecrets(...lists: readonly (Secret | undefined)[][]): Secret[] {
+  const byValue = new Map<string, Secret>()
+  for (const secret of lists.flat()) if (secret && !byValue.has(secret.value)) byValue.set(secret.value, secret)
+  return [...byValue.values()].sort((a, b) => b.value.length - a.value.length)
+}
+
+// What the guard uses from Cinemetric's settings file: the two hosts, and
+// the token and API key to recognise. Nothing else is copied out of it.
+export type Settings = { hosts: string[]; secrets: Secret[] }
+
+export function readSettings(text: string): Settings {
   let settings: unknown
   try {
     settings = JSON.parse(text)
   } catch {
-    return []
+    return { hosts: [], secrets: [] }
   }
-  if (settings === null || typeof settings !== 'object') return []
-  const { plex_url, tautulli_url } = settings as Record<string, unknown>
-  return [hostOf(plex_url), hostOf(tautulli_url)].filter((host): host is string => !!host)
+  if (settings === null || typeof settings !== 'object') return { hosts: [], secrets: [] }
+  const { plex_url, tautulli_url, plex_token, tautulli_api_key } = settings as Record<string, unknown>
+  return {
+    hosts: [hostOf(plex_url), hostOf(tautulli_url)].filter((host): host is string => !!host),
+    secrets: combineSecrets([
+      plexToken(plex_token),
+      secretOf(tautulli_api_key, TAUTULLI_KEY_LABEL, 'Tautulli API key'),
+    ]),
+  }
+}
+
+// The first secret found in the text, or undefined.
+export function findSecret(text: string, secrets: readonly Secret[]): Secret | undefined {
+  return secrets.find(secret => text.includes(secret.value))
+}
+
+// The value with every secret in every string replaced by its label. Parts
+// that hold no secret are kept as they were, and a value with none in it at
+// all comes back as the very same object.
+export function hideSecrets<T>(value: T, secrets: readonly Secret[]): T {
+  return hideIn(value, secrets) as T
+}
+
+function hideIn(value: unknown, secrets: readonly Secret[]): unknown {
+  if (typeof value === 'string') return hideInText(value, secrets)
+  if (Array.isArray(value)) {
+    const hidden = value.map(item => hideIn(item, secrets))
+    return hidden.some((item, i) => item !== value[i]) ? hidden : value
+  }
+  if (value !== null && typeof value === 'object') {
+    let changed = false
+    const hidden: Record<string, unknown> = {}
+    for (const [key, item] of Object.entries(value)) {
+      hidden[key] = hideIn(item, secrets)
+      if (hidden[key] !== item) changed = true
+    }
+    return changed ? hidden : value
+  }
+  return value
+}
+
+export function hideInText(text: string, secrets: readonly Secret[]): string {
+  let hidden = text
+  for (const secret of secrets) {
+    if (hidden.includes(secret.value)) hidden = hidden.split(secret.value).join(secret.label)
+  }
+  return hidden
 }
 
 function escapeForRegExp(text: string): string {
@@ -437,6 +512,46 @@ class ShellReader {
   }
 }
 
+// Ways a command names Cinemetric's own settings file, which holds the token
+// and API key. `.config/` is part of the name so a search of Cinemetric's
+// source for the shorter `cinemetric/config.json` doesn't count.
+const CINEMETRIC_SETTINGS_IN_TEXT = [
+  /\.config[\/\\]cinemetric[\/\\]config\.json/i,
+  /XDG_CONFIG_HOME\}?[\/\\]cinemetric[\/\\]config\.json/,
+]
+
+// Programs that only show a file's details, never what's in it.
+const FILE_DETAIL_PROGRAMS = new Set(['ls', 'stat'])
+
+function samePath(a: string, b: string): boolean {
+  return a.trim().replace(/\\/g, '/') === b.replace(/\\/g, '/')
+}
+
+// True when a file is Cinemetric's settings file. `settingsPath` is where
+// the guard found it on this computer, when it knows.
+export function isCinemetricSettingsFile(path: string, settingsPath?: string): boolean {
+  return (
+    (settingsPath !== undefined && samePath(path, settingsPath)) ||
+    /(^|[\/\\])\.config[\/\\]cinemetric[\/\\]config\.json$/i.test(path.trim())
+  )
+}
+
+// True when a shell command names Cinemetric's settings file and runs
+// anything other than `ls` or `stat`. A command the guard can't read counts
+// as running something else.
+export function commandReadsCinemetricSettings(command: string, settingsPath?: string): boolean {
+  const names =
+    CINEMETRIC_SETTINGS_IN_TEXT.some(pattern => pattern.test(command)) ||
+    (settingsPath !== undefined && command.replace(/\\/g, '/').includes(settingsPath.replace(/\\/g, '/')))
+  if (!names) return false
+  const commands = commandsIn(command)
+  if (commands === undefined) return true
+  return !commands.every(words => {
+    const name = words.find(word => !isAssignment(word))
+    return name === undefined || FILE_DETAIL_PROGRAMS.has(name)
+  })
+}
+
 const SETTINGS_FILE = /(^|[\/\\])\.claude[\/\\]settings(\.local)?\.json$/
 const SETTINGS_FILE_IN_TEXT = /\.claude[\/\\]settings(\.local)?\.json/
 
@@ -478,4 +593,20 @@ export function serverBlockMessage(reason: string): string {
 
 export function settingBlockMessage(): string {
   return `${BLOCKED_PREFIX} blocked this: only the user can switch the guard off. ${HOW_TO_SWITCH_OFF}`
+}
+
+export function settingsFileBlockMessage(): string {
+  return (
+    `${BLOCKED_PREFIX} blocked this: Cinemetric's settings file holds the user's Plex token and ` +
+    `Tautulli API key, so Claude doesn't read it. To see what's set up without them, run ` +
+    `Cinemetric's setup.py status. ${HOW_TO_SWITCH_OFF}`
+  )
+}
+
+// Names which secret was found, never its value.
+export function secretBlockMessage(secret: Secret): string {
+  return (
+    `${BLOCKED_PREFIX} blocked this: it contains the user's ${secret.name}, which Cinemetric keeps ` +
+    `out of files, messages and pages. ${HOW_TO_SWITCH_OFF}`
+  )
 }

@@ -239,9 +239,8 @@ section. It SHALL say plainly that mods come with Cinemetric (no extra install) 
 only in Claude Code (the terminal and the desktop app's Code tab). For each mod it SHALL say what the
 mod does in plain words, its short name (for example `guard`, `status` or `now`), and whether it
 starts on or off. The Now Playing card SHALL also say that it checks the server only while its panel
-is open. The Library status line card SHALL say that the line updates only when the `changes`
-skill or the dashboard saves a new snapshot, and that other skills, such as the server health check,
-don't change it. The section SHALL say that some versions of the
+is open. The Library status line card SHALL say which skills update the line: the `changes`
+skill and the dashboard, the two that save snapshots. The section SHALL say that some versions of the
 desktop app can't show the status line or the Now Playing panel, and SHALL link to the README for
 what to do when the mods don't show up. The "Shows every skill" count and
 headings SHALL stay about skills only.

@@ -96,8 +96,10 @@ session. There are two possible reasons:
 Cinemetric works best in Claude Code in your favorite terminal. That's where every skill and every mod
 works as described here, with no extra steps.
 
-- **Claude Code in the desktop app (the Code tab):** the skills and mods work there too, though some
-  versions of the app can't show the Now Playing panel. `/cinemetric-now` tells you when that happens.
+- **Claude Code in the desktop app (the Code tab):** the skills and the read-only guard work there too,
+  but some versions of the app can't show the library status line or the Now Playing panel
+  (`/cinemetric-now` tells you when that happens), and switching mods with `/cinemetric-mods` may not
+  work there. Switch them in a terminal instead: the desktop app uses the same settings.
 - **Claude in the desktop app's chat or on claude.ai:** mods only run in Claude Code, so they aren't
   available there.
 

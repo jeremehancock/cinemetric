@@ -45,7 +45,8 @@ The README SHALL also say what to do when the mods aren't running: run `claude u
 Code older than 2.1.260, and on a newer one add `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS` set to `"1"` to the
 `env` section of `~/.claude/settings.json` and start a new session, since Claude Code may start a
 session with the feature mods use switched off. It SHALL say that Cinemetric works best in Claude
-Code in a terminal.
+Code in a terminal, and that some versions of the desktop app can't show the library status line or
+the Now Playing panel, or switch mods with `/cinemetric-mods`.
 
 #### Scenario: Plugin checker on an older version
 - **WHEN** `claude plugin validate plugins/cinemetric` runs on Claude Code 2.1.75, 2.1.200 or 2.1.260

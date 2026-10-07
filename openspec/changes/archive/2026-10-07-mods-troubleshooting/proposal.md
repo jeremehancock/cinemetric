@@ -17,6 +17,9 @@ nobody could see.
 `/cinemetric-mods status on` there replied "Couldn't switch status on from here. Use /config
 instead." and hid Claude Code's reason, so there was no way to tell why.
 
+The library status line, switched on in the shared settings, didn't show in the desktop app either,
+though it showed in a terminal: that version of the app doesn't draw the row above the prompt.
+
 Cinemetric also works best in Claude Code in a terminal, and nothing said so.
 
 ## What Changes

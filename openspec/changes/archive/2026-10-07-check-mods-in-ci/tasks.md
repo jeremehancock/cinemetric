@@ -2,7 +2,7 @@
 
 - [x] 1.1 Add a `mods` job to `.github/workflows/tests.yml`: Node 22, `npm install -g @anthropic-ai/claude-code@2.1.293`, `claude plugin test plugins/cinemetric`, nonessential traffic off
 - [x] 1.2 Make **All tests passed** wait for both jobs and fail if either didn't succeed
-- [ ] 1.3 Confirm the job passes on the pull request
+- [x] 1.3 Confirm the job passes on the pull request
 
 ## 2. Hooks and scripts agree on file locations
 

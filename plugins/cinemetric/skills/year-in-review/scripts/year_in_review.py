@@ -68,7 +68,7 @@ class ReportError(Exception):
 
 
 class PersonError(ReportError):
-    """--user matched nobody or more than one person. Never a reason to fall back to Plex."""
+    """--user matched nobody or several people. Never a reason to fall back to another source."""
 
 
 # ---------------------------------------------------------------- config

@@ -80,7 +80,60 @@ SHARED = {
     "load_snapshot": {},
     "read_snapshot": {},
     "choose_snapshot": {},
+    # Values from the server
+    "as_bool": {},
+    "as_float": {"what-to-watch": "a missing rating stays unknown (None) instead of 0"},
+    "day": {"users-and-shares": "its times are already whole seconds, and it has no as_int"},
+    "when": {},
+    "months_before": {},
+    # Libraries, titles and history
+    "get_all": {},
+    "normalize": {},
+    "key_from": {},
+    "MAX_MATCHES": {},
+    "PLEX_HISTORY_PAGE_SIZE": {},
+    "PersonError": {},
+    "tautulli_person": {"year-in-review": "also returns the key recaps use to tell people apart"},
+    "stream_title": {},
+    # Playback rules shared by playback-check and title-lookup
+    "CAUSES": {},
+    "COMMON_AUDIO_CODECS": {},
+    "DTS_CODECS": {},
+    "IMAGE_SUBTITLE_CODECS": {},
+    "codec": {},
+    "language": {},
+    "remote_limit": {},
+    "read_once": {},
+    "check_file": {"subtitles-and-languages": "checks a file's languages, not how it plays"},
+    # HTML pages (dashboard and year-in-review)
+    "CSP": {},
+    "e": {},
+    "num": {},
+    "nice_step": {},
+    "full_page": {},
+    "write_page": {},
+    "save_state": {},
+    "saved_destination": {},
+    "ONLINE_PAGE_RE": {},
+    "DESTINATIONS": {},
+    # Running other skills' scripts (changes and dashboard)
+    "HERE": {},
+    "SKILLS_DIR": {},
+    "SCRIPT_TIMEOUT_SECONDS": {},
 }
+
+# Not shared helpers, though the same name appears in several scripts: each script's version does a
+# different job, so they're expected to differ. Listed so a later comparison doesn't take them for
+# drift. Nothing checks this list.
+DIFFERENT_JOBS = (
+    "ALLOWED_PATHS", "TAUTULLI_COMMANDS", "PLEX_TV_RULES", "TIMEOUT_SECONDS", "HISTORY_CAP", "LIMITS",
+    "PAGE_SIZE", "PLEX_PAGE_SIZE", "TOTAL_FIELDS", "SOURCES", "CSS", "History", "main", "parse_args",
+    "check", "build_report", "need_plex", "choose_sections", "check_library", "hours", "worth_a_look",
+    "since_snapshot", "read_history", "plex_history", "tautulli_history", "plex_plays", "tautulli_plays",
+    "write_private", "save_snapshot", "server_name", "run_source", "collect", "media_deletion_from",
+    "build", "render", "card", "tile", "bar_chart", "ranked", "plural", "load_state", "state_path",
+    "default_output", "saved_online_page", "cmd_destination", "cmd_online_page",
+)
 
 CLIENT_NAME = re.compile(r'"cinemetric-[a-z-]+"')
 

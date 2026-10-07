@@ -275,7 +275,7 @@ def as_int(value, default=0):
 
 
 def as_bool(value):
-    return value is True or str(value).lower() in ("1", "true")
+    return str(value).strip().lower() in ("1", "true", "yes")
 
 
 def gb(size):
@@ -383,7 +383,7 @@ def clean_long(text, length):
 
 
 def when(epoch):
-    # Plex uses 0 or -1 for "never".
+    # Plex uses 0 or -1 for "never" (for example an update check that hasn't run).
     epoch = as_int(epoch)
     return time.strftime("%Y-%m-%d %H:%M", time.localtime(epoch)) if epoch > 0 else None
 

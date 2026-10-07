@@ -333,12 +333,13 @@ def tautulli_person(client, wanted):
 
 # ---------------------------------------------------------------- episodes on the server
 
-def get_all(client, section_id, type_number):
+def get_all(client, section_id, type_number, extra=None):
     """Every item of one type in a section, fetched in pages."""
     path = f"/library/sections/{section_id}/all"
+    params = {"type": type_number, **(extra or {})}
     items, start = [], 0
     while True:
-        page = client.get(path, {"type": type_number}, start=start, size=LIBRARY_PAGE_SIZE)
+        page = client.get(path, params, start=start, size=LIBRARY_PAGE_SIZE)
         batch = page.get("Metadata", []) or []
         items.extend(batch)
         total = as_int(page.get("totalSize", page.get("size", len(items))))

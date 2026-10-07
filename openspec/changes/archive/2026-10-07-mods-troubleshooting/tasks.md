@@ -14,6 +14,8 @@
 - [x] 3.1 Close the panel and start no checks when Claude Code says it wasn't drawn; reply with why
 - [x] 3.2 Test it with an app that can't draw panels
 
+- [x] 3.3 `/cinemetric-mods`: give Claude Code's reason when a switch fails, and point to a terminal
+
 ## 4. Release
 
 - [x] 4.1 Bump the version to 0.25.1 (scripts, plugin.json, marketplace.json)

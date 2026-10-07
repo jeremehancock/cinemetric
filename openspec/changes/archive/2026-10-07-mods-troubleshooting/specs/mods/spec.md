@@ -1,5 +1,40 @@
 ## MODIFIED Requirements
 
+### Requirement: A command for switching mods
+The plugin SHALL add a `/cinemetric-mods` slash command that the user types themselves:
+- `/cinemetric-mods` on its own SHALL list every mod with a one-line description and whether it is on
+  or off;
+- `/cinemetric-mods <mod> on` and `/cinemetric-mods <mod> off` SHALL switch that mod, using the same
+  setting as the config menu, and confirm the new state;
+- an unknown mod name or word SHALL get a short message listing the mod names and the right form;
+- when Claude Code can't change the setting from this session (as in some sessions the desktop app
+  starts), the reply SHALL say the switch didn't happen, give Claude Code's reason, and say to type the
+  same command in Claude Code in a terminal or use `/config`.
+
+The command SHALL be available even when every mod is switched off, so a user can always turn one
+back on. Mod names SHALL be short words (the guard's is `guard`).
+
+#### Scenario: Listing the mods
+- **WHEN** the user types `/cinemetric-mods`
+- **THEN** they see each mod, what it does, and whether it is on or off
+
+#### Scenario: Switching the guard off
+- **WHEN** the user types `/cinemetric-mods guard off`
+- **THEN** the guard switches off right away, the config menu shows it off, and the command confirms it
+
+#### Scenario: A typo
+- **WHEN** the user types `/cinemetric-mods gaurd off`
+- **THEN** nothing changes and they see the list of mod names and how to use the command
+
+#### Scenario: Everything off
+- **WHEN** every mod is off and the user types `/cinemetric-mods guard on`
+- **THEN** the guard switches back on
+
+#### Scenario: A session that can't change settings
+- **WHEN** the user types `/cinemetric-mods status on` in a session where Claude Code can't change the
+  setting
+- **THEN** nothing changes, and the reply gives the reason and says to switch it in a terminal
+
 ### Requirement: Works on Claude Code versions without mods
 Cinemetric SHALL load, and every skill SHALL work, on Claude Code 2.1.75 or newer. Mods SHALL need
 Claude Code 2.1.260 or newer. `hooks/hooks.json` SHALL carry both a `hooks` section in the older

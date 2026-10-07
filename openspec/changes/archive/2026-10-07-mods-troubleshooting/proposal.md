@@ -14,6 +14,9 @@ In the same app, `/cinemetric-now` replied "Now Playing is open" but no panel ap
 version of the app can't draw plugin panels. The mod still checked Plex every 30 seconds for a panel
 nobody could see.
 
+`/cinemetric-mods status on` there replied "Couldn't switch status on from here. Use /config
+instead." and hid Claude Code's reason, so there was no way to tell why.
+
 Cinemetric also works best in Claude Code in a terminal, and nothing said so.
 
 ## What Changes
@@ -28,6 +31,8 @@ Cinemetric also works best in Claude Code in a terminal, and nothing said so.
   README for the fix.
 - `/cinemetric-now` checks whether the panel was actually drawn. If not, it closes it, checks
   nothing, and says the app can't show the panel and to try a terminal.
+- When `/cinemetric-mods` can't change a setting, the reply gives Claude Code's reason and says to
+  type the same command in a terminal (or use `/config`).
 - Version 0.25.1.
 
 ## Capabilities
@@ -36,7 +41,7 @@ Cinemetric also works best in Claude Code in a terminal, and nothing said so.
 <!-- none -->
 
 ### Modified Capabilities
-- `mods`: "Works on Claude Code versions without mods" asks the README to explain both fixes and
+- `mods`: "A command for switching mods" covers a session that can't change settings; "Works on Claude Code versions without mods" asks the README to explain both fixes and
   recommend the terminal; "Telling the user when mods can't run" changes what the notice says.
 - `website`: "Shows how to set up" and "Shows the mods" say Cinemetric works best in a terminal and
   point to the README when mods don't show up.
@@ -44,6 +49,7 @@ Cinemetric also works best in Claude Code in a terminal, and nothing said so.
 
 ## Impact
 
+- `plugins/cinemetric/hooks/command.ts` and its tests.
 - `plugins/cinemetric/hooks/now-playing.tsx`, `now-playing-rules.ts` and their tests.
 - `plugins/cinemetric/hooks/mods_notice.py`, `tests/test_mods_notice.py`, `README.md`,
   `website/index.html`, version numbers. No other change to the mods.

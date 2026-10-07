@@ -200,6 +200,107 @@ describe('commands that only handle text', () => {
   }
 })
 
+// PowerShell, which Claude Code uses on Windows, isn't in the tool types on
+// every computer, so its calls are built here.
+function powerShell(command: string) {
+  return { tool: 'PowerShell', command } as never
+}
+
+describe('PowerShell commands', () => {
+  test('a delete with Invoke-RestMethod is blocked', async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    const answer = await $.tool.call(
+      powerShell('Invoke-RestMethod -Method Delete -Uri "http://192.168.1.20:32400/library/metadata/123"'),
+    )
+    expect(refusal(answer)).toContain('Cinemetric read-only guard')
+    expect(refusal(answer)).toContain('uses the DELETE method')
+    expect(ran).toEqual([])
+  })
+
+  test('a library scan with Invoke-WebRequest is blocked', async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    const answer = await $.tool.call(
+      powerShell('Invoke-WebRequest "http://192.168.1.20:32400/library/sections/1/refresh"'),
+    )
+    expect(refusal(answer)).toContain('starts a library scan')
+    expect(ran).toEqual([])
+  })
+
+  test('a delete through .NET HttpClient is blocked', async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    const answer = await $.tool.call(
+      powerShell(
+        '$c = [System.Net.Http.HttpClient]::new(); $c.DeleteAsync("http://192.168.1.20:32400/library/metadata/1").Result',
+      ),
+    )
+    expect(refusal(answer)).toContain('uses the DELETE method')
+    expect(ran).toEqual([])
+  })
+
+  test('an upload through .NET WebClient is blocked', async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    const answer = await $.tool.call(
+      powerShell('(New-Object Net.WebClient).UploadString("http://192.168.1.20:32400/:/prefs", "x=1")'),
+    )
+    expect(refusal(answer)).toContain('sends data to the server')
+    expect(ran).toEqual([])
+  })
+
+  test('a read runs unchanged', async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    const answer = await $.tool.call(powerShell('Invoke-RestMethod "http://192.168.1.20:32400/identity"'))
+    expect(refusal(answer)).toBeUndefined()
+    expect(ran).toEqual(['PowerShell'])
+  })
+
+  test('an unrelated command runs unchanged', async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    await $.tool.call(powerShell('Get-ChildItem'))
+    await $.tool.call(powerShell('Invoke-RestMethod -Method Post https://example.com/api'))
+    expect(ran).toEqual(['PowerShell', 'PowerShell'])
+  })
+
+  test('a commit that mentions the server and a write is checked in full', async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    const answer = await $.tool.call(powerShell('git commit -m "Blocks curl -X DELETE to :32400"'))
+    expect(refusal(answer)).toContain('uses the DELETE method')
+    expect(ran).toEqual([])
+  })
+
+  test('reading the settings file is refused', async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    const answer = await $.tool.call(powerShell('Get-Content $env:USERPROFILE\\.config\\cinemetric\\config.json'))
+    expect(refusal(answer)).toContain('setup.py status')
+    expect(ran).toEqual([])
+  })
+
+  test('switching the guard off through a settings file is refused', async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    const answer = await $.tool.call(
+      powerShell(`Set-Content .claude\\settings.json '{"pluginConfigs": {"read_only_guard": false}}'`),
+    )
+    expect(refusal(answer)).toContain('only the user can switch the guard off')
+    expect(ran).toEqual([])
+  })
+
+  test('the token can go to the server but nowhere else', async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    const toServer = await $.tool.call(
+      powerShell(`Invoke-RestMethod "http://192.168.1.20:32400/identity?X-Plex-Token=${TOKEN}"`),
+    )
+    expect(refusal(toServer)).toBeUndefined()
+    const elsewhere = await $.tool.call(powerShell(`Set-Content notes.txt "${TOKEN}"`))
+    expect(refusal(elsewhere)).toContain('Plex token')
+    expect(ran).toEqual(['PowerShell'])
+  })
+
+  test('switched off, nothing is checked', { options: { read_only_guard: false } }, async ($, on) => {
+    const ran = world(on, CONFIGURED)
+    await $.tool.call(powerShell('Invoke-RestMethod -Method Delete "http://192.168.1.20:32400/library/metadata/1"'))
+    expect(ran).toEqual(['PowerShell'])
+  })
+})
+
 describe('where the addresses come from', () => {
   test('without a settings file, address-free signs still count', async ($, on) => {
     world(on)

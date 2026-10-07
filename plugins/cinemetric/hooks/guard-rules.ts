@@ -164,8 +164,16 @@ export function writeReason(text: string): string | undefined {
       `(?:-X\\s*|--request[\\s=]+|--method[\\s=]+|-Method\\s+|method\\s*[=:]\\s*)['"]?(${WRITE_METHODS})\\b`,
       'i',
     ).exec(text) ??
-    new RegExp(`\\b(?:requests|httpx|session|client)\\.(${WRITE_METHODS})\\s*\\(`, 'i').exec(text)
+    new RegExp(`\\b(?:requests|httpx|session|client)\\.(${WRITE_METHODS})\\s*\\(`, 'i').exec(text) ??
+    // .NET's HttpClient, which PowerShell can call: $client.DeleteAsync(...).
+    new RegExp(`\\.(${WRITE_METHODS})Async\\s*\\(`, 'i').exec(text)
   if (method?.[1]) return `uses the ${method[1].toUpperCase()} method`
+
+  // .NET's WebClient, which PowerShell can call: its Upload methods send
+  // with POST unless told otherwise.
+  if (/\.Upload(?:String|Data|File|Values)(?:Async|TaskAsync)?\s*\(/i.test(text)) {
+    return 'sends data to the server'
+  }
 
   if (/(?:^|\s)--(?:data(?:-raw|-binary|-urlencode|-ascii)?|json|form(?:-string)?|upload-file)(?=[\s=]|$)/.test(text)) {
     return 'sends data to the server'
@@ -536,14 +544,21 @@ export function isCinemetricSettingsFile(path: string, settingsPath?: string): b
   )
 }
 
+// True when a command's text names Cinemetric's settings file. A PowerShell
+// command that does is refused whatever it runs, since the shell reader
+// can't tell which PowerShell commands only show a file's details.
+export function commandNamesCinemetricSettings(command: string, settingsPath?: string): boolean {
+  return (
+    CINEMETRIC_SETTINGS_IN_TEXT.some(pattern => pattern.test(command)) ||
+    (settingsPath !== undefined && command.replace(/\\/g, '/').includes(settingsPath.replace(/\\/g, '/')))
+  )
+}
+
 // True when a shell command names Cinemetric's settings file and runs
 // anything other than `ls` or `stat`. A command the guard can't read counts
 // as running something else.
 export function commandReadsCinemetricSettings(command: string, settingsPath?: string): boolean {
-  const names =
-    CINEMETRIC_SETTINGS_IN_TEXT.some(pattern => pattern.test(command)) ||
-    (settingsPath !== undefined && command.replace(/\\/g, '/').includes(settingsPath.replace(/\\/g, '/')))
-  if (!names) return false
+  if (!commandNamesCinemetricSettings(command, settingsPath)) return false
   const commands = commandsIn(command)
   if (commands === undefined) return true
   return !commands.every(words => {

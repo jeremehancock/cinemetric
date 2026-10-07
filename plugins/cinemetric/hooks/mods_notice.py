@@ -1,9 +1,10 @@
-"""Cinemetric: tell the user when their Claude Code is too old to run Cinemetric's mods.
+"""Cinemetric: tell the user when Cinemetric's mods aren't running in this session.
 
-Runs as a SessionStart settings hook when a session starts. On Claude Code 2.1.260 and newer the
-mods run and set CINEMETRIC_MODS_ACTIVE before this script starts, so it shows nothing. On older
-versions nothing sets it, so the script shows a short notice, at most once a day. Any problem ends
-the script quietly: a missed notice is better than an error at startup.
+Runs as a SessionStart settings hook when a session starts. When the mods run they set
+CINEMETRIC_MODS_ACTIVE before this script starts, so it shows nothing. Otherwise nothing sets it,
+either because Claude Code is older than 2.1.260 or because the session started with the feature
+mods use switched off, so the script shows a short notice with both fixes, at most once a day. Any
+problem ends the script quietly: a missed notice is better than an error at startup.
 
 See openspec/specs/mods/spec.md.
 """
@@ -15,15 +16,21 @@ import sys
 
 MODS_VERSION = "2.1.260"
 
+ENABLE_SETTING = "CLAUDE_CODE_ENABLE_FUNCTION_HOOKS"
+
 NOTICE = (
-    "Cinemetric's mods (like the read-only guard) need Claude Code " + MODS_VERSION + " or newer. "
-    "Every Cinemetric skill still works. Run `claude update` to get the mods."
+    "Cinemetric's mods (like the read-only guard) aren't running in this session. They need Claude "
+    "Code " + MODS_VERSION + " or newer: run `claude update`. Already up to date? Add "
+    "\"" + ENABLE_SETTING + "\": \"1\" to the \"env\" section of ~/.claude/settings.json and start a "
+    "new session. Every Cinemetric skill still works."
 )
 
 CONTEXT = (
     "Cinemetric's mods, including the read-only guard and the /cinemetric-mods command, are not "
-    "running in this session because this Claude Code is older than " + MODS_VERSION + ". "
-    "Cinemetric's skills work normally. Updating Claude Code (claude update) turns the mods on."
+    "running in this session. Either this Claude Code is older than " + MODS_VERSION + " (claude "
+    "update fixes it), or the session started with the feature mods use switched off (adding "
+    "\"" + ENABLE_SETTING + "\": \"1\" to the \"env\" section of ~/.claude/settings.json and "
+    "starting a new session fixes it). Cinemetric's skills work normally."
 )
 
 

@@ -4,6 +4,8 @@
 plain-English report: what you have, how much space it uses, what quality it's in, what was just added,
 and what needs tidying up.
 
+Cinemetric works best in Claude Code in your favorite terminal. See [Where to use it](#where-to-use-it).
+
 **Website:** [cinemetric.dev](https://cinemetric.dev). Its source lives in [`website/`](website/): plain HTML,
 CSS and JavaScript with no build step, ready for any static host.
 
@@ -71,11 +73,39 @@ to who can switch things: it's meant to be turned off only by you (`/cinemetric-
 off its own safety net. Like the rest of the guard, that's a safety net, not a lock: it doesn't catch
 every workaround, such as a script Claude writes to change the settings file.
 
-**Claude Code version.** Mods need Claude Code 2.1.260 or newer. On an older version every skill still
-works, and Cinemetric shows a short notice (at most once a day) that the mods are waiting for an
-update. Run `claude update` to get them.
+**Mods not running?** If `/cinemetric-mods` says it isn't installed, or Cinemetric shows a notice that
+the mods aren't running, every skill still works, but the mods (including the guard) are off for that
+session. There are two possible reasons:
+
+- **Claude Code is older than 2.1.260.** Run `claude update`, then start a new session.
+- **Claude Code is new enough, but the feature mods use is switched off.** Claude Code is still rolling
+  out the feature mods are built on, so a session can start with it off. To switch it on for every
+  session, add this to `~/.claude/settings.json` (merge it into any `env` section already there),
+  then start a new session:
+
+  ```json
+  "env": {
+    "CLAUDE_CODE_ENABLE_FUNCTION_HOOKS": "1"
+  }
+  ```
+
+**In the desktop app's Code tab,** the mods work, but the app's slash menu doesn't list
+`/cinemetric-mods` or `/cinemetric-now`, and it may say "/cinemetric-mods isn't a command here" when you
+type one. Type the whole command and press Enter anyway: it still runs, and you can ignore the warning.
 
 ## Install
+
+### Where to use it
+
+Cinemetric works best in Claude Code in your favorite terminal. That's where every skill and every mod
+works as described here, with no extra steps.
+
+- **Claude Code in the desktop app (the Code tab):** the skills and mods work, but you have to type mod
+  commands in full (see [Mods not running?](#mods)).
+- **Claude in the desktop app's chat or on claude.ai:** mods only run in Claude Code, so they aren't
+  available there.
+
+### Install the plugin
 
 In Claude Code:
 

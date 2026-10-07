@@ -6,6 +6,7 @@ Tests never talk to a real Plex, plex.tv or Tautulli server, and never touch the
 
 import contextlib
 import email.message
+import gc
 import importlib.util
 import io
 import json
@@ -233,6 +234,9 @@ class OfflineTestCase(unittest.TestCase):
         for name in CLEARED_ENV:
             os.environ.pop(name, None)
 
+        # Free what earlier tests left behind (such as refused fake replies) before stderr is
+        # captured, so a ResourceWarning from cleaning them up can't land in this test's output.
+        gc.collect()
         self.stderr = io.StringIO()
         quiet = contextlib.redirect_stderr(self.stderr)
         quiet.__enter__()

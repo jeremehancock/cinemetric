@@ -1,0 +1,888 @@
+{
+ "_note": "Made-up server for subtitles-and-languages tests. Titles are invented.",
+ "/": {
+  "MediaContainer": {
+   "friendlyName": "Test Server",
+   "version": "1.40.0"
+  }
+ },
+ "/library/sections": {
+  "MediaContainer": {
+   "Directory": [
+    {
+     "key": "1",
+     "title": "Movies",
+     "type": "movie",
+     "language": "en-US"
+    },
+    {
+     "key": "2",
+     "title": "TV Shows",
+     "type": "show",
+     "language": "en"
+    },
+    {
+     "key": "3",
+     "title": "Music",
+     "type": "artist",
+     "language": "en"
+    }
+   ]
+  }
+ },
+ "movies": [
+  {
+   "ratingKey": "1001",
+   "title": "Japanese With English",
+   "year": 1958
+  },
+  {
+   "ratingKey": "1002",
+   "title": "Japanese With French",
+   "year": 1960
+  },
+  {
+   "ratingKey": "1003",
+   "title": "English Dub",
+   "year": 1988
+  },
+  {
+   "ratingKey": "1004",
+   "title": "Forced Only",
+   "year": 1964
+  },
+  {
+   "ratingKey": "1005",
+   "title": "Unlabelled Audio",
+   "year": 1931
+  },
+  {
+   "ratingKey": "1006",
+   "title": "English No Subs",
+   "year": 1999
+  },
+  {
+   "ratingKey": "1007",
+   "title": "Sidecar Subs",
+   "year": 2003
+  },
+  {
+   "ratingKey": "1008",
+   "title": "Two Versions",
+   "year": 2008
+  },
+  {
+   "ratingKey": "1009",
+   "title": "Gone File",
+   "year": 2009
+  },
+  {
+   "ratingKey": "1010",
+   "title": "No Details",
+   "year": 2010
+  },
+  {
+   "ratingKey": "1011",
+   "title": "Region Tags",
+   "year": 2011
+  },
+  {
+   "ratingKey": "1012",
+   "title": "Unknown Tag",
+   "year": 2012
+  },
+  {
+   "ratingKey": "1013",
+   "title": "No Audio",
+   "year": 1925
+  },
+  {
+   "ratingKey": "1014",
+   "title": "SDH Only",
+   "year": 2014
+  }
+ ],
+ "details": {
+  "1001": {
+   "ratingKey": "1001",
+   "title": "Japanese With English",
+   "year": 1958,
+   "Media": [
+    {
+     "id": 1,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 1,
+       "file": "/media/secret-path/file-1.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "ja",
+         "languageCode": "jpn",
+         "language": "Japanese",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "en",
+         "languageCode": "eng",
+         "language": "English"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1002": {
+   "ratingKey": "1002",
+   "title": "Japanese With French",
+   "year": 1960,
+   "Media": [
+    {
+     "id": 2,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 2,
+       "file": "/media/secret-path/file-2.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "ja",
+         "languageCode": "jpn",
+         "language": "Japanese",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "fr",
+         "languageCode": "fra",
+         "language": "French"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1003": {
+   "ratingKey": "1003",
+   "title": "English Dub",
+   "year": 1988,
+   "Media": [
+    {
+     "id": 3,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 3,
+       "file": "/media/secret-path/file-3.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "ja",
+         "languageCode": "jpn",
+         "language": "Japanese",
+         "selected": true,
+         "default": true
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "en",
+         "languageCode": "eng",
+         "language": "English"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1004": {
+   "ratingKey": "1004",
+   "title": "Forced Only",
+   "year": 1964,
+   "Media": [
+    {
+     "id": 4,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 4,
+       "file": "/media/secret-path/file-4.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "ja",
+         "languageCode": "jpn",
+         "language": "Japanese",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "en",
+         "languageCode": "eng",
+         "language": "English",
+         "forced": true
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1005": {
+   "ratingKey": "1005",
+   "title": "Unlabelled Audio",
+   "year": 1931,
+   "Media": [
+    {
+     "id": 5,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 5,
+       "file": "/media/secret-path/file-5.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "selected": true
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1006": {
+   "ratingKey": "1006",
+   "title": "English No Subs",
+   "year": 1999,
+   "Media": [
+    {
+     "id": 6,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 6,
+       "file": "/media/secret-path/file-6.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "en",
+         "languageCode": "eng",
+         "language": "English",
+         "selected": true
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1007": {
+   "ratingKey": "1007",
+   "title": "Sidecar Subs",
+   "year": 2003,
+   "Media": [
+    {
+     "id": 7,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 7,
+       "file": "/media/secret-path/file-7.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "ko",
+         "languageCode": "kor",
+         "language": "Korean",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "en",
+         "languageCode": "eng",
+         "language": "English",
+         "key": "/library/streams/77",
+         "format": "srt"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1008": {
+   "ratingKey": "1008",
+   "title": "Two Versions",
+   "year": 2008,
+   "Media": [
+    {
+     "id": 8,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 8,
+       "file": "/media/secret-path/file-8.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "en",
+         "languageCode": "eng",
+         "language": "English",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "en",
+         "languageCode": "eng",
+         "language": "English"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": 9,
+     "videoResolution": "720",
+     "Part": [
+      {
+       "id": 9,
+       "file": "/media/secret-path/file-9.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "en",
+         "languageCode": "eng",
+         "language": "English",
+         "selected": true
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1009": {
+   "ratingKey": "1009",
+   "title": "Gone File",
+   "year": 2009,
+   "Media": [
+    {
+     "id": 10,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 10,
+       "file": "/media/secret-path/file-10.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "ja",
+         "languageCode": "jpn",
+         "language": "Japanese",
+         "selected": true
+        }
+       ]
+      }
+     ],
+     "deletedAt": 1700000000
+    }
+   ]
+  },
+  "1011": {
+   "ratingKey": "1011",
+   "title": "Region Tags",
+   "year": 2011,
+   "Media": [
+    {
+     "id": 11,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 11,
+       "file": "/media/secret-path/file-11.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "en-US",
+         "languageCode": "eng",
+         "language": "English",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "en-GB",
+         "languageCode": "eng",
+         "language": "English"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1012": {
+   "ratingKey": "1012",
+   "title": "Unknown Tag",
+   "year": 2012,
+   "Media": [
+    {
+     "id": 12,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 12,
+       "file": "/media/secret-path/file-12.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "unk",
+         "languageCode": "",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "en",
+         "languageCode": "eng",
+         "language": "English"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1013": {
+   "ratingKey": "1013",
+   "title": "No Audio",
+   "year": 1925,
+   "Media": [
+    {
+     "id": 13,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 13,
+       "file": "/media/secret-path/file-13.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "1014": {
+   "ratingKey": "1014",
+   "title": "SDH Only",
+   "year": 2014,
+   "Media": [
+    {
+     "id": 14,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 14,
+       "file": "/media/secret-path/file-14.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "fr",
+         "languageCode": "fra",
+         "language": "French",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "en",
+         "languageCode": "eng",
+         "language": "English",
+         "hearingImpaired": true
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "5001": {
+   "ratingKey": "5001",
+   "title": "Episode 1",
+   "grandparentRatingKey": "500",
+   "grandparentTitle": "Harbor Tales",
+   "parentIndex": 1,
+   "index": 1,
+   "Media": [
+    {
+     "id": 15,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 15,
+       "file": "/media/secret-path/file-15.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "en",
+         "languageCode": "eng",
+         "language": "English",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "en",
+         "languageCode": "eng",
+         "language": "English"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "5002": {
+   "ratingKey": "5002",
+   "title": "Episode 2",
+   "grandparentRatingKey": "500",
+   "grandparentTitle": "Harbor Tales",
+   "parentIndex": 1,
+   "index": 2,
+   "Media": [
+    {
+     "id": 16,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 16,
+       "file": "/media/secret-path/file-16.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "es",
+         "languageCode": "spa",
+         "language": "Spanish",
+         "selected": true
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "5003": {
+   "ratingKey": "5003",
+   "title": "Episode 3",
+   "grandparentRatingKey": "500",
+   "grandparentTitle": "Harbor Tales",
+   "parentIndex": 1,
+   "index": 3,
+   "Media": [
+    {
+     "id": 17,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 17,
+       "file": "/media/secret-path/file-17.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "es",
+         "languageCode": "spa",
+         "language": "Spanish",
+         "selected": true
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "fr",
+         "languageCode": "fra",
+         "language": "French"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "5004": {
+   "ratingKey": "5004",
+   "title": "Episode 4",
+   "grandparentRatingKey": "500",
+   "grandparentTitle": "Harbor Tales",
+   "parentIndex": 1,
+   "index": 4,
+   "Media": [
+    {
+     "id": 18,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 18,
+       "file": "/media/secret-path/file-18.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "de",
+         "languageCode": "deu",
+         "language": "German",
+         "selected": true
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "5101": {
+   "ratingKey": "5101",
+   "title": "Episode 1",
+   "grandparentRatingKey": "501",
+   "grandparentTitle": "Quiet Show",
+   "parentIndex": 1,
+   "index": 1,
+   "Media": [
+    {
+     "id": 19,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 19,
+       "file": "/media/secret-path/file-19.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "selected": true
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "5102": {
+   "ratingKey": "5102",
+   "title": "Episode 2",
+   "grandparentRatingKey": "501",
+   "grandparentTitle": "Quiet Show",
+   "parentIndex": 1,
+   "index": 2,
+   "Media": [
+    {
+     "id": 20,
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "id": 20,
+       "file": "/media/secret-path/file-20.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "languageTag": "en",
+         "languageCode": "eng",
+         "language": "English",
+         "selected": true
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "shows": [
+  {
+   "ratingKey": "500",
+   "title": "Harbor Tales",
+   "year": 2010
+  },
+  {
+   "ratingKey": "501",
+   "title": "Quiet Show",
+   "year": 2015
+  }
+ ],
+ "episodes": [
+  {
+   "ratingKey": "5001",
+   "title": "Episode 1",
+   "grandparentRatingKey": "500",
+   "grandparentTitle": "Harbor Tales",
+   "parentIndex": 1,
+   "index": 1
+  },
+  {
+   "ratingKey": "5002",
+   "title": "Episode 2",
+   "grandparentRatingKey": "500",
+   "grandparentTitle": "Harbor Tales",
+   "parentIndex": 1,
+   "index": 2
+  },
+  {
+   "ratingKey": "5003",
+   "title": "Episode 3",
+   "grandparentRatingKey": "500",
+   "grandparentTitle": "Harbor Tales",
+   "parentIndex": 1,
+   "index": 3
+  },
+  {
+   "ratingKey": "5004",
+   "title": "Episode 4",
+   "grandparentRatingKey": "500",
+   "grandparentTitle": "Harbor Tales",
+   "parentIndex": 1,
+   "index": 4
+  },
+  {
+   "ratingKey": "5101",
+   "title": "Episode 1",
+   "grandparentRatingKey": "501",
+   "grandparentTitle": "Quiet Show",
+   "parentIndex": 1,
+   "index": 1
+  },
+  {
+   "ratingKey": "5102",
+   "title": "Episode 2",
+   "grandparentRatingKey": "501",
+   "grandparentTitle": "Quiet Show",
+   "parentIndex": 1,
+   "index": 2
+  }
+ ]
+}

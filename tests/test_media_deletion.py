@@ -6,7 +6,7 @@ from helpers import OfflineTestCase, PREFS_SECRET, Reply, load_script, prefs_ans
 
 SCRIPTS = ("setup", "library-report", "server-health", "watch-activity", "users-and-shares", "unwatched",
            "what-to-watch", "episode-gaps", "playback-check", "year-in-review",
-           "title-lookup")
+           "title-lookup", "subtitles-and-languages")
 MODULES = [(name, load_script(name)) for name in SCRIPTS]
 
 

@@ -23,7 +23,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.29.0"
+VERSION = "0.29.1"
 TIMEOUT_SECONDS = 30
 MAX_TITLE_LENGTH = 120
 
@@ -82,30 +82,35 @@ def config_path():
     return os.path.join(base, "cinemetric", "config.json")
 
 
+def read_config_file():
+    path = config_path()
+    if not os.path.exists(path):
+        return {}
+    info = os.stat(path)
+    if os.name == "posix":
+        if info.st_uid != os.getuid():
+            raise ReportError(f"Refusing to read {path}: it is owned by another user.")
+        if info.st_mode & (stat.S_IRWXG | stat.S_IRWXO):
+            raise ReportError(
+                f"Refusing to read {path}: other users can access it. Fix with: chmod 600 {path}"
+            )
+    try:
+        with open(path, encoding="utf-8") as fh:
+            data = json.load(fh)
+    except (OSError, ValueError) as exc:
+        raise ReportError(f"Could not read {path}: {exc.__class__.__name__}") from None
+    if not isinstance(data, dict):
+        raise ReportError(f"{path} must contain a JSON object.")
+    return data
+
+
 def load_config():
     """Return (url, token, verify_tls). Environment variables win over the config file."""
     url = os.environ.get("PLEX_URL")
     token = os.environ.get("PLEX_TOKEN")
     verify_tls = True
-    path = config_path()
-
-    if not (url and token) and os.path.exists(path):
-        info = os.stat(path)
-        if os.name == "posix":
-            if info.st_uid != os.getuid():
-                raise ReportError(f"Refusing to read {path}: it is owned by another user.")
-            if info.st_mode & (stat.S_IRWXG | stat.S_IRWXO):
-                raise ReportError(
-                    f"Refusing to read {path}: other users can access it. "
-                    f"Fix with: chmod 600 {path}"
-                )
-        try:
-            with open(path, encoding="utf-8") as fh:
-                data = json.load(fh)
-        except (OSError, ValueError) as exc:
-            raise ReportError(f"Could not read {path}: {exc.__class__.__name__}") from None
-        if not isinstance(data, dict):
-            raise ReportError(f"{path} must contain a JSON object.")
+    if not (url and token):
+        data = read_config_file()
         url = url or data.get("plex_url")
         token = token or data.get("plex_token")
         verify_tls = data.get("verify_tls", True) is not False
@@ -115,20 +120,20 @@ def load_config():
             "NOT_CONFIGURED: Cinemetric is not connected to a Plex server yet. Run the "
             "cinemetric:setup skill (or set PLEX_URL and PLEX_TOKEN)."
         )
-    return validate_url(url), str(token).strip(), verify_tls
+    return validate_url(url, "plex_url"), str(token).strip(), verify_tls
 
 
-def validate_url(url):
+def validate_url(url, name):
     parts = urllib.parse.urlsplit(str(url).strip())
     if parts.scheme not in ("http", "https") or not parts.hostname:
-        raise ReportError("plex_url must look like http://host:32400 or https://host")
+        raise ReportError(f"{name} must look like http://host:port or https://host")
     if parts.username or parts.password:
-        raise ReportError("plex_url must not contain a username or password.")
+        raise ReportError(f"{name} must not contain a username or password.")
     if parts.query or parts.fragment:
-        raise ReportError("plex_url must not contain ? or # parts.")
+        raise ReportError(f"{name} must not contain ? or # parts.")
     if parts.scheme == "http" and not looks_local(parts.hostname):
         print(
-            "warning: plex_url uses plain http to a non-local address, so your token travels "
+            f"warning: {name} uses plain http to a non-local address, so your credentials travel "
             "unencrypted. Prefer https for anything outside your home network.",
             file=sys.stderr,
         )
@@ -149,22 +154,24 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         raise ReportError(
             f"The server answered with a redirect (HTTP {code}). Cinemetric does not follow "
-            "redirects so your token stays with your server. Use the final address as plex_url."
+            "redirects so your credentials stay with your server. Use the final address instead."
         )
+
+
+def build_opener(base_url, verify_tls):
+    if base_url.startswith("https://") and not verify_tls:
+        print("warning: TLS certificate checking is OFF for " + base_url, file=sys.stderr)
+        context = ssl._create_unverified_context()
+    else:
+        context = ssl.create_default_context()
+    return urllib.request.build_opener(_NoRedirect(), urllib.request.HTTPSHandler(context=context))
 
 
 class PlexClient:
     def __init__(self, base_url, token, verify_tls):
         self.base_url = base_url
         self._token = token
-        if base_url.startswith("https://") and not verify_tls:
-            print("warning: TLS certificate checking is OFF (verify_tls: false).", file=sys.stderr)
-            context = ssl._create_unverified_context()
-        else:
-            context = ssl.create_default_context()
-        self._opener = urllib.request.build_opener(
-            _NoRedirect(), urllib.request.HTTPSHandler(context=context)
-        )
+        self._opener = build_opener(base_url, verify_tls)
 
     def _scrub(self, text):
         return str(text).replace(self._token, "[token hidden]") if self._token else str(text)

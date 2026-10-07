@@ -26,7 +26,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.29.0"
+VERSION = "0.29.1"
 SCRIPT_TIMEOUT_SECONDS = 1800
 KEEP_DAYS = 90
 MAX_TITLE_LENGTH = 120
@@ -45,7 +45,7 @@ class ChangesError(Exception):
 
 
 def clean(text):
-    """Text from snapshots and reports is untrusted data: strip control characters and cap the length."""
+    """Titles and names are untrusted data: strip control characters and cap the length."""
     text = re.sub(r"[\x00-\x1f\x7f]", " ", str(text or "")).strip()
     return text[:MAX_TITLE_LENGTH]
 

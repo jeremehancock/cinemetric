@@ -2,12 +2,12 @@
 
 import inspect
 
+import helpers
 from helpers import OfflineTestCase, PREFS_SECRET, Reply, load_script, prefs_answer
 
-SCRIPTS = ("setup", "library-report", "server-health", "watch-activity", "users-and-shares", "unwatched",
-           "what-to-watch", "episode-gaps", "playback-check", "year-in-review",
-           "title-lookup", "subtitles-and-languages", "show-progress")
-MODULES = [(name, load_script(name)) for name in SCRIPTS]
+# Every script with its own copy of the helper, found by looking rather than listed by hand.
+MODULES = [(name, module) for name, module in ((name, load_script(name)) for name in helpers.SCRIPTS)
+           if hasattr(module, "media_deletion_allowed")]
 
 
 def setting(value):
@@ -15,6 +15,9 @@ def setting(value):
 
 
 class Helper(OfflineTestCase):
+    def test_every_script_that_should_have_it_does(self):
+        self.assertGreaterEqual({name for name, _ in MODULES}, {"setup", "library-report", "show-progress"})
+
     def test_copies_are_identical(self):
         first = inspect.getsource(MODULES[0][1].media_deletion_allowed)
         for name, module in MODULES[1:]:

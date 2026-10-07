@@ -1,59 +1,47 @@
 """Security rules shared by the scripts (openspec/specs/security/spec.md).
 
-Shared helpers are copied into each script, so every check runs against every copy. A failure names
-the script it came from.
+Shared helpers are copied into each script, so every check runs against every copy. The lists of
+copies are found by looking at what each script defines, so a new script is checked without adding
+it here. A failure names the script it came from.
 """
 
 from unittest import mock
 
+import helpers
 from helpers import (FAKE_API_KEY, FAKE_TOKEN, FakeServer, OfflineTestCase, Reply, Unreachable,
                      load_script, plex_container)
 
 PLEX_URL = "http://192.0.2.10:32400"
 TAUTULLI_URL = "http://192.0.2.10:8181"
 
-library = load_script("library-report")
-health = load_script("server-health")
-watch = load_script("watch-activity")
-setup = load_script("setup")
-shares = load_script("users-and-shares")
-unwatched = load_script("unwatched")
-picker = load_script("what-to-watch")
-gaps = load_script("episode-gaps")
-checker = load_script("playback-check")
-recap = load_script("year-in-review")
-lookup = load_script("title-lookup")
-languages = load_script("subtitles-and-languages")
-progress = load_script("show-progress")
+MODULES = {name: load_script(name) for name in helpers.SCRIPTS}
+setup = MODULES["setup"]
+
+
+def copies_of(attr):
+    """(script name, module) for every script that has its own copy of a shared helper."""
+    return [(name, module) for name, module in MODULES.items() if hasattr(module, attr)]
+
 
 # (script name, address check, error it raises). Each check takes just the address.
-ADDRESS_CHECKS = [
-    ("library-report", library.validate_url, library.ReportError),
-    ("server-health", health.validate_url, health.ReportError),
-    ("watch-activity", lambda url: watch.validate_url(url, "plex_url"), watch.ReportError),
-    ("users-and-shares", lambda url: shares.validate_url(url, "plex_url"), shares.ReportError),
-    ("unwatched", lambda url: unwatched.validate_url(url, "plex_url"), unwatched.ReportError),
-    ("what-to-watch", lambda url: picker.validate_url(url, "plex_url"), picker.ReportError),
-    ("episode-gaps", lambda url: gaps.validate_url(url, "plex_url"), gaps.ReportError),
-    ("playback-check", lambda url: checker.validate_url(url, "plex_url"), checker.ReportError),
-    ("year-in-review", lambda url: recap.validate_url(url, "plex_url"), recap.ReportError),
-    ("title-lookup", lambda url: lookup.validate_url(url, "plex_url"), lookup.ReportError),
-    ("subtitles-and-languages", lambda url: languages.validate_url(url, "plex_url"), languages.ReportError),
-    ("show-progress", lambda url: progress.validate_url(url, "plex_url"), progress.ReportError),
-    ("setup", setup.clean_tautulli_url, setup.SetupError),
-]
-WARNS_ABOUT_PLAIN_HTTP = ADDRESS_CHECKS[:12]
-LOOKS_LOCAL = [("library-report", library.looks_local), ("server-health", health.looks_local),
-               ("watch-activity", watch.looks_local), ("users-and-shares", shares.looks_local),
-               ("unwatched", unwatched.looks_local), ("what-to-watch", picker.looks_local),
-               ("episode-gaps", gaps.looks_local), ("playback-check", checker.looks_local),
-               ("year-in-review", recap.looks_local), ("title-lookup", lookup.looks_local),
-               ("subtitles-and-languages", languages.looks_local), ("show-progress", progress.looks_local)]
-CLEANERS = [("library-report", library.clean), ("server-health", health.clean),
-            ("watch-activity", watch.clean), ("users-and-shares", shares.clean),
-            ("unwatched", unwatched.clean), ("what-to-watch", picker.clean), ("episode-gaps", gaps.clean),
-            ("playback-check", checker.clean), ("year-in-review", recap.clean), ("title-lookup", lookup.clean),
-            ("subtitles-and-languages", languages.clean), ("show-progress", progress.clean), ("setup", setup.clean)]
+ADDRESS_CHECKS = [(name, lambda url, check=module.validate_url: check(url, "plex_url"), module.ReportError)
+                  for name, module in copies_of("validate_url")]
+WARNS_ABOUT_PLAIN_HTTP = list(ADDRESS_CHECKS)
+ADDRESS_CHECKS.append(("setup", setup.clean_tautulli_url, setup.SetupError))
+LOOKS_LOCAL = [(name, module.looks_local) for name, module in copies_of("looks_local")]
+CLEANERS = [(name, module.clean) for name, module in copies_of("clean")]
+
+
+class ChecksFindTheScripts(OfflineTestCase):
+    """Guards the lists above: if a helper is renamed, its checks must not quietly run on nothing."""
+
+    def test_every_list_covers_the_scripts_it_should(self):
+        self.assertGreaterEqual({name for name, *_ in WARNS_ABOUT_PLAIN_HTTP},
+                                {"library-report", "server-health", "watch-activity", "show-progress"})
+        self.assertGreaterEqual({name for name, _ in LOOKS_LOCAL}, {"library-report", "episode-gaps"})
+        self.assertGreaterEqual({name for name, _ in CLEANERS}, {"setup", "changes", "watch-activity"})
+        self.assertGreaterEqual({name for name, _ in copies_of("PlexClient")}, {"library-report", "unwatched"})
+        self.assertGreaterEqual({name for name, _ in copies_of("TautulliClient")}, {"watch-activity", "unwatched"})
 
 
 class AddressChecks(OfflineTestCase):
@@ -153,13 +141,7 @@ def plex_clients():
             server.attach(client._opener)
             return client
         return build
-    return [(name, module, builder(module))
-            for name, module in (("library-report", library), ("server-health", health),
-                                 ("watch-activity", watch), ("users-and-shares", shares),
-                                 ("unwatched", unwatched), ("what-to-watch", picker),
-                                 ("episode-gaps", gaps), ("playback-check", checker),
-                                 ("year-in-review", recap), ("title-lookup", lookup),
-                                 ("subtitles-and-languages", languages), ("show-progress", progress))]
+    return [(name, module, builder(module)) for name, module in copies_of("PlexClient")]
 
 
 class PlexClientRules(OfflineTestCase):
@@ -235,9 +217,11 @@ def tautulli_ok(data):
     return {"response": {"result": "success", "message": None, "data": data}}
 
 
-class WatchActivityTautulliClient(OfflineTestCase):
-    module = watch
-    allowed = "get_tautulli_info"
+class TautulliClientRules:
+    """Checks for one script's TautulliClient. A test class is made below for every script with one."""
+
+    module = None
+    allowed = None
 
     def client(self, server):
         client = self.module.TautulliClient(TAUTULLI_URL, FAKE_API_KEY, True)
@@ -278,34 +262,12 @@ class WatchActivityTautulliClient(OfflineTestCase):
         self.assertEqual(len(server.requests), 1)
 
 
-class UsersAndSharesTautulliClient(WatchActivityTautulliClient):
-    module = shares
-    allowed = "get_users_table"
-
-
-class UnwatchedTautulliClient(WatchActivityTautulliClient):
-    module = unwatched
-    allowed = "get_history"
-
-
-class PlaybackCheckTautulliClient(WatchActivityTautulliClient):
-    module = checker
-    allowed = "get_stream_data"
-
-
-class YearInReviewTautulliClient(WatchActivityTautulliClient):
-    module = recap
-    allowed = "get_history"
-
-
-class TitleLookupTautulliClient(WatchActivityTautulliClient):
-    module = lookup
-    allowed = "get_history"
-
-
-class ShowProgressTautulliClient(WatchActivityTautulliClient):
-    module = progress
-    allowed = "get_history"
+for _name, _module in copies_of("TautulliClient"):
+    _class_name = "TautulliClient_" + _name.replace("-", "_")
+    globals()[_class_name] = type(_class_name, (TautulliClientRules, OfflineTestCase), {
+        "module": _module,
+        "allowed": sorted(_module.TAUTULLI_COMMANDS)[0],
+    })
 
 
 class SetupNetworkRules(OfflineTestCase):

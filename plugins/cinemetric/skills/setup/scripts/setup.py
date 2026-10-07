@@ -36,7 +36,7 @@ import urllib.parse
 import urllib.request
 import uuid
 
-VERSION = "0.29.0"
+VERSION = "0.29.1"
 PRODUCT = "Cinemetric"
 TIMEOUT_SECONDS = 15
 FINISH_WAIT_SECONDS = 60
@@ -125,7 +125,7 @@ def read_private(path):
 # ---------------------------------------------------------------- text
 
 def clean(text):
-    """Titles are untrusted data: strip control characters and cap the length."""
+    """Titles and names are untrusted data: strip control characters and cap the length."""
     text = re.sub(r"[\x00-\x1f\x7f]", " ", str(text or "")).strip()
     return text[:MAX_TITLE_LENGTH]
 

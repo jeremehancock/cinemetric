@@ -66,8 +66,10 @@ on, and `/cinemetric-mods <name> on` or `off` to switch one:
 ```
 
 Each mod also has a switch in Claude Code's settings menu (`/config`). The guard is the one exception
-to who can switch things: only you can turn it off (`/cinemetric-mods guard off` or `/config`), never
-Claude, so Claude can't switch off its own safety net.
+to who can switch things: it's meant to be turned off only by you (`/cinemetric-mods guard off` or
+`/config`). Cinemetric refuses Claude's usual ways of turning it off, so Claude can't casually switch
+off its own safety net. Like the rest of the guard, that's a safety net, not a lock: it doesn't catch
+every workaround, such as a script Claude writes to change the settings file.
 
 **Claude Code version.** Mods need Claude Code 2.1.260 or newer. On an older version every skill still
 works, and Cinemetric shows a short notice (at most once a day) that the mods are waiting for an

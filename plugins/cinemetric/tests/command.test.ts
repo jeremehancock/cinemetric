@@ -63,6 +63,18 @@ describe('/cinemetric-mods', () => {
     expect(row.value).toBe(false)
   })
 
+  test("a session that can't change settings says why and where to switch it", async ($, on) => {
+    mock.env(on, { HOME: '/home/u' })
+    on('config.list', () => ({ value: [] }))
+    on('config.set', () => {
+      throw new Error('no setting called cinemetric.library_status_line')
+    })
+    const { text } = await run($, 'status on')
+    // The reason, whatever the engine calls it, comes in brackets.
+    expect(text).toMatch(/^Couldn't switch status on from here \(.+\)\. /)
+    expect(text).toContain('/cinemetric-mods status on in Claude Code in a terminal')
+  })
+
   test('a typo changes nothing and shows the right form', async ($, on) => {
     const row = configMenu(on, true)
     const { text } = await run($, 'gaurd off')

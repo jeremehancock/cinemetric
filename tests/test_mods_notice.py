@@ -1,4 +1,4 @@
-"""The startup notice shown when Claude Code is too old to run Cinemetric's mods (hooks/mods_notice.py)."""
+"""The startup notice shown when Cinemetric's mods aren't running (hooks/mods_notice.py)."""
 
 import importlib.util
 import io
@@ -30,14 +30,17 @@ class ModsNotice(OfflineTestCase):
     def notice_file(self):
         return os.path.join(self.tmp, "data", "cinemetric", "mods-notice.json")
 
-    def test_older_claude_code_gets_the_notice(self):
+    def test_mods_not_running_gets_the_notice(self):
         output = notice_script.notice(hook_input(), "2026-10-06")
         self.assertIn("2.1.260", output["systemMessage"])
         self.assertIn("claude update", output["systemMessage"])
         self.assertIn("still works", output["systemMessage"])
+        self.assertIn("CLAUDE_CODE_ENABLE_FUNCTION_HOOKS", output["systemMessage"])
+        self.assertIn("~/.claude/settings.json", output["systemMessage"])
         context = output["hookSpecificOutput"]
         self.assertEqual(context["hookEventName"], "SessionStart")
         self.assertIn("not running", context["additionalContext"])
+        self.assertIn("CLAUDE_CODE_ENABLE_FUNCTION_HOOKS", context["additionalContext"])
 
     def test_the_day_is_saved_in_the_data_folder(self):
         notice_script.notice(hook_input(), "2026-10-06")

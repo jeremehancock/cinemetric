@@ -54,8 +54,14 @@ async function switchMod(
   let deny: string | undefined
   try {
     ;({ deny } = await $.config.set({ key: await settingKey($, mod), value: toOn }))
-  } catch {
-    return `Couldn't switch ${mod.name} ${word} from here. Use /config instead.`
+  } catch (error) {
+    // Say why, so a session that can't change settings (such as one the
+    // desktop app started) can be told apart from other failures.
+    const reason = error instanceof Error && error.message ? ` (${error.message.split('\n')[0]})` : ''
+    return (
+      `Couldn't switch ${mod.name} ${word} from here${reason}. ` +
+      `Type /${COMMAND} ${mod.name} ${word} in Claude Code in a terminal, or use /config.`
+    )
   }
   if (deny !== undefined) return `Couldn't switch ${mod.name} ${word}: ${deny}`
   return `${mod.name} is now ${word}.`

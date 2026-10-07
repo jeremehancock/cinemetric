@@ -71,8 +71,8 @@ data.
 ### Requirement: Shows how to set up
 The site SHALL include a setup guide covering: requirements (Claude Code, Python 3.8+, network access to
 the Plex server), the two install commands, connecting with Sign in with Plex, optionally adding
-Tautulli, the manual-setup fallback, and how to revoke access. Each command SHALL have a button that
-copies it. The guide SHALL link to the README for full details.
+Tautulli, the manual-setup fallback, and how to revoke access. It SHALL say that Cinemetric works
+best in Claude Code in a terminal. Each command SHALL have a button that copies it. The guide SHALL link to the README for full details.
 
 #### Scenario: Copying an install command
 - **WHEN** a visitor clicks the copy button next to `/plugin marketplace add jeremehancock/cinemetric`
@@ -81,6 +81,10 @@ copies it. The guide SHALL link to the README for full details.
 #### Scenario: Wanting more detail
 - **WHEN** a visitor needs more than the short setup steps
 - **THEN** the setup section links to the README on GitHub
+
+#### Scenario: Choosing where to run it
+- **WHEN** a visitor reads the setup section
+- **THEN** they learn that Cinemetric works best in Claude Code in a terminal
 
 ### Requirement: Matches the project's promises
 The site's claims SHALL match the README and specs: every skill is read-only, credentials never pass
@@ -235,7 +239,10 @@ section. It SHALL say plainly that mods come with Cinemetric (no extra install) 
 only in Claude Code (the terminal and the desktop app's Code tab). For each mod it SHALL say what the
 mod does in plain words, its short name (for example `guard`, `status` or `now`), and whether it
 starts on or off. The Now Playing card SHALL also say that it checks the server only while its panel
-is open. The "Shows every skill" count and headings SHALL stay about skills only.
+is open. The section SHALL say that some versions of the
+desktop app can't show the status line or the Now Playing panel, and SHALL link to the README for
+what to do when the mods don't show up. The "Shows every skill" count and
+headings SHALL stay about skills only.
 
 #### Scenario: A visitor reaches the mods
 - **WHEN** a visitor scrolls past the dashboard section
@@ -255,6 +262,10 @@ is open. The "Shows every skill" count and headings SHALL stay about skills only
 #### Scenario: Without JavaScript
 - **WHEN** a visitor opens the page with JavaScript turned off
 - **THEN** the Mods section, including how to switch mods, is still visible and readable
+
+#### Scenario: Mods not showing up
+- **WHEN** a visitor's mods don't show up
+- **THEN** the Mods section links them to the README's fixes
 
 ### Requirement: The setup guide points to the mods
 The setup guide SHALL keep its four steps and SHALL mention the mods in a collapsible "Mods

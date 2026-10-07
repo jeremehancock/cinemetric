@@ -10,6 +10,7 @@ import {
   CHECKING,
   NO_PYTHON,
   NOTHING_PLAYING,
+  NO_PANEL_REPLY,
   OFF_REPLY,
   OPEN_REPLY,
   PANE_ID,
@@ -76,7 +77,11 @@ const ran = (stdout: string, exitCode = 0, stderr = ''): ProcessRunResult => ({
 // panel, and Python running the script. `answer` decides each run's result;
 // throwing means the program couldn't start. Returns what was run and the
 // panels opened and closed.
-function world(on: On, answer: (argv: readonly string[]) => ProcessRunResult = () => ran(output([]))) {
+function world(
+  on: On,
+  answer: (argv: readonly string[]) => ProcessRunResult = () => ran(output([])),
+  canDrawPanels = true,
+) {
   const runs: (readonly string[])[] = []
   const open = new Set<string>()
   const clock = mock.clock(on, { now: CHECKED_AT * 1000 })
@@ -91,6 +96,9 @@ function world(on: On, answer: (argv: readonly string[]) => ProcessRunResult = (
   })
   on('ui.open', ($, e) => {
     open.add(e.id)
+    if (!canDrawPanels) {
+      return { value: { isPlaced: false as const, reason: 'the attached surfaces place no panes' } }
+    }
     return { value: { isPlaced: true as const } }
   })
   on('ui.close', ($, e) => {
@@ -251,6 +259,15 @@ describe('in a session', () => {
     const lines = await pane($)
     expect(lines[0]).toBe('2 streams · 1 transcoding · 24.1 Mbps · updated 9:41 PM')
     expect(lines[1]).toBe('alex · The Bear S03E04 · Living Room TV · playing 42% · direct play')
+  })
+
+  test("an app that can't draw panels: nothing stays open and nothing is checked", ON, async ($, on) => {
+    const { runs, open, clock } = world(on, () => ran(output([EPISODE])), false)
+    await startSession($)
+    expect((await nowCommand($, clock)).text).toBe(NO_PANEL_REPLY)
+    expect(open.has(PANE_ID)).toBe(false)
+    await clock.advance(120_000)
+    expect(runs).toEqual([])
   })
 
   test('the reply never carries stream details', ON, async ($, on) => {

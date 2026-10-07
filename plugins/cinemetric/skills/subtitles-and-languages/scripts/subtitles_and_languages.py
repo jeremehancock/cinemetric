@@ -23,13 +23,15 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.29.1"
+VERSION = "0.29.2"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 LIBRARY_PAGE_SIZE = 500
 DETAIL_BATCH = 100
 MAX_LANGUAGES = 5
 SUMMARY_LANGUAGES = 15
+MAX_RANGES_PER_SHOW = 30
+MAX_UNNUMBERED_PER_SHOW = 10
 
 # The only Plex server paths this script may request. Details are read for 1 to 100 titles at once.
 ALLOWED_PATHS = [
@@ -255,6 +257,17 @@ def as_bool(value):
     return str(value).strip().lower() in ("1", "true", "yes")
 
 
+def ranges(numbers):
+    """[3, 5, 6, 7] -> [[3, 3], [5, 7]]."""
+    result = []
+    for n in sorted(numbers):
+        if result and n == result[-1][1] + 1:
+            result[-1][1] = n
+        else:
+            result.append([n, n])
+    return result
+
+
 # ---------------------------------------------------------------- libraries
 
 def need_plex(config):
@@ -414,6 +427,46 @@ def summary(counter):
 
 # ---------------------------------------------------------------- libraries checked
 
+def episode_number(value):
+    """A season or episode number as a whole number, or None when it's missing or not a number."""
+    text = str(value if value is not None else "").strip()
+    return int(text) if text.isdigit() else None
+
+
+def note_episode(entry, item, some_versions):
+    """Record one flagged episode on its show's entry: by season and episode number, or by title and
+    air date when Plex has no number for it. Repeats of the same number count once."""
+    season, number = episode_number(item.get("parentIndex")), episode_number(item.get("index"))
+    if season is not None and number is not None:
+        key = (season, number)
+        entry["numbered"][key] = entry["numbered"].get(key, False) or some_versions
+    else:
+        aired = str(item.get("originallyAvailableAt") or "").strip()
+        entry["unnumbered"].append({
+            "title": clean(item.get("title")),
+            "aired": aired if re.fullmatch(r"\d{4}-\d{2}-\d{2}", aired) else None,
+            "some_versions": some_versions,
+        })
+
+
+def episode_numbers(numbered, unnumbered):
+    """A show's flagged episodes as ranges per season (at most 30 ranges) and its unnumbered ones
+    (at most 10), with how many episodes each cap left out."""
+    seasons, given, left_out = [], 0, 0
+    for season in sorted({s for s, _ in numbered}):
+        numbers = sorted(n for s, n in numbered if s == season)
+        kept = ranges(numbers)[:max(0, MAX_RANGES_PER_SHOW - given)]
+        given += len(kept)
+        shown = [n for n in numbers if any(a <= n <= b for a, b in kept)]
+        left_out += len(numbers) - len(shown)
+        if kept:
+            seasons.append({"season": season, "episodes": kept,
+                            "some_versions": [n for n in shown if numbered[(season, n)]]})
+    return {"seasons": seasons, "ranges_more": left_out,
+            "unnumbered": unnumbered[:MAX_UNNUMBERED_PER_SHOW],
+            "unnumbered_more": max(0, len(unnumbered) - MAX_UNNUMBERED_PER_SHOW)}
+
+
 FILE_FIELDS = ("resolution", "main_audio_language", "audio_languages", "subtitle_languages",
                "forced_subtitle_languages", "unknown_audio_tracks", "unknown_subtitle_tracks")
 
@@ -450,12 +503,13 @@ def check_library(client, section, codes, list_limit, names):
         if detail is None:
             counts["details_missing"] += 1
             continue
-        flagged = {finding: [] for finding in FINDINGS}
+        flagged, checked = {finding: [] for finding in FINDINGS}, 0
         for media in detail.get("Media", []) or []:
             if media.get("deletedAt"):
                 counts["unavailable"] += 1
                 continue
             counts["files"] += 1
+            checked += 1
             result = check_file(media, wanted, names)
             counts["forced_only"] += result["forced_only"]
             if result["main_audio_language"] is not None:
@@ -475,10 +529,11 @@ def check_library(client, section, codes, list_limit, names):
                     "title": clean(show.get("title") or item.get("grandparentTitle")),
                     "year": as_int(show.get("year")) or None,
                     "episodes": episodes[show_key], "episodes_flagged": 0,
-                    "audio_languages": collections.Counter(),
+                    "audio_languages": collections.Counter(), "numbered": {}, "unnumbered": [],
                 })
                 entry["episodes_flagged"] += 1
                 entry["audio_languages"][results[0]["main_audio_language"] or "unknown"] += 1
+                note_episode(entry, item, some_versions=len(results) < checked)
             else:
                 groups[finding][str(item.get("ratingKey"))] = {
                     "title": clean(item.get("title")), "year": as_int(item.get("year")) or None,
@@ -492,6 +547,7 @@ def check_library(client, section, codes, list_limit, names):
             entries.sort(key=lambda e: (-e["episodes_flagged"], e["title"].lower()))
             for entry in entries:
                 entry["audio_languages"] = summary(entry["audio_languages"])
+                entry.update(episode_numbers(entry.pop("numbered"), entry.pop("unnumbered")))
         else:
             entries.sort(key=lambda e: e["title"].lower())
         listed[finding] = entries[:list_limit]

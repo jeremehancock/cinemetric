@@ -65,8 +65,12 @@ tracks with no language and `other` for the rest), and `listed` and `more`, each
 finding. In a movie library each listed movie has `title`, `year` and `files` (each with
 `resolution`, `main_audio_language`, `audio_languages`, `subtitle_languages`,
 `forced_subtitle_languages`, `unknown_audio_tracks` and `unknown_subtitle_tracks`). In a TV library
-each listed show has `title`, `year`, `episodes`, `episodes_flagged` and `audio_languages` (the main
-audio language of the flagged episodes, with counts).
+each listed show has `title`, `year`, `episodes`, `episodes_flagged`, `audio_languages` (the main
+audio language of the flagged episodes, with counts) and which episodes are flagged: `seasons` (each
+with `season`, `episodes` as `[first, last]` ranges, and `some_versions`: episodes where another
+version of the same episode doesn't have the finding), `ranges_more` (flagged episodes left out after
+30 ranges), `unnumbered` (episodes Plex has no number for, each with `title`, `aired` and
+`some_versions`) and `unnumbered_more`.
 
 What the findings mean:
 - `foreign_no_subtitles`: no audio track in the user's language and no full subtitles in it. These
@@ -98,20 +102,29 @@ Present, in this order:
    When `forced_subtitle_languages` includes the user's language, say it has forced subtitles in
    that language, which usually only translate signs or a few lines. For TV, each show with how many
    of its episodes are affected and their audio language ("Squid Game: 9 of 22 episodes, Korean
-   audio"). When a show's affected episodes are in a language the show isn't usually in (for
-   example German audio on an American show), say these may be dubbed copies or labelled wrong; the
-   script can't tell which.
+   audio"), followed by which episodes (see "Writing episode numbers" below). When a show's affected
+   episodes are in a language the show isn't usually in (for example German audio on an American
+   show), say these may be dubbed copies or labelled wrong; the script can't tell which.
 4. **No subtitles in your language** (`no_subtitles`): give the counts per library. List titles only
    when the user asked about subtitles in a particular language or asked for the list; otherwise
    offer to list them. Most of these usually have audio in the user's language, so say that missing
    subtitles mainly matter for people who need or prefer them. Mention `forced_only` when above 0.
+   For TV, give which episodes only when the user asked for the list or for the episodes.
 5. **Language not set** (`unknown_language`): the count, then the titles or shows with the most
    affected episodes. Explain in one line that Plex chooses audio and subtitles by language, so it
-   may pick the wrong track or none for these.
+   may pick the wrong track or none for these. Give which episodes only when the user asked for the
+   list or for the episodes; otherwise offer to.
 6. **What's there**: one or two lines from `audio_languages` and `subtitle_languages`, e.g. "Main
    audio: 1,905 English, 25 Japanese, 7 French, 7 Chinese and 26 others. Subtitles are most often in
    English (1,509 files), French and Spanish." Skip it if the user only asked a narrow question.
 7. **Worth knowing**: one line from `limits`.
+
+**Writing episode numbers:** turn each show's `seasons` into short codes in season order, for example
+"S01E01 to E04, S01E06, S03E02" (a range of one is a single code; pad numbers to two digits). Call
+season 0 "Specials" ("Specials E03"). For a number in `some_versions`, say only one version of it is
+affected ("S02E05 (one version)"). Add each `unnumbered` episode by title and `aired` date, or title
+only when `aired` is null. When `ranges_more` or `unnumbered_more` is above 0, end with "and N more
+episodes".
 
 If `more` for a finding is above 0, say how many more titles there are and that they can ask for more.
 

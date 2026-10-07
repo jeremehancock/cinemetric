@@ -65,6 +65,7 @@ SHARED = {
     "clean_tree": {},
     "as_int": {},
     "as_count": {},
+    "ranges": {},
     "gb": {},
     "pick_person": {},
     "MAX_NAMES_LISTED": {},

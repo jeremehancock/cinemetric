@@ -46,7 +46,8 @@ server another way (curl, SSH, etc.).
 The JSON contains `server` (basics, `update`, `remote_access`, `resource_use`,
 `streaming_settings`), `live_activity`
 (`totals` and `streams`), `background` (`running_now`, `library_scans`, `maintenance_tasks`,
-`maintenance_settings`), `worth_a_look`, and `unavailable`. Each task in `running_now` has
+`maintenance_settings`), `worth_a_look`, `unavailable`, and `media_deletion_allowed` (whether Plex's
+"Allow media deletion" setting is on: `true`, `false`, or `null` when it couldn't be read). Each task in `running_now` has
 `progress_moved`: `true` (it moved during the wait), `false` (no visible progress) or `null` (not
 checked, for example because it finished during the wait). DVR and Live TV tasks (recordings and
 "Refreshing Sub") are never checked: they normally sit still while a recording runs, so don't call
@@ -112,6 +113,13 @@ Present, in this order:
      which Plex itself labels as 720p or lower. Viewers outside the home network get video converted
      down to that quality, even if their connection could handle more.
    - `high_cpu` / `high_memory`: the machine was busy during the sample, often from transcoding.
+
+   Then, if `media_deletion_allowed` is `true` and you haven't said it yet in this conversation, add one
+   line at the end of this section: Cinemetric only reads, but Plex is set to let apps delete media
+   files. To make sure Claude can't delete their movies, shows or music through Plex, they can switch
+   off **Allow media deletion** (Settings, Library); Plex then refuses deletions from every app,
+   including its own. It's Plex's default, so don't call it a problem or let it
+   change the headline. Say nothing about it when the field is `false` or `null`.
    - `task_not_progressing`: these tasks showed no progress over `seconds_between_checks` seconds,
      so they may be stuck. Say "possibly stuck", never "failed": the task may just be slow (a big
      scan or a long database job) or waiting to start (especially at 0%). Suggest checking again in a
@@ -138,7 +146,8 @@ Keep it readable: plain English, no raw JSON, no file paths.
 - This skill is read-only. Never offer to stop streams, start scans, change settings or install
   updates as part of this skill; tell the user to do that in Plex itself.
 - Settings are facts, not advice: say what a setting does and what it's set to. Don't tell the user
-  to change it; the owner may have chosen it on purpose. If they ask where a setting lives, it's in
+  to change it; the owner may have chosen it on purpose. The one exception is the media deletion tip
+  above, because it's about what apps (Claude included) can do to the server. If they ask where a setting lives, it's in
   Plex under **Settings → Transcoder** (hardware acceleration, video transcoding), **Settings →
   Remote Access** (remote limits) or **Settings → Library** (emptying trash).
 - Never display, echo, or ask for the Plex token.

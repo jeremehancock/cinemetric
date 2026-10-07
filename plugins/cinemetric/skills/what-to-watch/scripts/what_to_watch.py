@@ -22,7 +22,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.25.1"
+VERSION = "0.26.0"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 LIBRARY_PAGE_SIZE = 500
@@ -34,6 +34,7 @@ ALLOWED_PATHS = [
     re.compile(r"^/library/sections/\d+/all$"),
     re.compile(r"^/library/sections/\d+/genre$"),
     re.compile(r"^/library/onDeck$"),
+    re.compile(r"^/:/prefs$"),
 ]
 
 # Plex metadata type numbers used with /library/sections/{id}/all?type=N
@@ -532,6 +533,26 @@ def continue_watching(client, checked, args):
     return {"continue_watching": [continue_entry(item) for item in items][:args.limit]}
 
 
+# ---------------------------------------------------------------- media deletion
+#
+# Shared helper: the same code is in every script that reads from Plex. Keep every copy in step.
+
+def media_deletion_allowed(read_prefs):
+    """Whether Plex's "Allow media deletion" setting is on: True, False, or None when it can't be
+    told. read_prefs returns the /:/prefs answer. Only this one setting is looked at, since /:/prefs
+    also holds values that must never be printed. Never raises: a failed check mustn't stop a report."""
+    try:
+        prefs = read_prefs()
+        settings = prefs.get("Setting", []) if isinstance(prefs, dict) else []
+        for setting in settings or []:
+            if isinstance(setting, dict) and setting.get("id") == "allowMediaDeletion":
+                value = str(setting.get("value")).strip().lower()
+                return True if value in ("1", "true") else False if value in ("0", "false") else None
+    except Exception:
+        pass
+    return None
+
+
 def build_report(config, args, now=None):
     now = time.time() if now is None else now
     check_options(args)
@@ -553,6 +574,7 @@ def build_report(config, args, now=None):
         report.update(continue_watching(client, checked, args))
     else:
         report.update(pick(client, checked, args))
+    report["media_deletion_allowed"] = media_deletion_allowed(lambda: client.get("/:/prefs"))
     return report
 
 

@@ -30,7 +30,11 @@ Script: `python3 ${CLAUDE_SKILL_DIR}/scripts/setup.py <command>`. It prints JSON
    first that works.
 5. **Confirm.** Tell the user it's connected (server name and address) and that they can now ask for a
    library report. Also mention they can revoke Cinemetric's access at any time in Plex under
-   **Settings → Authorized Devices** (it appears as "Cinemetric").
+   **Settings → Authorized Devices** (it appears as "Cinemetric"). If `select` gave
+   `media_deletion_allowed: true`, add one line: Cinemetric only reads, but Plex is set to let apps
+   delete media files. To make sure Claude can't delete their movies, shows or music through Plex,
+   they can switch off **Allow media deletion** (Settings, Library); Plex then refuses deletions from
+   every app, including its own. It's extra peace of mind, not a requirement. Say nothing about it when the field is `false` or `null`.
 
 If the user gives up partway, run `cancel` to delete the in-progress sign-in file.
 

@@ -7,16 +7,15 @@ genre, length, release year, rating, content rating and the signed-in account's 
 shuffled by default so each ask gives new ideas. It can also list what that account is partway
 through and the next episode up. Only titles on the server; it never contacts Tautulli or any other
 service.
-
 ## Requirements
 ### Requirement: Sources used
 The script `skills/what-to-watch/scripts/what_to_watch.py` SHALL request only `/`,
-`/library/sections`, `/library/sections/{id}/all`, `/library/sections/{id}/genre` and
-`/library/onDeck` from the user's Plex server, reading library items in pages of 500. It SHALL NOT contact Tautulli, plex.tv or any other address.
+`/library/sections`, `/library/sections/{id}/all`, `/library/sections/{id}/genre`, `/library/onDeck`
+and `/:/prefs` from the user's Plex server, reading library items in pages of 500. `/:/prefs` SHALL be read only for the media deletion setting (see "Media deletion setting" in the conventions spec). It SHALL NOT contact Tautulli, plex.tv or any other address.
 
 #### Scenario: Building a shortlist
 - **WHEN** the script builds a shortlist
-- **THEN** every request goes to the configured Plex server, to one of the five allowed paths, with
+- **THEN** every request goes to the configured Plex server, to one of the six allowed paths, with
   `GET`
 
 #### Scenario: Tautulli is set up

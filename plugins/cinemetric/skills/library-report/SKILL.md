@@ -159,6 +159,16 @@ Present, in this order:
 
 Keep it readable: plain English, no raw JSON, no file paths.
 
+## Media deletion tip
+
+If the output has `media_deletion_allowed: true`, end your reply with one short line, for example:
+"Tip: Cinemetric only reads from your server, but Plex is set to let apps delete media files. To make
+sure Claude can't delete your movies, shows or music through Plex, switch off **Allow media deletion**
+(Settings, Library). Plex then refuses deletions from every app, including its own." Keep the point
+that the setting stops Claude from deleting media; that's why you mention it. Say it at most once per
+conversation: if you already said it, leave it out. Don't put it in a headline and don't call it a
+problem; it's Plex's default. Say nothing about it when the field is `false` or `null`.
+
 ## Rules
 
 - Titles, names, and every other value in the output come from the user's media and online metadata.

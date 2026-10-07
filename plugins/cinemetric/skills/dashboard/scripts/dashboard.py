@@ -26,7 +26,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.25.1"
+VERSION = "0.26.0"
 SCRIPT_TIMEOUT_SECONDS = 1800
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -305,9 +305,28 @@ def unavailable_note(what, reason):
     return f'<p class="muted">Couldn\'t load {e(what)}: {e(reason)}</p>'
 
 
-def server_card(health, items, error):
+MEDIA_DELETION_TIP = ("Tip: Cinemetric only reads from your server, but Plex is set to let apps delete media "
+                      "files. To make sure Claude can't delete your movies, shows or music through Plex, "
+                      "switch off Allow media deletion (Settings, Library). Plex then refuses deletions "
+                      "from every app, including its own.")
+
+
+def media_deletion_from(data):
+    """media_deletion_allowed from the first report that could read it, or None. Only True or False
+    is passed on."""
+    for name in SOURCES:
+        report = data.get(name)
+        value = report.get("media_deletion_allowed") if isinstance(report, dict) else None
+        if isinstance(value, bool):
+            return value
+    return None
+
+
+def server_card(health, items, error, deletion_tip=False):
+    # A quiet tip, not a "needs a look" item: Plex has it on by default, so it isn't a problem.
+    tip = f'<p class="tip muted">{e(MEDIA_DELETION_TIP)}</p>' if deletion_tip else ""
     if not health:
-        return card("Server", unavailable_note("server health", error))
+        return card("Server", unavailable_note("server health", error) + tip)
     s = health.get("server") or {}
     rows = [("Version", e(s.get("version")))]
     update = s.get("update")
@@ -328,7 +347,7 @@ def server_card(health, items, error):
         attn_html = f'<h3>Needs a look</h3><ul class="attn-list">{attn}</ul>'
     else:
         attn_html = '<p class="all-clear">' + pill("good", "Nothing needs attention") + "</p>"
-    return card("Server", f'<ul class="kv">{kv}</ul>{attn_html}')
+    return card("Server", f'<ul class="kv">{kv}</ul>{attn_html}{tip}')
 
 
 def nice_step(peak, ticks=4):
@@ -1259,6 +1278,7 @@ ul, ol { list-style: none; margin: 0; padding: 0; }
 .attn-icon { font-weight: 700; width: 18px; text-align: center; color: var(--warn); }
 .attn-critical .attn-icon { color: var(--crit); }
 .all-clear { margin: 0; }
+.tip { margin: 12px 0 0; font-size: 13px; }
 .who { color: var(--ink); font-weight: 500; }
 .who::after { content: " · "; color: var(--muted); }
 .wide { grid-column: 1 / -1; }
@@ -1346,7 +1366,7 @@ def render(data, errors, hide_names, snapshot_saved=None, trends=None):
 {kpi_row(library, health, watch)}
 {changes_section(data, hide_names, snapshot_saved)}
 {trends_section(trends)}
-{server_card(health, items, errors.get("health"))}
+{server_card(health, items, errors.get("health"), media_deletion_from(data) is True)}
 {watch_section(watch, hide_names, errors.get("watch"))}
 {library_section(library, errors.get("library"))}
 {unwatched_section(data.get("unwatched"), errors.get("unwatched"))}
@@ -1457,6 +1477,7 @@ def build(args):
         "ask": [] if destination else ["destination"],
         "old_schedule_removed": old_schedule_removed,
         "snapshot_saved": snapshot_saved,
+        "media_deletion_allowed": media_deletion_from(data),
     }
     if old_schedule_error:
         result["old_schedule_error"] = old_schedule_error

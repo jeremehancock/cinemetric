@@ -7,7 +7,8 @@ import json
 import sys
 from unittest import mock
 
-from helpers import FAKE_API_KEY, FAKE_TOKEN, FakeServer, OfflineTestCase, fixture, load_script
+from helpers import (FAKE_API_KEY, FAKE_TOKEN, FakeServer, OfflineTestCase, fixture, load_script,
+                     check_media_deletion)
 
 wtw = load_script("what-to-watch")
 
@@ -430,3 +431,22 @@ class CommandLine(Base):
         code, out = self.run_main("--genre", "comedy", "--unwatched")
         self.assertEqual(code, 0)
         self.assertEqual(json.loads(out)["matches"], 5)
+
+
+# ---------------------------------------------------------------- media deletion setting
+
+
+class MediaDeletion(Base):
+    def test_media_deletion_setting(self):
+        def build(answer):
+            self.server.routes["/:/prefs"] = answer
+            self.server.requests.clear()
+            return self.report(), self.server.requests
+        check_media_deletion(self, build)
+
+    def test_continue_watching_has_it_too(self):
+        def build(answer):
+            self.server.routes["/:/prefs"] = answer
+            self.server.requests.clear()
+            return self.report(continue_watching=True), self.server.requests
+        check_media_deletion(self, build)

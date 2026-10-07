@@ -18,7 +18,9 @@ The script SHALL request only `/`, `/updater/status`, `/myplex/account`, `/stati
 The script SHALL request `/:/prefs` at most once per report and keep only the settings listed below,
 discarding everything else without printing it. A listed setting the server doesn't return SHALL be
 left out rather than guessed. The server's public address SHALL be left out of the remote access
-details.
+details. The same answer SHALL also give the top-level `media_deletion_allowed` field (see "Media
+deletion setting" in the conventions spec); `allowMediaDeletion` SHALL NOT be added to either
+settings list or to `worth_a_look`.
 
 Kept in `background.maintenance_settings`:
 - `ButlerStartHour` and `ButlerEndHour` as `maintenance_start_hour` and `maintenance_end_hour`
@@ -41,8 +43,8 @@ On/off settings SHALL be booleans and hour, second and kbps settings SHALL be in
 #### Scenario: Reading server settings
 - **WHEN** `/:/prefs` returns all of the server's settings
 - **THEN** `background.maintenance_settings` contains only the six maintenance settings,
-  `server.streaming_settings` contains only the six streaming settings, and no other setting's id or
-  value appears anywhere in the report
+  `server.streaming_settings` contains only the six streaming settings, `media_deletion_allowed` is
+  set from `allowMediaDeletion`, and no other setting's id or value appears anywhere in the report
 
 #### Scenario: Custom transcoder folder
 - **WHEN** `TranscoderTempDirectory` is set to `/mnt/fast/transcode`
@@ -56,7 +58,12 @@ On/off settings SHALL be booleans and hour, second and kbps settings SHALL be in
 
 #### Scenario: One request for both parts
 - **WHEN** the script builds a report
-- **THEN** `/:/prefs` is requested once
+- **THEN** `/:/prefs` is requested once, and it gives both settings parts and
+  `media_deletion_allowed`
+
+#### Scenario: Now playing only
+- **WHEN** the script runs with `--now-playing`
+- **THEN** `/:/prefs` isn't requested and the output has no `media_deletion_allowed` field
 
 ### Requirement: Partial results instead of failure
 Only `/` is required. Every other part (update check, remote access, CPU and memory, streaming

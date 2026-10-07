@@ -36,7 +36,7 @@ import urllib.parse
 import urllib.request
 import uuid
 
-VERSION = "0.25.1"
+VERSION = "0.26.0"
 PRODUCT = "Cinemetric"
 TIMEOUT_SECONDS = 15
 FINISH_WAIT_SECONDS = 60
@@ -46,7 +46,7 @@ MAX_TITLE_LENGTH = 120
 # The only Tautulli API commands this script may run.
 TAUTULLI_COMMANDS = {"get_apikey", "get_tautulli_info"}
 
-# Every address this script may contact, apart from the user's chosen server ("/" only).
+# Every address this script may contact, apart from the user's chosen server ("/" and "/:/prefs" only).
 PLEX_TV_RULES = [
     ("POST", re.compile(r"^https://plex\.tv/api/v2/pins$")),
     ("GET", re.compile(r"^https://plex\.tv/api/v2/pins/\d+$")),
@@ -185,6 +185,35 @@ def test_server(uri, token, client_id):
         return None
 
 
+def read_prefs(uri, token, client_id):
+    """The chosen server's /:/prefs answer. Only media_deletion_allowed reads it."""
+    request = urllib.request.Request(
+        uri.rstrip("/") + "/:/prefs", headers=plex_headers(client_id, token), method="GET"
+    )
+    with _opener().open(request, timeout=5) as resp:
+        return json.loads(resp.read()).get("MediaContainer", {})
+
+
+# ---------------------------------------------------------------- media deletion
+#
+# Shared helper: the same code is in every script that reads from Plex. Keep every copy in step.
+
+def media_deletion_allowed(read_prefs):
+    """Whether Plex's "Allow media deletion" setting is on: True, False, or None when it can't be
+    told. read_prefs returns the /:/prefs answer. Only this one setting is looked at, since /:/prefs
+    also holds values that must never be printed. Never raises: a failed check mustn't stop a report."""
+    try:
+        prefs = read_prefs()
+        settings = prefs.get("Setting", []) if isinstance(prefs, dict) else []
+        for setting in settings or []:
+            if isinstance(setting, dict) and setting.get("id") == "allowMediaDeletion":
+                value = str(setting.get("value")).strip().lower()
+                return True if value in ("1", "true") else False if value in ("0", "false") else None
+    except Exception:
+        pass
+    return None
+
+
 # ---------------------------------------------------------------- steps
 
 def cmd_start(args):
@@ -287,7 +316,9 @@ def cmd_select(args):
             config.update({k: v for k, v in previous.items() if k.startswith("tautulli_")})
             write_private(config_path(), config)
             os.remove(pending_path())
-            return {"step": "done", "server": name, "address": uri, "config_file": config_path()}
+            allowed = media_deletion_allowed(lambda: read_prefs(uri, server["token"], pending["client_id"]))
+            return {"step": "done", "server": name, "address": uri, "config_file": config_path(),
+                    "media_deletion_allowed": allowed}
     raise SetupError(
         f"Could not reach {server['name']} at any of its {len(server['connections'])} addresses "
         "from this computer. Check that it is running and reachable on your network."

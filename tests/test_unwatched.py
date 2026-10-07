@@ -8,7 +8,8 @@ import sys
 import time
 from unittest import mock
 
-from helpers import FAKE_API_KEY, FAKE_TOKEN, FakeServer, OfflineTestCase, Reply, fixture, load_script
+from helpers import (FAKE_API_KEY, FAKE_TOKEN, FakeServer, OfflineTestCase, Reply, fixture, load_script,
+                     check_media_deletion)
 
 uw = load_script("unwatched")
 
@@ -435,3 +436,17 @@ class CommandLine(Base):
         self.assertEqual(code, 1)
         self.assertEqual(out, "")
         self.assertIn("error: OWNER_ONLY: ", self.stderr.getvalue())
+
+
+# ---------------------------------------------------------------- media deletion setting
+
+
+class MediaDeletion(Base):
+    def test_media_deletion_setting(self):
+        net = self.network(tautulli=False)
+
+        def build(answer):
+            net.server.routes["/:/prefs"] = answer
+            net.server.requests.clear()
+            return self.report(config(tautulli=None)), net.server.requests
+        check_media_deletion(self, build)

@@ -121,6 +121,16 @@ Keep it short and conversational: no raw JSON, no tables unless asked, no file p
 - The same movie in two libraries (for example "Movies" and "4K Movies") is one suggestion;
   `libraries` names both. You can mention the 4K copy when it's there.
 
+## Media deletion tip
+
+If the output has `media_deletion_allowed: true`, end your reply with one short line, for example:
+"Tip: Cinemetric only reads from your server, but Plex is set to let apps delete media files. To make
+sure Claude can't delete your movies, shows or music through Plex, switch off **Allow media deletion**
+(Settings, Library). Plex then refuses deletions from every app, including its own." Keep the point
+that the setting stops Claude from deleting media; that's why you mention it. Say it at most once per
+conversation: if you already said it, leave it out. Don't put it in a headline and don't call it a
+problem; it's Plex's default. Say nothing about it when the field is `false` or `null`.
+
 ## Rules
 
 - Suggest only titles from the report. Never suggest titles that aren't on the server, and never

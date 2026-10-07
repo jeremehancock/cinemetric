@@ -22,7 +22,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.25.1"
+VERSION = "0.26.0"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 LIBRARY_PAGE_SIZE = 500
@@ -36,6 +36,7 @@ ALLOWED_PATHS = [
     re.compile(r"^/library/sections$"),
     re.compile(r"^/library/sections/\d+/all$"),
     re.compile(r"^/status/sessions/history/all$"),
+    re.compile(r"^/:/prefs$"),
 ]
 
 # The only Tautulli API commands this script may run. Both only read data.
@@ -508,6 +509,26 @@ def summarise(section, titles, history, cutoff, limit):
     }
 
 
+# ---------------------------------------------------------------- media deletion
+#
+# Shared helper: the same code is in every script that reads from Plex. Keep every copy in step.
+
+def media_deletion_allowed(read_prefs):
+    """Whether Plex's "Allow media deletion" setting is on: True, False, or None when it can't be
+    told. read_prefs returns the /:/prefs answer. Only this one setting is looked at, since /:/prefs
+    also holds values that must never be printed. Never raises: a failed check mustn't stop a report."""
+    try:
+        prefs = read_prefs()
+        settings = prefs.get("Setting", []) if isinstance(prefs, dict) else []
+        for setting in settings or []:
+            if isinstance(setting, dict) and setting.get("id") == "allowMediaDeletion":
+                value = str(setting.get("value")).strip().lower()
+                return True if value in ("1", "true") else False if value in ("0", "false") else None
+    except Exception:
+        pass
+    return None
+
+
 def build_report(config, args, now=None):
     now = time.time() if now is None else now
     client = need_plex(config)
@@ -552,6 +573,7 @@ def build_report(config, args, now=None):
         "libraries": libraries,
         "skipped_libraries": skipped,
         "totals": totals,
+        "media_deletion_allowed": media_deletion_allowed(lambda: client.get("/:/prefs")),
     }
 
 

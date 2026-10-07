@@ -40,6 +40,9 @@ CSS and JavaScript with no build step, ready for any static host.
 More skills are planned, and ideas are welcome; see [Roadmap](#roadmap).
 
 Every Cinemetric skill is **read-only**: it never changes anything on your server. See [SECURITY.md](SECURITY.md).
+If your server lets apps delete media files, Cinemetric mentions it once in a conversation, because
+switching off **Allow media deletion** in Plex (Settings, Library) makes sure Claude can't delete your
+movies, shows or music through Plex. Plex then refuses deletions from every app, including its own.
 
 ## Mods
 
@@ -49,7 +52,7 @@ come with Cinemetric, so there's nothing extra to install, and each one has its 
 | Mod | Starts | What it does |
 |---|---|---|
 | `guard` | On | **Read-only guard.** Checks the commands Claude writes on its own, outside Cinemetric's skills. If one would change something on your Plex server, Tautulli or plex.tv (deleting a title, starting a library scan, marking something watched, stopping someone's stream, running a Tautulli command that isn't a read), the guard stops it before it runs and tells Claude why. It also keeps your Plex token and Tautulli API key out of Claude's sight: it hides them in anything a command prints, stops Claude reading Cinemetric's settings file, and stops Claude putting them in a file, an issue or a page |
-| `status` | Off | **Library status line.** A dim line just above the prompt such as `Plex: 1,970 movies · 417 shows · 59.4 TB · checked 3 days ago`, read from the newest snapshot Cinemetric saved when you asked what changed or refreshed the dashboard. It only changes when one of those saves a new snapshot: other skills, like the server health check, don't update it. It never contacts your server, and updates after each turn, so a fresh snapshot shows straight away |
+| `status` | Off | **Library status line.** A dim line just above the prompt such as `Plex: 1,970 movies · 417 shows · 59.4 TB · checked 3 days ago`, read from the newest snapshot Cinemetric saved. It updates when you ask what changed or refresh the dashboard, the two skills that save snapshots. It never contacts your server, and checks for a new snapshot after each turn, so it shows straight away |
 | `now` | Off | **Now Playing.** Type `/cinemetric-now` to open a panel showing who's streaming from your server right now: each person, what they're watching, on which device, how far in, and whether it's playing directly or being transcoded (converted on the fly). It checks your server about every 30 seconds, only while the panel is open, and stops when you close it. The panel shows people's names, and what it shows stays on your screen: it isn't sent to Claude. Switching any mod on or off closes the panel; type `/cinemetric-now` to open it again |
 
 > [!IMPORTANT]

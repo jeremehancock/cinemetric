@@ -8,10 +8,11 @@ most watched titles. A whole-server recap names no one and leaves off titles onl
 a recap can also cover the owner's own viewing or one person's. History comes from Tautulli when it's
 set up and from Plex's own history otherwise. Script: `skills/year-in-review/scripts/year_in_review.py`.
 How Claude presents and publishes it is in the skill's `SKILL.md`.
-
 ## Requirements
 ### Requirement: Sources used
-With Plex, the script SHALL request only `/`, `/accounts` and `/status/sessions/history/all`. With
+With Plex, the script SHALL request only `/`, `/accounts`, `/status/sessions/history/all` and
+`/:/prefs`. `/:/prefs` SHALL be read only for the media deletion setting (see "Media deletion setting" in the conventions spec). When Plex isn't configured, the setting isn't read and
+`media_deletion_allowed` is `null`. With
 Tautulli, it SHALL run only `get_tautulli_info`, `get_history` and `get_users`. Source choice SHALL
 work as in `watch-activity`: `--source auto` (the default) uses Tautulli if it's configured and falls
 back to Plex otherwise, recording why in `fallback_reason`; `--source tautulli` fails with

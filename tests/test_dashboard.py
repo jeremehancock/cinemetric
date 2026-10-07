@@ -7,6 +7,7 @@ run_source() are tested with their inputs replaced.
 
 import argparse
 import json
+import re
 import os
 import stat
 import subprocess
@@ -992,3 +993,33 @@ class ReadingTrends(OfflineTestCase):
                 self.assertEqual(result["sections_missing"], {})
                 with open(result["output"], encoding="utf-8") as fh:
                     self.assertNotIn("<h2>Trends</h2>", fh.read())
+
+
+# ---------------------------------------------------------------- media deletion setting
+
+class MediaDeletionTip(OfflineTestCase):
+    def test_tip_shown_when_allowed_without_changing_the_status(self):
+        data = sample_data()
+        before = page(data)
+        data["playback"]["media_deletion_allowed"] = True
+        after = page(data)
+        self.assertNotIn("Allow media deletion", before)
+        self.assertIn("Allow media deletion", after)
+        status = re.compile(r'<div class="masthead-meta">(.*?)<span>Updated')
+        self.assertEqual(status.search(after).group(0), status.search(before).group(0))
+        self.assertEqual(after.count('class="attn '), before.count('class="attn '))
+
+    def test_no_tip_when_switched_off_or_unknown(self):
+        for value in (False, None):
+            data = sample_data()
+            data["health"]["media_deletion_allowed"] = value
+            with self.subTest(value=value):
+                self.assertNotIn("Allow media deletion", page(data))
+
+    def test_first_report_that_could_read_it(self):
+        data = sample_data()
+        data["library"]["media_deletion_allowed"] = None
+        data["health"]["media_deletion_allowed"] = False
+        data["playback"]["media_deletion_allowed"] = True
+        self.assertIs(db.media_deletion_from(data), False)
+        self.assertIsNone(db.media_deletion_from({"library": None, "health": {}}))

@@ -6,6 +6,7 @@ Tests never talk to a real Plex, plex.tv or Tautulli server, and never touch the
 
 import contextlib
 import email.message
+import gc
 import importlib.util
 import io
 import json
@@ -155,6 +156,43 @@ def plex_container(**fields):
     return {"MediaContainer": fields}
 
 
+# ---------------------------------------------------------------- media deletion setting
+
+PREFS_SECRET = "prefs-secret-that-must-never-be-printed"
+
+
+def prefs_answer(allowed):
+    """A /:/prefs answer holding a secret, plus allowMediaDeletion unless allowed is None."""
+    settings = [{"id": "PlexOnlineToken", "value": PREFS_SECRET, "type": "text"},
+                {"id": "FriendlyName", "value": "Test Server", "type": "text"}]
+    if allowed is not None:
+        settings.append({"id": "allowMediaDeletion", "value": allowed, "type": "bool", "default": True})
+    return plex_container(Setting=settings)
+
+
+# (what /:/prefs answers, the media_deletion_allowed the report should give)
+MEDIA_DELETION_CASES = [
+    (prefs_answer(True), True),
+    (prefs_answer(False), False),
+    (prefs_answer(None), None),
+    (Reply("", status=403), None),
+]
+
+
+def check_media_deletion(test, build):
+    """Run build(answer) -> (report, requests) for each case in MEDIA_DELETION_CASES and check the
+    field, that no other setting leaks, that /:/prefs was requested once and that nothing about it
+    was added to `unavailable`."""
+    for answer, expected in MEDIA_DELETION_CASES:
+        status = answer.status if isinstance(answer, Reply) else 200
+        with test.subTest(expected=expected, status=status):
+            report, requests = build(answer)
+            test.assertIs(report["media_deletion_allowed"], expected)
+            test.assertNotIn(PREFS_SECRET, json.dumps(report))
+            test.assertEqual(sum(seen.path == "/:/prefs" for seen in requests), 1)
+            test.assertNotIn("media deletion", json.dumps(report.get("unavailable") or []).lower())
+
+
 # ---------------------------------------------------------------- base test case
 
 class NetworkBlocked(AssertionError):
@@ -196,6 +234,9 @@ class OfflineTestCase(unittest.TestCase):
         for name in CLEARED_ENV:
             os.environ.pop(name, None)
 
+        # Free what earlier tests left behind (such as refused fake replies) before stderr is
+        # captured, so a ResourceWarning from cleaning them up can't land in this test's output.
+        gc.collect()
         self.stderr = io.StringIO()
         quiet = contextlib.redirect_stderr(self.stderr)
         quiet.__enter__()

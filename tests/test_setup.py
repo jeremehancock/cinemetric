@@ -7,7 +7,8 @@ import ssl
 import stat
 from unittest import mock
 
-from helpers import FAKE_API_KEY, FAKE_TOKEN, FakeServer, OfflineTestCase, Reply, Unreachable, load_script
+from helpers import (FAKE_API_KEY, FAKE_TOKEN, PREFS_SECRET, FakeServer, OfflineTestCase, Reply, Unreachable,
+                     load_script, prefs_answer)
 
 su = load_script("setup")
 
@@ -221,6 +222,21 @@ class SigningIn(Faked):
         self.assertEqual(config["plex_url"], "http://192.0.2.11:32400")
         self.assertEqual(config["tautulli_api_key"], FAKE_API_KEY)
         self.assertFalse(os.path.exists(su.pending_path()))
+
+    def test_select_reads_the_media_deletion_setting(self):
+        server = self.fake({"http://192.0.2.10:32400/": {"MediaContainer": {"friendlyName": "Test Server"}}})
+        for answer, expected in ((prefs_answer(True), True), (prefs_answer(False), False),
+                                 (Reply("", status=403), None), (Unreachable("timed out"), None)):
+            with self.subTest(expected=expected, answer=answer):
+                self.start_pending(servers=[{"name": "Test Server", "owned": True, "token": FAKE_TOKEN,
+                                             "connections": ["http://192.0.2.10:32400"]}])
+                server.routes["http://192.0.2.10:32400/:/prefs"] = answer
+                server.requests.clear()
+                result = su.cmd_select(argparse.Namespace(number=1, replace=True))
+                self.assertIs(result["media_deletion_allowed"], expected)
+                self.assertNotIn(PREFS_SECRET, json.dumps(result))
+                self.assertEqual(su.read_private(su.config_path())["plex_url"], "http://192.0.2.10:32400")
+                self.assertEqual([seen.path for seen in server.requests], ["/", "/:/prefs"])
 
     def test_select_out_of_range(self):
         self.start_pending(servers=[{"name": "Test Server", "token": FAKE_TOKEN, "connections": []}])

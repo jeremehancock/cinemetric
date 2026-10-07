@@ -5,7 +5,8 @@ import inspect
 from helpers import OfflineTestCase, PREFS_SECRET, Reply, load_script, prefs_answer
 
 SCRIPTS = ("setup", "library-report", "server-health", "watch-activity", "users-and-shares", "unwatched",
-           "what-to-watch", "episode-gaps", "playback-check", "year-in-review")
+           "what-to-watch", "episode-gaps", "playback-check", "year-in-review",
+           "title-lookup")
 MODULES = [(name, load_script(name)) for name in SCRIPTS]
 
 

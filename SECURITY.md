@@ -59,6 +59,9 @@ is sent to Claude. It saves nothing.
   the read-only guard catches common ways Claude might change things on its own, but if you ask Claude
   to delete, rename or fix something, that's ordinary Claude Code work, not something Cinemetric
   controls. Treat it like any other change Claude makes on your computer.
+- The read-only guard checks commands and web fetches, not clicks. If you let Claude control your
+  web browser (for example with Claude in Chrome) while you're signed in to Plex, it could change
+  things in the Plex web app the same way you could, and the guard wouldn't see it.
 - Claude Code's own permission prompts are your last check. By default Claude Code asks before running
   a command, so read any command that mentions your Plex server or Tautulli before you approve it. If
   you let Claude Code run commands without asking, the guard is the only check left.

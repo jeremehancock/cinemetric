@@ -120,7 +120,7 @@
       <div class="wrap">
         <div class="section-head reveal">
           <p class="kicker">The library</p>
-          <h2 id="skills-title">Thirteen skills. One curious question at a time.</h2>
+          <h2 id="skills-title">Fourteen skills. One curious question at a time.</h2>
           <p>Just ask Claude in your own words. Each skill knows when it's needed, runs a small script against your server and turns the result into a clear report.</p>
         </div>
 
@@ -148,6 +148,11 @@
                 <span class="skill-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M6 10v28l20-14z" fill="currentColor"/><path d="M32 20v8M38 14v20M44 18v12" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" opacity=".7"/></svg></span>
                 <span class="skill-name">playback-check</span>
                 <span class="skill-sub">Why it transcodes</span>
+              </a></li>
+              <li><a class="skill-row" href="#skill-languages" style="--a:#2dd4bf;--b:#0b3a35">
+                <span class="skill-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="4" y="9" width="40" height="30" rx="4" fill="none" stroke="currentColor" stroke-width="3.5"/><path d="M11 26h12M27 26h10M11 32h20" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M35 32h2" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" opacity=".6"/></svg></span>
+                <span class="skill-name">subtitles-and-languages</span>
+                <span class="skill-sub">Missing subtitles</span>
               </a></li>
             </ul>
           </div>
@@ -714,8 +719,59 @@
       </div>
     </section>
 
+    <!-- ============ SKILL: SUBTITLES AND LANGUAGES ============ -->
+    <section class="section feature" id="skill-languages" aria-labelledby="f-languages">
+      <div class="wrap feature-grid">
+        <div class="feature-copy reveal">
+          <p class="kicker" style="--k:#5eead4">subtitles-and-languages</p>
+          <h2 id="f-languages">Find the films nobody can follow.</h2>
+          <p>Checks the language of every audio and subtitle track, so you find the foreign film with no subtitles you can read before movie night, not during it.</p>
+          <ul class="ticks">
+            <li>Movies and episodes with audio in another language and no subtitles in yours.</li>
+            <li>Titles missing subtitles in a language you name, such as Spanish for family visiting.</li>
+            <li>Tracks with no language set, which stop Plex picking the right one.</li>
+            <li>How many files have audio and subtitles in each language.</li>
+            <li>Forced subtitles, which usually cover only a few lines, aren't counted as full subtitles.</li>
+          </ul>
+          <p class="ask-line">Ask Claude: <q>Which foreign films can't we follow?</q> or <q>Which movies are missing Spanish subtitles?</q></p>
+        </div>
+
+        <figure class="mock demo reveal" aria-label="Example: foreign films with no subtitles in your language">
+          <div class="mock-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><em>Claude Code</em></div>
+          <div class="tabpanel" id="panel-languages-1">
+            <pre class="term"><code><span class="t-you">&gt; Which foreign films can't we follow?</span>
+<span class="t-dot">⏺</span> I checked against English, your
+  libraries' language. Of your 9,942
+  files, 17 have audio in another
+  language and no English subtitles.
+
+  <b class="t-h">Foreign audio, no subtitles</b>
+  Mountain Spirits (1994): Japanese
+    audio, French subtitles only
+  The Quiet Garden (2019): Korean audio,
+    only forced English subtitles, which
+    usually cover just a few lines
+  Northern Lines: 9 of 22 episodes,
+    Korean audio
+  Coastal Patrol: 6 episodes labelled
+    German, maybe dubbed copies
+
+  <b class="t-h">Language not set</b>
+  212 episodes have tracks with no
+  language, so Plex may pick the wrong
+  one. Most are in Station Days.
+
+  <b class="t-h">Worth knowing</b>
+  This goes by each track's language
+  label, which can be wrong or missing.</code></pre>
+          </div>
+          <figcaption>Example reply with made-up data. Claude's wording will vary.</figcaption>
+        </figure>
+      </div>
+    </section>
+
     <!-- ============ SKILL: TITLE LOOKUP ============ -->
-    <section class="section feature" id="skill-lookup" aria-labelledby="f-lookup">
+    <section class="section feature flip" id="skill-lookup" aria-labelledby="f-lookup">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#facc15">title-lookup</p>
@@ -767,7 +823,7 @@
     </section>
 
     <!-- ============ SKILL: YEAR IN REVIEW ============ -->
-    <section class="section feature flip" id="skill-recap" aria-labelledby="f-recap">
+    <section class="section feature" id="skill-recap" aria-labelledby="f-recap">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#818cf8">year-in-review</p>
@@ -791,7 +847,7 @@
     </section>
 
     <!-- ============ SKILL: DASHBOARD ============ -->
-    <section class="section feature" id="skill-dashboard" aria-labelledby="f-dash">
+    <section class="section feature flip" id="skill-dashboard" aria-labelledby="f-dash">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#a382ff">dashboard</p>

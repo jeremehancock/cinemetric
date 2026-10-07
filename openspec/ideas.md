@@ -40,7 +40,9 @@ These came out of an explore session on 2026-10-05 and apply to every idea below
     3. Go one level deeper     (subtitles and audio per file are done in playback-check)
 ```
 
-Suggested order: open. (`title-lookup` was done on 2026-10-07. Snapshots and "what changed" were done on 2026-10-06, and so were `year-in-review`, dashboard
+Suggested order: open. (`title-lookup` and `subtitles-and-languages` were done on 2026-10-07. A server
+check for the latter found that Plex keeps each person's preferred languages on plex.tv, not on the
+server, so it checks against each library's own language unless one is named. Snapshots and "what changed" were done on 2026-10-06, and so were `year-in-review`, dashboard
 trends, `episode-gaps`, the former `tv-completeness` idea, and `playback-check`, which turned out cheap: Plex
 returns subtitle and audio details for 100 titles per request, so no sampling was needed. The `server-health` settings checks, the
 `watch-activity` one person, busiest moment and unfinished titles additions, the `unwatched` skill,
@@ -52,22 +54,6 @@ track.)
 ---
 
 ## New skills
-
-### `subtitles-and-languages`
-
-Which titles have audio in a language other than the user's with no subtitles in their language,
-which audio and subtitle tracks have no language set ("unknown"), and which titles are missing a
-subtitle language the user names.
-
-- **Cheap to read:** `playback-check` already reads every title's audio and subtitle tracks in
-  batches of 100 (`/library/metadata/{ids}`), so the same approach works here.
-- **The user's language:** take `--language en` (repeatable); without it, use the server's default
-  subtitle and audio language from `/:/prefs` **(to verify the setting names)**, reading only those
-  settings, the way `media_deletion_allowed` reads only one.
-- **Catch:** a film's "original language" isn't always the first audio track. Use the default or
-  selected track, as `playback-check` does for its main track.
-- **Open question:** should this be a part of `playback-check` instead of its own skill? Separate
-  seems clearer: one is about playing smoothly, the other about understanding what's said.
 
 ### `collections-and-playlists`
 

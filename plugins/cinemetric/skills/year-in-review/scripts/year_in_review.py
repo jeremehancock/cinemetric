@@ -34,7 +34,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.27.0"
+VERSION = "0.28.0"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 MAX_NAMES_LISTED = 30

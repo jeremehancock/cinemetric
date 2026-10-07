@@ -39,7 +39,7 @@ The script prints `error: ...` on stderr and exits 1. Explain the problem in pla
 
 - **`NOT_CONFIGURED`**: Cinemetric isn't connected to a server yet. Use the `cinemetric:setup` skill to
   sign in with Plex, then run the report. Never ask the user to paste their token into the chat.
-- **token rejected (401)**: the token is wrong or was revoked; run the `cinemetric:setup` skill again.
+- **rejected the credentials (401)**: the token is wrong or was revoked; run the `cinemetric:setup` skill again.
 - **could not reach the server**: check the address and port, and that the server is running.
 - **refusing to read config ... other users can access it**: tell them to run the `chmod 600` command shown.
 - **redirect**: they should use the final address (often the `https://` one) as `plex_url`.

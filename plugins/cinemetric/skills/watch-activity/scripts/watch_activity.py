@@ -21,7 +21,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.29.0"
+VERSION = "0.29.1"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 PLEX_PAGE_SIZE = 200
@@ -54,7 +54,7 @@ class ReportError(Exception):
 
 
 class PersonError(ReportError):
-    """--user matched nobody or more than one person. Never a reason to fall back to Plex."""
+    """--user matched nobody or several people. Never a reason to fall back to another source."""
 
 
 # ---------------------------------------------------------------- config

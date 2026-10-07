@@ -23,7 +23,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.29.0"
+VERSION = "0.29.1"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 LIBRARY_PAGE_SIZE = 500
@@ -275,7 +275,7 @@ def as_int(value, default=0):
 
 
 def as_bool(value):
-    return value is True or str(value).lower() in ("1", "true")
+    return str(value).strip().lower() in ("1", "true", "yes")
 
 
 def gb(size):
@@ -288,12 +288,13 @@ def share(part, whole):
 
 # ---------------------------------------------------------------- library
 
-def get_all(client, section_id, type_number):
+def get_all(client, section_id, type_number, extra=None):
     """Every item of one type in a section, fetched in pages."""
     path = f"/library/sections/{section_id}/all"
+    params = {"type": type_number, **(extra or {})}
     items, start = [], 0
     while True:
-        page = client.get(path, {"type": type_number}, start=start, size=LIBRARY_PAGE_SIZE)
+        page = client.get(path, params, start=start, size=LIBRARY_PAGE_SIZE)
         batch = page.get("Metadata", []) or []
         items.extend(batch)
         total = as_int(page.get("totalSize", page.get("size", len(items))))

@@ -24,9 +24,8 @@ section. It SHALL say plainly that mods come with Cinemetric (no extra install) 
 only in Claude Code (the terminal and the desktop app's Code tab). For each mod it SHALL say what the
 mod does in plain words, its short name (for example `guard`, `status` or `now`), and whether it
 starts on or off. The Now Playing card SHALL also say that it checks the server only while its panel
-is open. The section SHALL say that in the desktop
-app's Code tab mod commands need typing in full, because its slash menu leaves them out, and SHALL
-link to the README for what to do when the mods don't show up. The "Shows every skill" count and
+is open. The section SHALL link to the README for what
+to do when the mods don't show up. The "Shows every skill" count and
 headings SHALL stay about skills only.
 
 #### Scenario: A visitor reaches the mods

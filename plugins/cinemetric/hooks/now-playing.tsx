@@ -10,6 +10,7 @@ import type { EngineInterface, On, Timer } from 'claude-code'
 import {
   CHECK_EVERY_MS,
   CHECK_TIMEOUT_MS,
+  NO_PANEL_REPLY,
   NO_PYTHON,
   NOW_COMMAND,
   OFF_REPLY,
@@ -96,7 +97,13 @@ function stopChecks(): void {
 export function setUpNowPlaying(on: On, isOn: boolean): void {
   on('command.run', { command: NOW_COMMAND }, async $ => {
     if (!isOn) return { text: OFF_REPLY }
-    await $.ui.open({ id: PANE_ID, title: PANE_TITLE })
+    const opened = await $.ui.open({ id: PANE_ID, title: PANE_TITLE })
+    // An app that can't draw panels keeps the panel open but unseen, so
+    // close it rather than check Plex for a panel nobody can see.
+    if (!opened.isPlaced) {
+      await $.ui.close({ id: PANE_ID })
+      return { text: NO_PANEL_REPLY }
+    }
     startChecks($)
     return { text: OPEN_REPLY }
   })

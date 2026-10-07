@@ -9,9 +9,7 @@ file. The README SHALL state both version numbers.
 The README SHALL also say what to do when the mods aren't running: run `claude update` on a Claude
 Code older than 2.1.260, and on a newer one add `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS` set to `"1"` to the
 `env` section of `~/.claude/settings.json` and start a new session, since Claude Code may start a
-session with the feature mods use switched off. It SHALL say that in the desktop app's Code tab the
-mod commands work when typed in full but are left out of the app's slash menu, and that the app may
-say the command isn't one even though it runs. It SHALL say that Cinemetric works best in Claude
+session with the feature mods use switched off. It SHALL say that Cinemetric works best in Claude
 Code in a terminal.
 
 #### Scenario: Plugin checker on an older version
@@ -21,12 +19,6 @@ Code in a terminal.
 #### Scenario: Mods missing on a current Claude Code
 - **WHEN** a user on Claude Code 2.1.260 or newer finds `/cinemetric-mods` isn't installed
 - **THEN** the README tells them which setting to add and to start a new session
-
-#### Scenario: Using the desktop app's Code tab
-- **WHEN** a user types `/cinemetric-mods` in the desktop app's Code tab and sees that it isn't a
-  command there
-- **THEN** the README has told them to type it in full, that the warning can be ignored, and that
-  Cinemetric works best in a terminal
 
 ### Requirement: Telling the user when mods can't run
 When a session starts and the mods aren't running, Cinemetric SHALL show the user a short notice

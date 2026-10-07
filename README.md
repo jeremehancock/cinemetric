@@ -89,10 +89,6 @@ session. There are two possible reasons:
   }
   ```
 
-**In the desktop app's Code tab,** the mods work, but the app's slash menu doesn't list
-`/cinemetric-mods` or `/cinemetric-now`, and it may say "/cinemetric-mods isn't a command here" when you
-type one. Type the whole command and press Enter anyway: it still runs, and you can ignore the warning.
-
 ## Install
 
 ### Where to use it
@@ -100,8 +96,8 @@ type one. Type the whole command and press Enter anyway: it still runs, and you 
 Cinemetric works best in Claude Code in your favorite terminal. That's where every skill and every mod
 works as described here, with no extra steps.
 
-- **Claude Code in the desktop app (the Code tab):** the skills and mods work, but you have to type mod
-  commands in full (see [Mods not running?](#mods)).
+- **Claude Code in the desktop app (the Code tab):** the skills and mods work there too, though some
+  versions of the app can't show the Now Playing panel. `/cinemetric-now` tells you when that happens.
 - **Claude in the desktop app's chat or on claude.ai:** mods only run in Claude Code, so they aren't
   available there.
 

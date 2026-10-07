@@ -8,8 +8,7 @@ set, which happens on an older Claude Code and on a current one where the rollou
 **Goals:** a notice that is right in both cases; a README answer for "mods not showing up"; telling
 people the terminal is the best place to use Cinemetric.
 
-**Non-Goals:** working around the desktop app's slash menu (Cinemetric registers its commands the
-way Claude Code documents; the app builds its menu without them); changing any setting for the user.
+**Non-Goals:** changing any setting for the user.
 
 ## Decisions
 
@@ -19,4 +18,4 @@ way Claude Code documents; the app builds its menu without them); changing any s
   itself, so a flag or shell variable wouldn't reach it. `~/.claude/settings.json` is read by every
   session, wherever it starts. Tested with the desktop app's own copy of Claude Code.
 - **"Works best in a terminal", not "doesn't work in the desktop app".** Skills and mods both work in
-  the Code tab; only the slash menu and a misleading warning get in the way.
+  the Code tab too.

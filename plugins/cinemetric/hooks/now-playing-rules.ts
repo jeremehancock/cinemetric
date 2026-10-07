@@ -21,6 +21,11 @@ export const CHECK_TIMEOUT_MS = 20_000
 
 export const OFF_REPLY = 'Now Playing is off. Type /cinemetric-mods now on to switch it on.'
 export const OPEN_REPLY = "Now Playing is open. It checks Plex about every 30 seconds while it's open."
+// Where the app can't draw plugin panels (such as some versions of the
+// desktop app), the panel is closed again and nothing is checked.
+export const NO_PANEL_REPLY =
+  "This app can't show Now Playing's panel, so it isn't open and Plex isn't being checked. " +
+  'Try /cinemetric-now in Claude Code in a terminal.'
 
 export const CHECKING = 'Checking Plex...'
 export const NOTHING_PLAYING = 'Nothing is playing right now.'

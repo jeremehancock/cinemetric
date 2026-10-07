@@ -783,7 +783,7 @@
                   <p class="mod-meta"><span class="mod-state is-on">On by default</span> Name: <code>guard</code></p>
                 </div>
               </div>
-              <p>Cinemetric's skills only read from your server. The guard also checks the commands Claude writes on its own: if one would change something on your Plex server, Tautulli or plex.tv (deleting a title, starting a library scan, marking something watched, stopping someone's stream), it stops it before it runs and tells Claude&nbsp;why.</p>
+              <p>Cinemetric's skills only read from your server. The guard also checks the commands Claude writes on its own: if one would change something on your Plex server, Tautulli or plex.tv (deleting a title, starting a library scan, marking something watched), it stops it before it runs. It also hides your Plex token and Tautulli API key from what Claude sees, and stops Claude putting them in files, issues or&nbsp;pages.</p>
               <p class="mod-caveat"><strong>A safety net, not a guarantee.</strong> It reads each command before it runs, so it can't see inside a program Claude saves to a file and runs&nbsp;later. It's meant to be turned off only by&nbsp;you.</p>
             </article>
 
@@ -827,7 +827,7 @@
         <div class="section-head reveal">
           <p class="kicker">Built to be trusted</p>
           <h2 id="privacy-title">Look, don't touch.</h2>
-          <p>Cinemetric reads from your server and never writes to it, and the <a href="#mods">read-only guard</a> stops Claude's own commands from changing it. Your keys stay with you.</p>
+          <p>Cinemetric reads from your server and never writes to it, and the <a href="#mods">read-only guard</a>, an extra safety net, stops Claude's own commands from changing it and keeps your Plex token and Tautulli API key out of Claude's sight. Your keys stay with you.</p>
         </div>
         <ul class="cards" role="list">
           <li class="card reveal">

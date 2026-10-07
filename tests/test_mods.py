@@ -98,6 +98,15 @@ class WebsiteMods(unittest.TestCase):
         for words in ("never Claude", "only you can turn it off"):
             self.assertNotIn(words, text)
 
+    def test_guard_card_and_privacy_mention_the_token(self):
+        self.assertIn("hides your Plex token and Tautulli API key", self.site.text["mods"])
+        self.assertIn("keeps your Plex token and Tautulli API key out of Claude's sight",
+                      self.site.text["privacy"])
+        self.assertIn("safety net", self.site.text["privacy"])
+        # Hiding can be worked around, so the site mustn't promise more.
+        for words in ("never see", "can't see your token", "completely"):
+            self.assertNotIn(words, self.site.text["mods"])
+
     def test_mods_commands_can_be_copied(self):
         self.assertIn("/cinemetric-mods", self.site.copy)
         self.assertIn("/cinemetric-mods status on", self.site.copy)

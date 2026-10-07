@@ -8,6 +8,7 @@
 import type { EngineInterface, On } from 'claude-code'
 
 import { COMMAND_SPEC } from './command'
+import { NOW_COMMAND_SPEC, PANE_ID as NOW_PANE_ID } from './now-playing-rules'
 
 import {
   NO_SNAPSHOT,
@@ -103,10 +104,19 @@ async function showStatus($: EngineInterface): Promise<void> {
 }
 
 // The module's one session.start hook lives here, since it needs this file's
-// helpers. It also adds the /cinemetric-mods command, whatever the switches.
+// helpers. It also adds the /cinemetric-mods and /cinemetric-now commands,
+// whatever the switches. It runs again after every reload (any switch
+// change), which ends Now Playing's checks, so it closes that panel too:
+// typing /cinemetric-now opens it again.
 export function setUpStatusLine(on: On, isOn: boolean): void {
   on('session.start', async ($, e, next) => {
     await $.command.register(COMMAND_SPEC)
+    await $.command.register(NOW_COMMAND_SPEC)
+    try {
+      if ((await $.ui.panes()).some(pane => pane.id === NOW_PANE_ID)) await $.ui.close({ id: NOW_PANE_ID })
+    } catch {
+      // Nothing to close, or it couldn't be: the rest of the start goes on.
+    }
     // Clears a status entry an earlier version of this mod may have pinned.
     $.ui.status(undefined)
     if (!isOn) return next(e)

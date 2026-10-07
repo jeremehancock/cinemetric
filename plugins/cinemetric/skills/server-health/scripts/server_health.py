@@ -23,7 +23,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.24.0"
+VERSION = "0.25.0"
 TIMEOUT_SECONDS = 30
 MAX_TITLE_LENGTH = 120
 
@@ -801,6 +801,15 @@ def build_report(client, args):
     return report
 
 
+def now_playing(client):
+    """Only the current streams, for the Now Playing mod: one request, no snapshots."""
+    return {
+        "cinemetric_version": VERSION,
+        "checked_at": int(time.time()),
+        "live_activity": live_activity(client),
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description="Read-only Plex server health snapshot (JSON output).")
     parser.add_argument("--check", action="store_true", help="only test the connection and token")
@@ -811,6 +820,8 @@ def main():
     parser.add_argument("--since", type=int, help="compare with a snapshot at least this many days old (1-90)")
     parser.add_argument("--snapshot-items", action="store_true",
                         help="add this run's part of a snapshot (used by the changes skill and dashboard)")
+    parser.add_argument("--now-playing", action="store_true",
+                        help="only the current streams (used by the Now Playing mod)")
     args = parser.parse_args()
     if args.since is not None:
         args.since = max(1, min(args.since, 90))
@@ -827,6 +838,8 @@ def main():
                 "version": root.get("version"),
                 "platform": root.get("platform"),
             }
+        elif args.now_playing:
+            result = now_playing(client)
         else:
             result = build_report(client, args)
     except ReportError as exc:

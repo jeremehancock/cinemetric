@@ -1,11 +1,13 @@
 """server-health (openspec/specs/server-health/spec.md)."""
 
 import argparse
+import io
+import json
 import time
 from unittest import mock
 
-from helpers import (FAKE_TOKEN, FakeServer, OfflineTestCase, Reply, fixture, load_script, plex_container,
-                     write_snapshot)
+from helpers import (FAKE_TOKEN, FakeServer, OfflineTestCase, Reply, Unreachable, fixture, load_script,
+                     plex_container, write_snapshot)
 
 sh = load_script("server-health")
 
@@ -495,3 +497,48 @@ class ServerSnapshot(ReportTestCase):
         report = self.report(server, snapshot_items=True)
         self.assertIsNone(report["snapshot"]["area"]["update_version"])
         self.assertEqual(report["since_snapshot"]["changes"], [])
+
+
+class NowPlayingOnly(OfflineTestCase):
+    """--now-playing: only the current streams, for the Now Playing mod."""
+
+    def run_main(self, server):
+        def client(*config):
+            made = real_client(*config)
+            server.attach(made._opener)
+            return made
+        real_client = sh.PlexClient
+        out, err = io.StringIO(), io.StringIO()
+        with mock.patch.object(sh, "load_config", return_value=("http://192.0.2.10:32400", FAKE_TOKEN, True)), \
+                mock.patch.object(sh, "PlexClient", client), \
+                mock.patch.object(sh.sys, "argv", ["server_health.py", "--now-playing"]), \
+                mock.patch.object(sh.sys, "stdout", out), mock.patch.object(sh.sys, "stderr", err):
+            code = sh.main()
+        return code, out.getvalue(), err.getvalue()
+
+    def test_only_the_sessions_are_requested(self):
+        server = sample_server()
+        code, out, _ = self.run_main(server)
+        self.assertEqual(code, 0)
+        self.assertEqual([seen.path for seen in server.requests], ["/status/sessions"])
+        result = json.loads(out)
+        self.assertEqual(set(result), {"cinemetric_version", "checked_at", "live_activity"})
+        self.assertEqual(result["cinemetric_version"], sh.VERSION)
+        self.assertIsInstance(result["checked_at"], int)
+        self.assertEqual(result["live_activity"]["totals"]["streams"], 2)
+        self.assertEqual([s["title"] for s in result["live_activity"]["streams"]],
+                         ["Arrival (2016)", "The Show S01E02"])
+
+    def test_nothing_playing(self):
+        code, out, _ = self.run_main(sample_server(**{"/status/sessions": plex_container(size=0)}))
+        self.assertEqual(code, 0)
+        live = json.loads(out)["live_activity"]
+        self.assertEqual(live["streams"], [])
+        self.assertEqual(live["totals"]["streams"], 0)
+
+    def test_unreachable_server(self):
+        code, out, err = self.run_main(FakeServer({"/status/sessions": Unreachable("connection refused")}))
+        self.assertEqual(code, 1)
+        self.assertEqual(out, "")
+        self.assertTrue(err.startswith("error: "))
+        self.assertNotIn(FAKE_TOKEN, err)

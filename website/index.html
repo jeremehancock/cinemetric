@@ -799,6 +799,20 @@
               <div class="codeblock mod-sample"><code>Plex: 1,970 movies · 417 shows · 59.4 TB · checked today</code></div>
               <p>It reads the snapshot Cinemetric saves when you ask what changed or refresh the dashboard, so it never contacts your&nbsp;server.</p>
             </article>
+
+            <article class="card mod-card reveal" aria-labelledby="mod-now">
+              <div class="mod-head">
+                <svg class="mod-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 9.5v5l4.5-2.5z" fill="currentColor"/></svg>
+                <div>
+                  <h3 id="mod-now">Now Playing</h3>
+                  <p class="mod-meta"><span class="mod-state">Off by default</span> Name: <code>now</code></p>
+                </div>
+              </div>
+              <p>Type <code>/cinemetric-now</code> to open a panel showing who's streaming right now: what they're watching, on which device, and whether it's playing directly or being&nbsp;transcoded:</p>
+              <div class="codeblock mod-sample mod-panel" aria-label="Example of the Now Playing panel"><code><span class="mod-panel-top">3 streams · 1 transcoding · 31.2 Mbps · updated 9:41 PM</span><span>alex · Arrival (2016) · Roku · playing 42% · direct play</span><span>sam · Dune (2021) · iPhone · paused 10% · transcode (video)</span><span>jo · Bluey S02E14 · iPad · playing 77% · direct stream</span></code></div>
+              <p>It checks your server about every 30 seconds, only while the panel is open, and what it shows stays on your screen, never sent to&nbsp;Claude.</p>
+              <p class="mod-caveat"><strong>Shows who's watching.</strong> Since the panel lists people by name, it never opens by itself, only when you&nbsp;ask.</p>
+            </article>
           </div>
 
           <div class="mod-switch reveal">
@@ -815,9 +829,9 @@
             </div>
             <p>Each mod also has a switch in Claude Code's settings menu, opened with <code>/config</code>.</p>
             <p>The guard is the one exception to who can switch things: it's meant to be turned off only by you. Cinemetric refuses Claude's usual ways of turning it off, so Claude can't casually switch off its own safety&nbsp;net.</p>
-            <p class="mod-note">Mods need Claude Code 2.1.260 or newer. On an older version every skill still works, and Cinemetric lets you know (at most once a day) that the mods are waiting for an&nbsp;update.</p>
           </div>
         </div>
+        <p class="mod-note reveal">Mods need Claude Code 2.1.260 or newer. On an older version every skill still works, and Cinemetric lets you know (at most once a day) that the mods are waiting for an&nbsp;update.</p>
       </div>
     </section>
 

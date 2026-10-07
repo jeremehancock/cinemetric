@@ -1,7 +1,7 @@
 {
   "name": "cinemetric",
-  "version": "0.24.0",
-  "description": "Claude skills for your Plex server. Read-only reports on your media and server, plus mods for Claude Code: a read-only guard and a library status line.",
+  "version": "0.25.0",
+  "description": "Claude skills for your Plex server. Read-only reports on your media and server, plus mods for Claude Code: a read-only guard, a library status line and a Now Playing panel.",
   "author": {
     "name": "Jereme Hancock"
   },
@@ -20,6 +20,12 @@
       "type": "boolean",
       "title": "Library status line",
       "description": "Shows your Plex library's size and when Cinemetric last checked it, just above the prompt. Read from snapshots on this computer; never contacts your server.",
+      "default": false
+    },
+    "now_playing_pane": {
+      "type": "boolean",
+      "title": "Now Playing",
+      "description": "Lets /cinemetric-now open a panel showing who's streaming from your Plex server right now. It checks the server about every 30 seconds, only while the panel is open.",
       "default": false
     }
   }

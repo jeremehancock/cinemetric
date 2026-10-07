@@ -1,10 +1,5 @@
 # Cinemetric
 
-> [!NOTE]
-> **Early days.** Cinemetric is still growing, so skills, setup steps and report formats may change
-> between versions. Ideas and bug reports are welcome via
-> [GitHub issues](https://github.com/jeremehancock/cinemetric/issues).
-
 **Claude skills for your Plex server.** Ask Claude Code about your media library and get a clear,
 plain-English report: what you have, how much space it uses, what quality it's in, what was just added,
 and what needs tidying up.
@@ -164,7 +159,8 @@ manual setup and think a token leaked, use "sign out of all devices" in your Ple
 
 ## Roadmap
 
-Plans can change; feedback and ideas are welcome via GitHub issues. What the existing skills do, and
+Plans can change; feedback and ideas are welcome via
+[GitHub issues](https://github.com/jeremehancock/cinemetric/issues). What the existing skills do, and
 the rules every skill follows, are written down as specs in [openspec/specs/](openspec/specs/). New
 work starts as an OpenSpec change proposal (`/opsx:propose`) before any code is written. Notes on how
 each idea below might be built are in [openspec/ideas.md](openspec/ideas.md).

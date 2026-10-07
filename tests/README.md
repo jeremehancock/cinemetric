@@ -8,9 +8,16 @@ python3 -m unittest discover -s tests
 
 This needs Python 3.8 or newer and nothing else: the tests use only the standard library.
 
-GitHub also runs them on Python 3.8 and the newest Python for every pull request into `main`
-(see `.github/workflows/tests.yml`). A pull request can't be merged until the **All tests passed**
-check is green.
+The mods (read-only guard, status line, Now Playing) have their own tests in
+`plugins/cinemetric/tests/`, written in TypeScript. Run them with Claude Code:
+
+```bash
+claude plugin test plugins/cinemetric
+```
+
+GitHub runs the Python tests on Python 3.8 and the newest Python, and the mods' tests with a pinned
+Claude Code version, for every pull request into `main` (see `.github/workflows/tests.yml`). A pull
+request can't be merged until the **All tests passed** check is green.
 
 ## The rules
 

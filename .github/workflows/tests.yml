@@ -27,11 +27,29 @@ jobs:
       - run: python3 --version
       - run: python3 -m unittest discover -s tests -v
 
+  # The mods' tests (read-only guard, status line, Now Playing) run in Claude Code's own engine.
+  # No login or secrets needed. Claude Code is pinned so a new release can't turn this red on an
+  # unrelated pull request; raise the version on purpose when the mods need something newer.
+  mods:
+    name: mods
+    runs-on: ubuntu-latest
+    env:
+      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - run: npm install -g @anthropic-ai/claude-code@2.1.293
+      - run: claude --version
+      - run: claude plugin test plugins/cinemetric
+
   # The one check the main branch requires. It reports a failure (never "skipped") if any run
-  # above failed or was cancelled, so the version list can change without touching branch rules.
+  # above failed or was cancelled, so the version list and jobs can change without touching branch
+  # rules.
   all-tests-passed:
     name: All tests passed
-    needs: test
+    needs: [test, mods]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -39,4 +57,8 @@ jobs:
         run: |
           echo "Tests failed or were cancelled on at least one Python version."
           exit 1
-      - run: echo "Tests passed on every Python version."
+      - if: needs.mods.result != 'success'
+        run: |
+          echo "The mods' tests failed or were cancelled."
+          exit 1
+      - run: echo "Tests passed on every Python version, and the mods' tests passed."

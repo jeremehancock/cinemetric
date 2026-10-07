@@ -1,6 +1,6 @@
-// The read-only guard: checks Claude's own shell commands and web fetches
-// before they run, and refuses the ones that would change the user's Plex
-// server, Tautulli or plex.tv. It also keeps the user's Plex token and
+// The read-only guard: checks Claude's own shell commands (Bash and
+// PowerShell) and web fetches before they run, and refuses the ones that
+// would change the user's Plex server, Tautulli or plex.tv. It also keeps the user's Plex token and
 // Tautulli API key out of what Claude sees and sends.
 // See openspec/specs/read-only-guard/spec.md.
 
@@ -13,6 +13,7 @@ import {
   type Settings,
   blockReason,
   combineSecrets,
+  commandNamesCinemetricSettings,
   commandReadsCinemetricSettings,
   commandTouchesGuardSetting,
   editTouchesGuardSetting,
@@ -103,7 +104,9 @@ function toolArguments(e: object): object {
 // Sending the token to the user's own server, or Tautulli, is how it's meant
 // to be used. Writes there are still refused by the hooks further in.
 function aimedAtOwnServers(e: { tool: string } & Record<string, unknown>, hosts: readonly string[]): boolean {
-  if (e.tool === 'Bash' && typeof e.command === 'string') return isAimedAtServers(e.command, hosts)
+  if ((e.tool === 'Bash' || e.tool === 'PowerShell') && typeof e.command === 'string') {
+    return isAimedAtServers(e.command, hosts)
+  }
   if (e.tool === 'WebFetch' && typeof e.url === 'string') return isAimedAtServers(e.url, hosts)
   return false
 }
@@ -162,6 +165,25 @@ export function setUpGuard(on: On): void {
       return { deny: settingsFileBlockMessage() }
     }
     const reason = shellBlockReason(e.command, await configuredHosts($))
+    return reason ? { deny: serverBlockMessage(reason) } : next(e)
+  }).catch(($, e, next) => {
+    sayGuardFailed($)
+    return next(e)
+  })
+
+  // PowerShell commands, which Claude Code runs on Windows. The checks are
+  // the Bash ones, except that the shell reader follows Bash's rules, so it
+  // isn't used: no command is let through as text-only, and one that names
+  // the settings file is refused whatever it runs. This tool isn't in the
+  // types on every computer, so its command is read without them.
+  on('tool.call', { tool: 'PowerShell' }, async ($, e, next) => {
+    const { command } = e as { command?: unknown }
+    if (typeof command !== 'string') return next(e)
+    if (commandTouchesGuardSetting(command)) return { deny: settingBlockMessage() }
+    if (commandNamesCinemetricSettings(command, await settingsPath($))) {
+      return { deny: settingsFileBlockMessage() }
+    }
+    const reason = blockReason(command, await configuredHosts($))
     return reason ? { deny: serverBlockMessage(reason) } : next(e)
   }).catch(($, e, next) => {
     sayGuardFailed($)

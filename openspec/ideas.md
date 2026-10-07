@@ -40,7 +40,7 @@ These came out of an explore session on 2026-10-05 and apply to every idea below
     3. Go one level deeper     (subtitles and audio per file are done in playback-check)
 ```
 
-Suggested order: open. (Snapshots and "what changed" were done on 2026-10-06, and so were `year-in-review`, dashboard
+Suggested order: open. (`title-lookup` was done on 2026-10-07. Snapshots and "what changed" were done on 2026-10-06, and so were `year-in-review`, dashboard
 trends, `episode-gaps`, the former `tv-completeness` idea, and `playback-check`, which turned out cheap: Plex
 returns subtitle and audio details for 100 titles per request, so no sampling was needed. The `server-health` settings checks, the
 `watch-activity` one person, busiest moment and unfinished titles additions, the `unwatched` skill,
@@ -53,11 +53,90 @@ track.)
 
 ## New skills
 
-None right now.
+### `subtitles-and-languages`
+
+Which titles have audio in a language other than the user's with no subtitles in their language,
+which audio and subtitle tracks have no language set ("unknown"), and which titles are missing a
+subtitle language the user names.
+
+- **Cheap to read:** `playback-check` already reads every title's audio and subtitle tracks in
+  batches of 100 (`/library/metadata/{ids}`), so the same approach works here.
+- **The user's language:** take `--language en` (repeatable); without it, use the server's default
+  subtitle and audio language from `/:/prefs` **(to verify the setting names)**, reading only those
+  settings, the way `media_deletion_allowed` reads only one.
+- **Catch:** a film's "original language" isn't always the first audio track. Use the default or
+  selected track, as `playback-check` does for its main track.
+- **Open question:** should this be a part of `playback-check` instead of its own skill? Separate
+  seems clearer: one is about playing smoothly, the other about understanding what's said.
+
+### `collections-and-playlists`
+
+Collections and playlists on the server: how many titles each holds, collections with only one title,
+smart vs regular collections, playlists with items Plex can no longer find, and titles that aren't in
+any collection.
+
+- **Sources:** `/library/sections/{id}/collections` and `/playlists` **(to verify)**, plus each
+  one's items.
+- **Catch:** playlists belong to the account that made them. With the owner's token only the owner's
+  playlists are visible; say so instead of implying they're all there.
+- Facts only: no "you should make a collection for ..." suggestions.
+
+### `export`
+
+Saves a listing of a library as a CSV file on the user's computer (title, year, library, resolution,
+codecs, size, added date, watched status, collections), for a spreadsheet.
+
+- **Where it goes:** the same data folder the dashboard uses, with the same private file permissions,
+  unless the user names a folder.
+- **Catch:** the CSV is a file on disk that may later be shared. Leave people's names out by default;
+  a `--with-people` option could add "last watched by".
+- **Catch:** spreadsheet programs run text that starts with `=`, `+`, `-` or `@` as a formula. Titles
+  from the server must be escaped against that (prefix with `'`).
 
 ---
 
 ## Updates to existing skills
+
+### `server-health`: busiest hours and the maintenance window
+
+A grid of plays by hour of the day and day of the week, compared with Plex's scheduled maintenance
+window, for example "Maintenance runs 2 to 5 AM, but 9% of plays happen then, mostly Saturday nights."
+
+- **Sources:** Tautulli's `get_plays_by_hourofday` and `get_plays_by_dayofweek` **(to verify)**;
+  without Tautulli, count Plex history entries by `viewedAt` (finished plays only, so say so).
+  `server-health` already reads the butler (maintenance) window.
+- **Catch:** times must be in the server's local time, and Tautulli reports in its own configured
+  time zone.
+
+### `library-report`: Dolby Vision and HDR10+
+
+HDR is already counted. Count Dolby Vision (and its profile, where Plex gives it) and HDR10+
+separately, since Dolby Vision is the format most likely to look wrong or transcode on some devices.
+
+- **Catch:** check whether these details are in the library listing or only in each title's detail
+  page. If only in details, use `playback-check`'s batches of 100.
+
+### `what-to-watch`: something we can all watch, and more like this
+
+- **Together:** titles none of several Plex Home members have watched. Needs each member's watched
+  status, which the owner's token may not give **(to verify)**; with Tautulli, use history per person.
+- **More like this:** Plex's own list of similar titles for one title
+  (`/library/metadata/{id}/similar` **(to verify)**), limited to titles on the server.
+
+### `unwatched`: per person, and shows people stopped watching
+
+- **Per person:** "what Sam hasn't touched" as well as "what nobody has touched". Same rules, history
+  filtered to one person, as `watch-activity --user` does.
+- **Stopped partway:** shows where someone finished some episodes of a season and played nothing from
+  the show for months. Needs per-episode history, so probably Tautulli only.
+
+### `changes`: growth rate
+
+Snapshots already record storage over time, so the trends output could say "you're adding about 1.2 TB
+a month" over the saved period.
+
+- **Catch:** Plex doesn't report free disk space, so there's no "full by" date unless the user gives
+  the disk size. Don't guess it.
 
 ### Snapshots
 
@@ -82,3 +161,37 @@ Left out of the first version (see `openspec/changes/archive/*-year-in-review/de
 - **Busiest moment for one person:** Tautulli's `most_concurrent` stat ignores `user_id` (checked on
   v2.18.2), so with `--user` the report leaves it out. It could be worked out from that person's
   history `started` / `stopped` times instead. Only worth it if someone asks.
+
+---
+
+## Mods
+
+### Heads-up toast
+
+A one-time notice when a session starts, read from the newest snapshot without contacting the server,
+for example "Plex update available · 12 files unavailable". Off by default, like `status`.
+
+- Reuses the status line's snapshot reading, so it never contacts Plex.
+- **Catch:** a snapshot can be weeks old. Say how old, as the status line does.
+
+### Guard log
+
+A `/cinemetric-guard log` command listing recent commands the guard stopped and why, so the user can
+see it working and spot false alarms.
+
+- **Catch:** a blocked command can contain a token or API key. Store it with the same hiding the guard
+  already applies to command output, and keep the log in memory for the session only, or in a private
+  file that's pruned.
+
+### Now Playing: total bandwidth and the exact transcode reason
+
+A total bandwidth line at the top of the panel, and the reason for each transcode (for example "PGS
+subtitles" or "DTS audio") using the same rules as `playback-check`.
+
+- **Catch:** the session listing gives the transcode decision but not always the reason; check what
+  `/status/sessions` includes **(to verify)** before promising it.
+
+### Status line: titles added since the last check
+
+An optional "+14 titles" segment, from the difference between the two newest snapshots. Still never
+contacts the server.

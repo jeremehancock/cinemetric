@@ -48,7 +48,7 @@ h2 { font-size: clamp(1.75rem, 3.6vw, 2.6rem); font-weight: 800; }
 h3 { font-size: 1.15rem; font-weight: 700; }
 p { margin: 0 0 1em; }
 /* Keeps a paragraph or list item from ending on a single lonely word. */
-p, li, figcaption, .poster-sub { text-wrap: pretty; }
+p, li, figcaption, .skill-sub { text-wrap: pretty; }
 /* Short text (a line or three) looks better with its lines evened out, so a second line
    is never just a word or two hanging under a full one. */
 .ticks li, .feature-copy > p, .ask-line, .card p, .mock figcaption, .steps-lead, .section-head p,
@@ -208,41 +208,51 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
 
 /* ---------- Shelf ---------- */
 .shelf-section { padding-top: 40px; }
-/* Every card is the same size. Eleven skills can't fill every row, so the short last row is centered
-   under the full ones: 4, 4 and 3 on wide screens. */
-.shelf {
-  --per-row: 4; --gap: 16px;
-  list-style: none; margin: 0; padding: 0;
-  display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap);
+/* The skills in three groups by what they're for. Groups can be any size, so adding a skill never
+   leaves a card alone on a row. */
+.shelf { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.shelf-group {
+  padding: 24px 16px 14px; border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--bg-2), var(--bg));
+  box-shadow: 0 20px 40px -28px rgba(0, 0, 0, .9), inset 0 0 0 1px var(--line);
 }
-.shelf li { flex: 0 0 calc((100% - (var(--per-row) - 1) * var(--gap)) / var(--per-row)); }
-.poster {
-  position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px;
-  height: 100%; min-height: 210px; padding: 22px 20px; border-radius: var(--radius); overflow: hidden;
-  text-decoration: none; color: var(--text);
+.shelf-head { margin: 0 12px; font-size: 1.15rem; }
+.shelf-note { margin: 4px 12px 14px; color: var(--muted); font-size: .92rem; }
+.shelf-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.skill-row {
+  display: grid; grid-template-columns: 48px 1fr; grid-template-rows: auto auto; column-gap: 14px;
+  align-content: center; padding: 10px 12px; border-radius: var(--radius-sm);
+  text-decoration: none; color: var(--text); transition: background .2s, box-shadow .2s;
+}
+.skill-row:hover, .skill-row:focus-visible {
+  color: var(--text); outline: none;
+  background: color-mix(in srgb, var(--a) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--a) 45%, transparent);
+}
+.skill-icon {
+  grid-row: 1 / span 2; align-self: center; display: grid; place-items: center;
+  width: 48px; height: 48px; border-radius: 12px; color: var(--a);
   background:
     radial-gradient(120% 90% at 20% 0%, color-mix(in srgb, var(--a) 45%, transparent), transparent 65%),
-    linear-gradient(170deg, var(--b), #0d0e10 85%);
-  background-color: var(--b);
-  box-shadow: 0 20px 40px -24px rgba(0, 0, 0, .9), inset 0 0 0 1px rgba(255, 255, 255, .07);
-  transition: transform .35s var(--ease), box-shadow .35s var(--ease);
+    linear-gradient(170deg, var(--b), #0d0e10 90%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .07);
+  transition: transform .3s var(--ease);
 }
-.poster::after {
-  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  box-shadow: inset 0 0 0 0 var(--accent); transition: box-shadow .25s;
+.skill-row:hover .skill-icon, .skill-row:focus-visible .skill-icon { transform: scale(1.06); }
+.skill-icon svg { display: block; width: 30px; height: 30px; }
+.skill-name { grid-column: 2; align-self: end; font-family: var(--mono); font-weight: 700; font-size: .95rem; }
+.skill-sub { grid-column: 2; align-self: start; color: var(--muted); font-size: .9rem; }
+/* Slightly smaller names keep three groups side by side down to 860px; below that they stack, each
+   still a single list so no skill sits alone on a row. */
+@media (max-width: 1000px) {
+  .shelf { gap: 14px; }
+  .shelf-group { padding: 22px 10px 12px; }
+  .skill-row { column-gap: 12px; padding: 10px; }
+  .skill-name { font-size: .88rem; }
 }
-.poster:hover, .poster:focus-visible { transform: translateY(-6px); box-shadow: 0 34px 60px -28px rgba(0, 0, 0, 1); color: var(--text); }
-.poster:hover::after, .poster:focus-visible::after { box-shadow: inset 0 0 0 3px var(--accent); }
-.poster:focus-visible { outline: none; }
-.poster-art {
-  position: absolute; top: 22px; left: 20px; width: 64px; color: var(--a);
-  filter: drop-shadow(0 8px 24px color-mix(in srgb, var(--a) 60%, transparent));
-  transform-origin: left top; transition: transform .4s var(--ease);
+@media (max-width: 860px) {
+  .shelf { grid-template-columns: 1fr; gap: 16px; }
 }
-.poster:hover .poster-art { transform: scale(1.08); }
-.poster-art svg { display: block; width: 100%; height: auto; }
-.poster-title { font-family: var(--mono); font-weight: 700; font-size: .98rem; white-space: nowrap; }
-.poster-sub { color: var(--muted); font-size: .95rem; }
 
 /* ---------- Feature rows ---------- */
 .feature { padding: clamp(56px, 8vw, 96px) 0; }
@@ -451,12 +461,7 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
 .js .reveal.in { opacity: 1; transform: none; }
 
 /* ---------- Responsive ---------- */
-/* Rows of three (3, 3, 3 and 2) when four would squeeze the names. */
-@media (max-width: 1140px) {
-  .shelf { --per-row: 3; }
-}
 @media (max-width: 1000px) {
-  .poster { min-height: 180px; }
   .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 860px) {
@@ -493,13 +498,6 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
   .hero { padding: 120px 0 70px; }
   .poster-row i { width: 110px; }
   /* Phones: one row per skill, icon on the left. */
-  .shelf { --per-row: 1; --gap: 12px; }
-  .poster {
-    display: grid; grid-template-columns: 48px 1fr; grid-template-rows: auto auto;
-    column-gap: 16px; row-gap: 2px; align-content: center; min-height: 0; padding: 16px 18px;
-  }
-  .poster-art { position: static; grid-row: 1 / span 2; align-self: center; width: 48px; }
-  .poster-title, .poster-sub { grid-column: 2; }
   .cards { grid-template-columns: 1fr; }
   .step { grid-template-columns: 1fr; gap: 12px; padding: 20px; }
   .step-num { width: 40px; height: 40px; font-size: 1.1rem; border-radius: 12px; }

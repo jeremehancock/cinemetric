@@ -1,0 +1,1420 @@
+{
+ "/": {
+  "MediaContainer": {
+   "friendlyName": "Test Server",
+   "version": "1.43.0"
+  }
+ },
+ "/library/sections": {
+  "MediaContainer": {
+   "Directory": [
+    {
+     "key": "1",
+     "title": "Movies",
+     "type": "movie"
+    },
+    {
+     "key": "2",
+     "title": "TV Shows",
+     "type": "show"
+    },
+    {
+     "key": "3",
+     "title": "Kids Movies",
+     "type": "movie"
+    },
+    {
+     "key": "4",
+     "title": "Music",
+     "type": "artist"
+    }
+   ]
+  }
+ },
+ "listings": {
+  "1": [
+   {
+    "ratingKey": "101",
+    "key": "/library/metadata/101",
+    "type": "movie",
+    "title": "Harbor Lights",
+    "year": 2019,
+    "guid": "plex://movie/harbor",
+    "addedAt": 1690000101,
+    "duration": 6300000,
+    "librarySectionID": 1,
+    "librarySectionTitle": "Movies",
+    "contentRating": "PG-13",
+    "audienceRating": 8.1,
+    "rating": 7.6,
+    "Media": [
+     {
+      "videoResolution": "4k",
+      "videoCodec": "hevc",
+      "audioCodec": "truehd",
+      "audioChannels": 6,
+      "container": "mkv",
+      "bitrate": 60000,
+      "Part": [
+       {
+        "file": "/media/movies/Harbor Lights (2019)/Harbor Lights 4K.mkv",
+        "size": 58000000000
+       }
+      ]
+     },
+     {
+      "videoResolution": "1080",
+      "videoCodec": "h264",
+      "audioCodec": "ac3",
+      "audioChannels": 6,
+      "container": "mkv",
+      "bitrate": 12000,
+      "Part": [
+       {
+        "file": "/media/movies/Harbor Lights (2019)/Harbor Lights 1080p.mkv",
+        "size": 12000000000
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "ratingKey": "102",
+    "key": "/library/metadata/102",
+    "type": "movie",
+    "title": "Harbor Lights Returns",
+    "year": 2022,
+    "guid": "plex://movie/harbor2",
+    "addedAt": 1690000102,
+    "duration": 6300000,
+    "librarySectionID": 1,
+    "librarySectionTitle": "Movies",
+    "Media": [
+     {
+      "videoResolution": "1080",
+      "videoCodec": "h264",
+      "audioCodec": "eac3",
+      "audioChannels": 6,
+      "container": "mkv",
+      "bitrate": 9000,
+      "Part": [
+       {
+        "file": "/media/movies/Harbor Lights Returns (2022).mkv",
+        "size": 9000000000
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "ratingKey": "103",
+    "key": "/library/metadata/103",
+    "type": "movie",
+    "title": "Night Train",
+    "year": 1984,
+    "guid": "plex://movie/nt1984",
+    "addedAt": 1690000103,
+    "duration": 6300000,
+    "librarySectionID": 1,
+    "librarySectionTitle": "Movies",
+    "Media": [
+     {
+      "videoResolution": "sd",
+      "videoCodec": "mpeg4",
+      "audioCodec": "ac3",
+      "audioChannels": 6,
+      "container": "mkv",
+      "bitrate": 2000,
+      "Part": [
+       {
+        "file": "/media/movies/Night Train (1984).avi",
+        "size": 1500000000
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "ratingKey": "104",
+    "key": "/library/metadata/104",
+    "type": "movie",
+    "title": "Night Train",
+    "year": 2021,
+    "guid": "plex://movie/nt2021",
+    "addedAt": 1690000104,
+    "duration": 6300000,
+    "librarySectionID": 1,
+    "librarySectionTitle": "Movies",
+    "Media": [
+     {
+      "videoResolution": "1080",
+      "videoCodec": "h264",
+      "audioCodec": "dca",
+      "audioChannels": 6,
+      "container": "mkv",
+      "bitrate": 15000,
+      "Part": [
+       {
+        "file": "/media/movies/Night Train (2021)/Night Train.mkv",
+        "size": 20000000000
+       }
+      ]
+     },
+     {
+      "videoResolution": "720",
+      "videoCodec": "h264",
+      "audioCodec": "aac",
+      "audioChannels": 6,
+      "container": "mkv",
+      "bitrate": 4000,
+      "deletedAt": 1700000000,
+      "Part": [
+       {
+        "file": "/media/movies/Night Train (2021)/Night Train 720p.mkv",
+        "size": 3000000000
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "ratingKey": "105",
+    "key": "/library/metadata/105",
+    "type": "movie",
+    "title": "Sky-Fall Kid",
+    "year": 2010,
+    "guid": "plex://movie/skyfallkid",
+    "addedAt": 1690000105,
+    "duration": 6300000,
+    "librarySectionID": 1,
+    "librarySectionTitle": "Movies",
+    "Media": [
+     {
+      "videoResolution": "1080",
+      "videoCodec": "h264",
+      "audioCodec": "aac",
+      "audioChannels": 6,
+      "container": "mkv",
+      "bitrate": 5000,
+      "Part": [
+       {
+        "file": "/media/movies/Sky-Fall Kid (2010).mkv",
+        "size": 4000000000
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "ratingKey": "106",
+    "key": "/library/metadata/106",
+    "type": "movie",
+    "title": "Paper Moon Garden",
+    "year": 2015,
+    "guid": "plex://movie/pmg",
+    "addedAt": 1690000106,
+    "duration": 6300000,
+    "librarySectionID": 1,
+    "librarySectionTitle": "Movies",
+    "Media": [
+     {
+      "videoResolution": "1080",
+      "videoCodec": "h264",
+      "audioCodec": "aac",
+      "audioChannels": 6,
+      "container": "mkv",
+      "bitrate": 6000,
+      "Part": [
+       {
+        "file": "/media/movies/Paper Moon Garden.mkv",
+        "size": 5000000000
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "ratingKey": "107",
+    "key": "/library/metadata/107",
+    "type": "movie",
+    "title": "Home Video",
+    "year": null,
+    "guid": "local://107",
+    "addedAt": 1690000107,
+    "duration": 6300000,
+    "librarySectionID": 1,
+    "librarySectionTitle": "Movies",
+    "Media": [
+     {
+      "videoResolution": "1080",
+      "videoCodec": "h264",
+      "audioCodec": "aac",
+      "audioChannels": 6,
+      "container": "mkv",
+      "bitrate": 5000,
+      "Part": [
+       {
+        "file": "/media/movies/Home Video.mkv",
+        "size": 1000000000
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "ratingKey": "108",
+    "key": "/library/metadata/108",
+    "type": "movie",
+    "title": "Home Video",
+    "year": null,
+    "guid": "local://108",
+    "addedAt": 1690000108,
+    "duration": 6300000,
+    "librarySectionID": 1,
+    "librarySectionTitle": "Movies",
+    "Media": [
+     {
+      "videoResolution": "1080",
+      "videoCodec": "h264",
+      "audioCodec": "aac",
+      "audioChannels": 6,
+      "container": "mkv",
+      "bitrate": 5000,
+      "Part": [
+       {
+        "file": "/media/movies/Home Video copy.mkv",
+        "size": 1000000000
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "2": [
+   {
+    "ratingKey": "201",
+    "key": "/library/metadata/201/children",
+    "type": "show",
+    "title": "Lighthouse Keepers",
+    "year": 2018,
+    "guid": "plex://show/lk",
+    "addedAt": 1600000000,
+    "librarySectionID": 2,
+    "librarySectionTitle": "TV Shows",
+    "contentRating": "TV-PG",
+    "audienceRating": 8.4
+   }
+  ],
+  "3": [
+   {
+    "ratingKey": "301",
+    "key": "/library/metadata/301",
+    "type": "movie",
+    "title": "Paper Moon Garden",
+    "year": 2015,
+    "guid": "plex://movie/pmg",
+    "addedAt": 1690000301,
+    "duration": 6300000,
+    "librarySectionID": 3,
+    "librarySectionTitle": "Kids Movies",
+    "Media": [
+     {
+      "videoResolution": "720",
+      "videoCodec": "h264",
+      "audioCodec": "aac",
+      "audioChannels": 6,
+      "container": "mkv",
+      "bitrate": 3000,
+      "Part": [
+       {
+        "file": "/media/kids/Paper Moon Garden.mkv",
+        "size": 2000000000
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "details": {
+  "101": {
+   "ratingKey": "101",
+   "key": "/library/metadata/101",
+   "type": "movie",
+   "title": "Harbor Lights",
+   "year": 2019,
+   "guid": "plex://movie/harbor",
+   "addedAt": 1690000101,
+   "duration": 6300000,
+   "librarySectionID": 1,
+   "librarySectionTitle": "Movies",
+   "Media": [
+    {
+     "videoResolution": "4k",
+     "videoCodec": "hevc",
+     "audioCodec": "truehd",
+     "audioChannels": 6,
+     "container": "mkv",
+     "bitrate": 60000,
+     "Part": [
+      {
+       "file": "/media/movies/Harbor Lights (2019)/Harbor Lights 4K.mkv",
+       "size": 58000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "hevc",
+         "bitDepth": 10,
+         "colorTrc": "smpte2084",
+         "DOVIPresent": true
+        },
+        {
+         "streamType": 2,
+         "codec": "truehd",
+         "default": true,
+         "languageTag": "en",
+         "profile": "dolby truehd + dolby atmos"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "videoResolution": "1080",
+     "videoCodec": "h264",
+     "audioCodec": "ac3",
+     "audioChannels": 6,
+     "container": "mkv",
+     "bitrate": 12000,
+     "Part": [
+      {
+       "file": "/media/movies/Harbor Lights (2019)/Harbor Lights 1080p.mkv",
+       "size": 12000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264",
+         "bitDepth": 8,
+         "colorTrc": "bt709"
+        },
+        {
+         "streamType": 2,
+         "codec": "ac3",
+         "default": true,
+         "languageTag": "en"
+        },
+        {
+         "streamType": 3,
+         "codec": "srt",
+         "languageTag": "en"
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "contentRating": "PG-13",
+   "summary": "A lighthouse keeper's daughter keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. keeps the light burning. ",
+   "audienceRating": 8.1,
+   "rating": 7.6,
+   "Genre": [
+    {
+     "tag": "Drama"
+    },
+    {
+     "tag": "Family"
+    }
+   ],
+   "Collection": [
+    {
+     "tag": "Sea Stories"
+    },
+    {
+     "tag": "Family Night"
+    }
+   ]
+  },
+  "102": {
+   "ratingKey": "102",
+   "key": "/library/metadata/102",
+   "type": "movie",
+   "title": "Harbor Lights Returns",
+   "year": 2022,
+   "guid": "plex://movie/harbor2",
+   "addedAt": 1690000102,
+   "duration": 6300000,
+   "librarySectionID": 1,
+   "librarySectionTitle": "Movies",
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "videoCodec": "h264",
+     "audioCodec": "eac3",
+     "audioChannels": 6,
+     "container": "mkv",
+     "bitrate": 9000,
+     "Part": [
+      {
+       "file": "/media/movies/Harbor Lights Returns (2022).mkv",
+       "size": 9000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264",
+         "bitDepth": 8,
+         "colorTrc": "bt709"
+        },
+        {
+         "streamType": 2,
+         "codec": "eac3",
+         "default": true,
+         "languageTag": "en"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "103": {
+   "ratingKey": "103",
+   "key": "/library/metadata/103",
+   "type": "movie",
+   "title": "Night Train",
+   "year": 1984,
+   "guid": "plex://movie/nt1984",
+   "addedAt": 1690000103,
+   "duration": 6300000,
+   "librarySectionID": 1,
+   "librarySectionTitle": "Movies",
+   "Media": [
+    {
+     "videoResolution": "sd",
+     "videoCodec": "mpeg4",
+     "audioCodec": "ac3",
+     "audioChannels": 6,
+     "container": "mkv",
+     "bitrate": 2000,
+     "Part": [
+      {
+       "file": "/media/movies/Night Train (1984).avi",
+       "size": 1500000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "mpeg4"
+        },
+        {
+         "streamType": 2,
+         "codec": "ac3",
+         "default": true,
+         "languageTag": "en"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "104": {
+   "ratingKey": "104",
+   "key": "/library/metadata/104",
+   "type": "movie",
+   "title": "Night Train",
+   "year": 2021,
+   "guid": "plex://movie/nt2021",
+   "addedAt": 1690000104,
+   "duration": 6300000,
+   "librarySectionID": 1,
+   "librarySectionTitle": "Movies",
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "videoCodec": "h264",
+     "audioCodec": "dca",
+     "audioChannels": 6,
+     "container": "mkv",
+     "bitrate": 15000,
+     "Part": [
+      {
+       "file": "/media/movies/Night Train (2021)/Night Train.mkv",
+       "size": 20000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264",
+         "bitDepth": 8,
+         "colorTrc": "bt709"
+        },
+        {
+         "streamType": 2,
+         "codec": "dca",
+         "default": true,
+         "profile": "dts"
+        },
+        {
+         "streamType": 3,
+         "codec": "pgs",
+         "languageTag": "en"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "videoResolution": "720",
+     "videoCodec": "h264",
+     "audioCodec": "aac",
+     "audioChannels": 6,
+     "container": "mkv",
+     "bitrate": 4000,
+     "Part": [
+      {
+       "file": "/media/movies/Night Train (2021)/Night Train 720p.mkv",
+       "size": 3000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264",
+         "bitDepth": 8,
+         "colorTrc": "bt709"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "default": true,
+         "languageTag": "en"
+        }
+       ]
+      }
+     ],
+     "deletedAt": 1700000000
+    }
+   ]
+  },
+  "105": {
+   "ratingKey": "105",
+   "key": "/library/metadata/105",
+   "type": "movie",
+   "title": "Sky-Fall Kid",
+   "year": 2010,
+   "guid": "plex://movie/skyfallkid",
+   "addedAt": 1690000105,
+   "duration": 6300000,
+   "librarySectionID": 1,
+   "librarySectionTitle": "Movies",
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "videoCodec": "h264",
+     "audioCodec": "aac",
+     "audioChannels": 6,
+     "container": "mkv",
+     "bitrate": 5000,
+     "Part": [
+      {
+       "file": "/media/movies/Sky-Fall Kid (2010).mkv",
+       "size": 4000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264",
+         "bitDepth": 8,
+         "colorTrc": "bt709"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "default": true,
+         "languageTag": "en"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "106": {
+   "ratingKey": "106",
+   "key": "/library/metadata/106",
+   "type": "movie",
+   "title": "Paper Moon Garden",
+   "year": 2015,
+   "guid": "plex://movie/pmg",
+   "addedAt": 1690000106,
+   "duration": 6300000,
+   "librarySectionID": 1,
+   "librarySectionTitle": "Movies",
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "videoCodec": "h264",
+     "audioCodec": "aac",
+     "audioChannels": 6,
+     "container": "mkv",
+     "bitrate": 6000,
+     "Part": [
+      {
+       "file": "/media/movies/Paper Moon Garden.mkv",
+       "size": 5000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264",
+         "bitDepth": 8,
+         "colorTrc": "bt709"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "default": true,
+         "languageTag": "en"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "301": {
+   "ratingKey": "301",
+   "key": "/library/metadata/301",
+   "type": "movie",
+   "title": "Paper Moon Garden",
+   "year": 2015,
+   "guid": "plex://movie/pmg",
+   "addedAt": 1690000301,
+   "duration": 6300000,
+   "librarySectionID": 3,
+   "librarySectionTitle": "Kids Movies",
+   "Media": [
+    {
+     "videoResolution": "720",
+     "videoCodec": "h264",
+     "audioCodec": "aac",
+     "audioChannels": 6,
+     "container": "mkv",
+     "bitrate": 3000,
+     "Part": [
+      {
+       "file": "/media/kids/Paper Moon Garden.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264",
+         "bitDepth": 8,
+         "colorTrc": "bt709"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "default": true,
+         "languageTag": "en"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "107": {
+   "ratingKey": "107",
+   "key": "/library/metadata/107",
+   "type": "movie",
+   "title": "Home Video",
+   "year": null,
+   "guid": "local://107",
+   "addedAt": 1690000107,
+   "duration": 6300000,
+   "librarySectionID": 1,
+   "librarySectionTitle": "Movies",
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "videoCodec": "h264",
+     "audioCodec": "aac",
+     "audioChannels": 6,
+     "container": "mkv",
+     "bitrate": 5000,
+     "Part": [
+      {
+       "file": "/media/movies/Home Video.mkv",
+       "size": 1000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264",
+         "bitDepth": 8,
+         "colorTrc": "bt709"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "108": {
+   "ratingKey": "108",
+   "key": "/library/metadata/108",
+   "type": "movie",
+   "title": "Home Video",
+   "year": null,
+   "guid": "local://108",
+   "addedAt": 1690000108,
+   "duration": 6300000,
+   "librarySectionID": 1,
+   "librarySectionTitle": "Movies",
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "videoCodec": "h264",
+     "audioCodec": "aac",
+     "audioChannels": 6,
+     "container": "mkv",
+     "bitrate": 5000,
+     "Part": [
+      {
+       "file": "/media/movies/Home Video copy.mkv",
+       "size": 1000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264",
+         "bitDepth": 8,
+         "colorTrc": "bt709"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "201": {
+   "ratingKey": "201",
+   "key": "/library/metadata/201/children",
+   "type": "show",
+   "title": "Lighthouse Keepers",
+   "year": 2018,
+   "guid": "plex://show/lk",
+   "addedAt": 1600000000,
+   "librarySectionID": 2,
+   "librarySectionTitle": "TV Shows",
+   "contentRating": "TV-PG",
+   "summary": "Keepers of a lonely light.",
+   "audienceRating": 8.4,
+   "Genre": [
+    {
+     "tag": "Drama"
+    }
+   ],
+   "Collection": [
+    {
+     "tag": "Sea Stories"
+    }
+   ]
+  },
+  "2000": {
+   "ratingKey": "2000",
+   "key": "/library/metadata/2000",
+   "type": "episode",
+   "title": "Behind the Light",
+   "grandparentTitle": "Lighthouse Keepers",
+   "grandparentRatingKey": "201",
+   "grandparentKey": "/library/metadata/201",
+   "parentIndex": 0,
+   "index": 1,
+   "year": 2018,
+   "addedAt": 1600000010,
+   "duration": 2700000,
+   "librarySectionID": 2,
+   "librarySectionTitle": "TV Shows",
+   "summary": "Episode Behind the Light.",
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "videoCodec": "h264",
+     "audioCodec": "aac",
+     "audioChannels": 6,
+     "container": "mkv",
+     "bitrate": 6000,
+     "Part": [
+      {
+       "file": "/media/tv/Lighthouse Keepers/S00E01.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264",
+         "bitDepth": 8,
+         "colorTrc": "bt709"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "default": true,
+         "languageTag": "en"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "2001": {
+   "ratingKey": "2001",
+   "key": "/library/metadata/2001",
+   "type": "episode",
+   "title": "First Watch",
+   "grandparentTitle": "Lighthouse Keepers",
+   "grandparentRatingKey": "201",
+   "grandparentKey": "/library/metadata/201",
+   "parentIndex": 1,
+   "index": 1,
+   "year": 2018,
+   "addedAt": 1600000100,
+   "duration": 2700000,
+   "librarySectionID": 2,
+   "librarySectionTitle": "TV Shows",
+   "summary": "Episode First Watch.",
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "videoCodec": "h264",
+     "audioCodec": "aac",
+     "audioChannels": 6,
+     "container": "mkv",
+     "bitrate": 6000,
+     "Part": [
+      {
+       "file": "/media/tv/Lighthouse Keepers/S01E01.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264",
+         "bitDepth": 8,
+         "colorTrc": "bt709"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "default": true,
+         "languageTag": "en"
+        },
+        {
+         "streamType": 3,
+         "codec": "pgs",
+         "languageTag": "en"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "2002": {
+   "ratingKey": "2002",
+   "key": "/library/metadata/2002",
+   "type": "episode",
+   "title": "Fog",
+   "grandparentTitle": "Lighthouse Keepers",
+   "grandparentRatingKey": "201",
+   "grandparentKey": "/library/metadata/201",
+   "parentIndex": 1,
+   "index": 2,
+   "year": 2018,
+   "addedAt": 1600000200,
+   "duration": 2700000,
+   "librarySectionID": 2,
+   "librarySectionTitle": "TV Shows",
+   "summary": "Episode Fog.",
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "videoCodec": "h264",
+     "audioCodec": "aac",
+     "audioChannels": 6,
+     "container": "mkv",
+     "bitrate": 6000,
+     "Part": [
+      {
+       "file": "/media/tv/Lighthouse Keepers/S01E02.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264",
+         "bitDepth": 8,
+         "colorTrc": "bt709"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "default": true,
+         "languageTag": "en"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "2003": {
+   "ratingKey": "2003",
+   "key": "/library/metadata/2003",
+   "type": "episode",
+   "title": "Storm",
+   "grandparentTitle": "Lighthouse Keepers",
+   "grandparentRatingKey": "201",
+   "grandparentKey": "/library/metadata/201",
+   "parentIndex": 1,
+   "index": 3,
+   "year": 2018,
+   "addedAt": 1600000300,
+   "duration": 2700000,
+   "librarySectionID": 2,
+   "librarySectionTitle": "TV Shows",
+   "summary": "Episode Storm.",
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "videoCodec": "h264",
+     "audioCodec": "truehd",
+     "audioChannels": 6,
+     "container": "mkv",
+     "bitrate": 6000,
+     "Part": [
+      {
+       "file": "/media/tv/Lighthouse Keepers/S01E03.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264",
+         "bitDepth": 8,
+         "colorTrc": "bt709"
+        },
+        {
+         "streamType": 2,
+         "codec": "truehd",
+         "default": true,
+         "languageTag": "en",
+         "profile": "dolby truehd + dolby atmos"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "2004": {
+   "ratingKey": "2004",
+   "key": "/library/metadata/2004",
+   "type": "episode",
+   "title": "Return",
+   "grandparentTitle": "Lighthouse Keepers",
+   "grandparentRatingKey": "201",
+   "grandparentKey": "/library/metadata/201",
+   "parentIndex": 2,
+   "index": 1,
+   "year": 2018,
+   "addedAt": 1634560000,
+   "duration": 2700000,
+   "librarySectionID": 2,
+   "librarySectionTitle": "TV Shows",
+   "summary": "Episode Return.",
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "videoCodec": "h264",
+     "audioCodec": "aac",
+     "audioChannels": 6,
+     "container": "mkv",
+     "bitrate": 6000,
+     "Part": [
+      {
+       "file": "/media/tv/Lighthouse Keepers/S02E01.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264",
+         "bitDepth": 8,
+         "colorTrc": "bt709"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "default": true,
+         "languageTag": "en"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "2005": {
+   "ratingKey": "2005",
+   "key": "/library/metadata/2005",
+   "type": "episode",
+   "title": "Gone Dark",
+   "grandparentTitle": "Lighthouse Keepers",
+   "grandparentRatingKey": "201",
+   "grandparentKey": "/library/metadata/201",
+   "parentIndex": 2,
+   "index": 2,
+   "year": 2018,
+   "addedAt": 1634646400,
+   "duration": 2700000,
+   "librarySectionID": 2,
+   "librarySectionTitle": "TV Shows",
+   "summary": "Episode Gone Dark.",
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "videoCodec": "h264",
+     "audioCodec": "aac",
+     "audioChannels": 6,
+     "container": "mkv",
+     "bitrate": 6000,
+     "Part": [
+      {
+       "file": "/media/tv/Lighthouse Keepers/S02E02.mkv",
+       "size": 2000000000,
+       "Stream": [
+        {
+         "streamType": 1,
+         "codec": "h264",
+         "bitDepth": 8,
+         "colorTrc": "bt709"
+        },
+        {
+         "streamType": 2,
+         "codec": "aac",
+         "default": true,
+         "languageTag": "en"
+        }
+       ]
+      }
+     ],
+     "deletedAt": 1700000000
+    }
+   ]
+  }
+ },
+ "leaves": {
+  "201": [
+   {
+    "ratingKey": "2000",
+    "key": "/library/metadata/2000",
+    "type": "episode",
+    "title": "Behind the Light",
+    "grandparentTitle": "Lighthouse Keepers",
+    "grandparentRatingKey": "201",
+    "grandparentKey": "/library/metadata/201",
+    "parentIndex": 0,
+    "index": 1,
+    "year": 2018,
+    "addedAt": 1600000010,
+    "duration": 2700000,
+    "librarySectionID": 2,
+    "librarySectionTitle": "TV Shows",
+    "Media": [
+     {
+      "videoResolution": "1080",
+      "videoCodec": "h264",
+      "audioCodec": "aac",
+      "audioChannels": 6,
+      "container": "mkv",
+      "bitrate": 6000,
+      "Part": [
+       {
+        "file": "/media/tv/Lighthouse Keepers/S00E01.mkv",
+        "size": 2000000000
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "ratingKey": "2001",
+    "key": "/library/metadata/2001",
+    "type": "episode",
+    "title": "First Watch",
+    "grandparentTitle": "Lighthouse Keepers",
+    "grandparentRatingKey": "201",
+    "grandparentKey": "/library/metadata/201",
+    "parentIndex": 1,
+    "index": 1,
+    "year": 2018,
+    "addedAt": 1600000100,
+    "duration": 2700000,
+    "librarySectionID": 2,
+    "librarySectionTitle": "TV Shows",
+    "Media": [
+     {
+      "videoResolution": "1080",
+      "videoCodec": "h264",
+      "audioCodec": "aac",
+      "audioChannels": 6,
+      "container": "mkv",
+      "bitrate": 6000,
+      "Part": [
+       {
+        "file": "/media/tv/Lighthouse Keepers/S01E01.mkv",
+        "size": 2000000000
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "ratingKey": "2002",
+    "key": "/library/metadata/2002",
+    "type": "episode",
+    "title": "Fog",
+    "grandparentTitle": "Lighthouse Keepers",
+    "grandparentRatingKey": "201",
+    "grandparentKey": "/library/metadata/201",
+    "parentIndex": 1,
+    "index": 2,
+    "year": 2018,
+    "addedAt": 1600000200,
+    "duration": 2700000,
+    "librarySectionID": 2,
+    "librarySectionTitle": "TV Shows",
+    "Media": [
+     {
+      "videoResolution": "1080",
+      "videoCodec": "h264",
+      "audioCodec": "aac",
+      "audioChannels": 6,
+      "container": "mkv",
+      "bitrate": 6000,
+      "Part": [
+       {
+        "file": "/media/tv/Lighthouse Keepers/S01E02.mkv",
+        "size": 2000000000
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "ratingKey": "2003",
+    "key": "/library/metadata/2003",
+    "type": "episode",
+    "title": "Storm",
+    "grandparentTitle": "Lighthouse Keepers",
+    "grandparentRatingKey": "201",
+    "grandparentKey": "/library/metadata/201",
+    "parentIndex": 1,
+    "index": 3,
+    "year": 2018,
+    "addedAt": 1600000300,
+    "duration": 2700000,
+    "librarySectionID": 2,
+    "librarySectionTitle": "TV Shows",
+    "Media": [
+     {
+      "videoResolution": "1080",
+      "videoCodec": "h264",
+      "audioCodec": "truehd",
+      "audioChannels": 6,
+      "container": "mkv",
+      "bitrate": 6000,
+      "Part": [
+       {
+        "file": "/media/tv/Lighthouse Keepers/S01E03.mkv",
+        "size": 2000000000
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "ratingKey": "2004",
+    "key": "/library/metadata/2004",
+    "type": "episode",
+    "title": "Return",
+    "grandparentTitle": "Lighthouse Keepers",
+    "grandparentRatingKey": "201",
+    "grandparentKey": "/library/metadata/201",
+    "parentIndex": 2,
+    "index": 1,
+    "year": 2018,
+    "addedAt": 1634560000,
+    "duration": 2700000,
+    "librarySectionID": 2,
+    "librarySectionTitle": "TV Shows",
+    "Media": [
+     {
+      "videoResolution": "1080",
+      "videoCodec": "h264",
+      "audioCodec": "aac",
+      "audioChannels": 6,
+      "container": "mkv",
+      "bitrate": 6000,
+      "Part": [
+       {
+        "file": "/media/tv/Lighthouse Keepers/S02E01.mkv",
+        "size": 2000000000
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "ratingKey": "2005",
+    "key": "/library/metadata/2005",
+    "type": "episode",
+    "title": "Gone Dark",
+    "grandparentTitle": "Lighthouse Keepers",
+    "grandparentRatingKey": "201",
+    "grandparentKey": "/library/metadata/201",
+    "parentIndex": 2,
+    "index": 2,
+    "year": 2018,
+    "addedAt": 1634646400,
+    "duration": 2700000,
+    "librarySectionID": 2,
+    "librarySectionTitle": "TV Shows",
+    "Media": [
+     {
+      "videoResolution": "1080",
+      "videoCodec": "h264",
+      "audioCodec": "aac",
+      "audioChannels": 6,
+      "container": "mkv",
+      "bitrate": 6000,
+      "deletedAt": 1700000000,
+      "Part": [
+       {
+        "file": "/media/tv/Lighthouse Keepers/S02E02.mkv",
+        "size": 2000000000
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "history": [
+  {
+   "ratingKey": "101",
+   "key": "/library/metadata/101",
+   "accountID": 1,
+   "viewedAt": 1759300000,
+   "deviceID": 7,
+   "type": "movie",
+   "title": "Harbor Lights"
+  },
+  {
+   "ratingKey": "101",
+   "key": "/library/metadata/101",
+   "accountID": 2,
+   "viewedAt": 1759000000,
+   "deviceID": 7,
+   "type": "movie",
+   "title": "Harbor Lights"
+  },
+  {
+   "ratingKey": "2001",
+   "key": "/library/metadata/2001",
+   "accountID": 2,
+   "viewedAt": 1758000000,
+   "deviceID": 7,
+   "type": "episode",
+   "grandparentKey": "/library/metadata/201",
+   "grandparentTitle": "Lighthouse Keepers",
+   "parentIndex": 1,
+   "index": 1
+  },
+  {
+   "ratingKey": "2002",
+   "key": "/library/metadata/2002",
+   "accountID": 2,
+   "viewedAt": 1758100000,
+   "deviceID": 7,
+   "type": "episode",
+   "grandparentKey": "/library/metadata/201",
+   "grandparentTitle": "Lighthouse Keepers",
+   "parentIndex": 1,
+   "index": 2
+  },
+  {
+   "ratingKey": "2002",
+   "key": "/library/metadata/2002",
+   "accountID": 2,
+   "viewedAt": 1758150000,
+   "deviceID": 7,
+   "type": "episode",
+   "grandparentKey": "/library/metadata/201",
+   "grandparentTitle": "Lighthouse Keepers",
+   "parentIndex": 1,
+   "index": 2
+  },
+  {
+   "ratingKey": "2003",
+   "key": "/library/metadata/2003",
+   "accountID": 2,
+   "viewedAt": 1758200000,
+   "deviceID": 7,
+   "type": "episode",
+   "grandparentKey": "/library/metadata/201",
+   "grandparentTitle": "Lighthouse Keepers",
+   "parentIndex": 1,
+   "index": 3
+  },
+  {
+   "ratingKey": "102",
+   "key": "/library/metadata/102",
+   "accountID": 1,
+   "viewedAt": 1757000000,
+   "deviceID": 7,
+   "type": "movie",
+   "title": "Harbor Lights Returns"
+  }
+ ],
+ "accounts": [
+  {
+   "id": 1,
+   "name": "Alex",
+   "email": "alex@example.com"
+  },
+  {
+   "id": 2,
+   "name": "Sam"
+  }
+ ],
+ "prefs_no_limit": {
+  "MediaContainer": {
+   "Setting": [
+    {
+     "id": "WanPerStreamMaxUploadRate",
+     "value": 0
+    },
+    {
+     "id": "PlexOnlineToken",
+     "value": "pref-secret-value"
+    }
+   ]
+  }
+ },
+ "prefs_with_limit": {
+  "MediaContainer": {
+   "Setting": [
+    {
+     "id": "WanPerStreamMaxUploadRate",
+     "value": 20000
+    },
+    {
+     "id": "PlexOnlineToken",
+     "value": "pref-secret-value"
+    }
+   ]
+  }
+ }
+}

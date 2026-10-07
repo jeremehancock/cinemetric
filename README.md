@@ -33,6 +33,7 @@ CSS and JavaScript with no build step, ready for any static host.
 | `what-to-watch` | Finds something to watch tonight in your own library: by genre, length, decade, rating or content rating, unwatched only, shuffled for fresh ideas each time. Suggests a few titles with a reason for each, or picks up where you left off. Only titles already on your server |
 | `episode-gaps` | Gaps in your TV shows: episode numbers missing between ones you have (E01, E02 and E04 are there, so E03 is probably missing), seasons that start late, seasons missing between others, and episodes whose files Plex can't find. Specials, two-episode files and shows numbered straight on across seasons aren't counted as gaps. Uses only what's on your server, so it can't see episodes after the last one you have |
 | `playback-check` | Files likely to be transcoded (converted on the fly) on common devices, and why: image-based subtitles (PGS, VobSub), TrueHD or DTS audio, and bitrates above your remote streaming limit or a speed you choose. With Tautulli, also which devices and people transcode most, how often, and why. Checks every movie and episode in about a minute; facts only, it never tells you to convert files |
+| `title-lookup` | Everything about one movie, show or episode in one answer: when it was added, length, ratings, genres and collections; each file's quality (resolution, HDR, codecs, size); whether it's likely to be transcoded and why; for a show, its seasons, episode counts and episodes Plex can't find; and who watched it, when, and how far they got. If several titles match, Claude asks which one you meant. Uses Tautulli if you have it, otherwise Plex's own history |
 | `changes` | What changed since yesterday, last week or last month: titles added and removed, new episodes, files Plex can no longer find, Plex updates, and people given or losing access. Each time you run it (or build the dashboard) it saves a small private snapshot on your computer, at most one per day, kept 90 days, to compare with next time. Nothing runs in the background; the library, server and sharing reports and the dashboard show the same "since last time" changes. It can also say how the library and sharing moved across all the saved snapshots |
 | `year-in-review` | A recap page of one calendar year: hours watched, busiest months and busiest day, movies vs TV vs music, and the most watched movies, shows and artists. For the whole server it names no one and leaves off titles only one person watched, so it doesn't reveal anyone's viewing; it can also cover just your own year, or one person's as a recap to give them. Saved on your computer, as a private claude.ai page, or both; running it again updates the same file and link |
 | `dashboard` | One page with library stats, server status (version, updates, remote access and anything that needs a look), the last 30 days of watching, unwatched titles, episode gaps, playback and sharing, with charts, plus trends over the saved snapshots (storage, titles per library and people with access). Saved on your computer, as a private claude.ai page you can open anywhere, or both; each refresh updates the same file and link |
@@ -135,7 +136,8 @@ Then try: *"Give me a Plex library report"*, *"What's been added to my Movies li
 *"How's my Plex server doing?"*, *"What's been watched on Plex this month?"*,
 *"Who have I shared my Plex server with?"*, *"What on my Plex server has nobody watched in months?"*,
 *"Find me a comedy under 2 hours I haven't seen"*, *"Am I missing any episodes on Plex?"*,
-*"Why does Plex keep transcoding?"* or *"Build my Plex dashboard"*
+*"Why does Plex keep transcoding?"*, *"Tell me about Blade Runner 2049 on my Plex"* or
+*"Build my Plex dashboard"*
 
 ### Optional: add Tautulli
 
@@ -197,9 +199,34 @@ the rules every skill follows, are written down as specs in [openspec/specs/](op
 work starts as an OpenSpec change proposal (`/opsx:propose`) before any code is written. Notes on how
 each idea below might be built are in [openspec/ideas.md](openspec/ideas.md).
 
-**Ideas for later**
+**New skill ideas**
 
-No new skill ideas are queued right now. Suggestions are welcome via GitHub issues.
+- **`subtitles-and-languages`:** titles in another language with no subtitles in yours, tracks with no
+  language set, and titles missing a subtitle language you name.
+- **`collections-and-playlists`:** your collections and playlists, how big each is, collections with
+  only one title, and playlists pointing at files Plex can no longer find.
+- **`export`:** save a library listing as a spreadsheet file (CSV) on your computer.
+
+**Updates to existing skills**
+
+- **`server-health`:** when your server is busiest, by hour and day of the week, compared with when
+  Plex runs its scheduled maintenance.
+- **`library-report`:** count Dolby Vision and HDR10+ separately from other HDR.
+- **`what-to-watch`:** something several people at home haven't seen yet, and "more like this" for a
+  title you liked.
+- **`unwatched`:** what one person hasn't watched, and shows people stopped watching partway through.
+- **`changes`:** how fast the library is growing, for example "about 1.2 TB a month".
+- **`year-in-review`:** favorite genres, and a comparison with the year before.
+
+**Mod ideas**
+
+- **Heads-up:** a one-time notice when Claude Code starts, such as "Plex update available · 12 files
+  unavailable", read from the newest snapshot without contacting your server.
+- **Guard log:** a command that lists what the guard stopped recently and why.
+- **Now Playing:** total bandwidth, and the exact reason each stream is being transcoded.
+- **Status line:** an optional count of titles added since the last check.
+
+Suggestions are welcome via GitHub issues.
 
 ## Support Development
 

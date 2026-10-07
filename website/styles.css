@@ -52,7 +52,7 @@ p, li, figcaption, .poster-sub { text-wrap: pretty; }
 /* Short text (a line or three) looks better with its lines evened out, so a second line
    is never just a word or two hanging under a full one. */
 .ticks li, .feature-copy > p, .ask-line, .card p, .mock figcaption, .steps-lead, .section-head p,
-.step-body p, .extra-body p, .extra-body li, .notice p, .mod-switch p, .legal { text-wrap: balance; }
+.step-body p, .extra-body p, .extra-body li, .mod-switch p, .legal { text-wrap: balance; }
 q { quotes: "\201C" "\201D"; }
 
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
@@ -407,12 +407,12 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
 
 /* ---------- Notices ---------- */
 .notices { padding-top: 20px; }
-.notice-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; }
+.notice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 .notice { border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; background: var(--bg-2); }
 .notice h2 { font-size: 1.1rem; letter-spacing: 0; }
 .notice p { color: var(--muted); margin: 0; font-size: .95rem; }
-.notice.caution { border-color: rgba(240, 180, 41, .3); background: linear-gradient(135deg, rgba(240, 180, 41, .07), transparent 60%), var(--bg-2); }
 .notice.caution h2 { color: var(--warn); }
+.notice.in-charge h2 { color: var(--accent-hi); }
 
 /* ---------- Support ---------- */
 .support-section { padding-top: 20px; }

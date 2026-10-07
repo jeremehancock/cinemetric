@@ -19,7 +19,9 @@ CSS and JavaScript with no build step, ready for any static host.
 > **AI can make mistakes.** Cinemetric's scripts collect the numbers, but the reports you read are
 > written by Claude, an AI model. It can misread data, summarize something incorrectly, or draw a
 > conclusion the numbers don't fully support. Double-check anything important in Plex (or Tautulli)
-> before acting on it, especially before deleting, replacing or re-encoding files.
+> before acting on it, especially before deleting, replacing or re-encoding files. Cinemetric only
+> controls what its own skills do: if you ask Claude to change something on your server, read each
+> command Claude Code shows you before you approve it. See [SECURITY.md](SECURITY.md) for more.
 
 ## Skills
 

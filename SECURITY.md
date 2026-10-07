@@ -46,6 +46,18 @@ Claude passing it on. Its rules are in
 - Anyone who can read your config file or environment can use your token. Keep your user account secure.
 - A Plex token has the same access as the account it belongs to. Read-only behavior is enforced by
   Cinemetric's code, not by Plex.
+- Cinemetric can't stop Claude from changing your server if you ask it to. The skills only read, and
+  the read-only guard catches common ways Claude might change things on its own, but if you ask Claude
+  to delete, rename or fix something, that's ordinary Claude Code work, not something Cinemetric
+  controls. Treat it like any other change Claude makes on your computer.
+- Claude Code's own permission prompts are your last check. By default Claude Code asks before running
+  a command, so read any command that mentions your Plex server or Tautulli before you approve it. If
+  you let Claude Code run commands without asking, the guard is the only check left.
+- Two Plex settings limit the damage if something does go wrong. If you don't delete files through
+  Plex, switch off **Allow media deletion** (Settings, Library): Plex then refuses to delete media
+  files for any app, Claude included. And keep **Backup database every three days** switched on
+  (Settings, Scheduled Tasks): it keeps copies of your library details and watch history, though not
+  the media files themselves.
 
 ## Reporting a problem
 

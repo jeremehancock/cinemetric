@@ -28,7 +28,7 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 
-VERSION = "0.25.1"
+VERSION = "0.26.0"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 MAX_PLEX_TV_BYTES = 5 * 1024 * 1024
@@ -42,6 +42,7 @@ ALLOWED_PATHS = [
     re.compile(r"^/$"),
     re.compile(r"^/library/sections$"),
     re.compile(r"^/status/sessions/history/all$"),
+    re.compile(r"^/:/prefs$"),
 ]
 
 # The only plex.tv addresses this script may request, and how. All of them only read data.
@@ -764,6 +765,26 @@ def since_snapshot(server_id, area, args):
         return None
 
 
+# ---------------------------------------------------------------- media deletion
+#
+# Shared helper: the same code is in every script that reads from Plex. Keep every copy in step.
+
+def media_deletion_allowed(read_prefs):
+    """Whether Plex's "Allow media deletion" setting is on: True, False, or None when it can't be
+    told. read_prefs returns the /:/prefs answer. Only this one setting is looked at, since /:/prefs
+    also holds values that must never be printed. Never raises: a failed check mustn't stop a report."""
+    try:
+        prefs = read_prefs()
+        settings = prefs.get("Setting", []) if isinstance(prefs, dict) else []
+        for setting in settings or []:
+            if isinstance(setting, dict) and setting.get("id") == "allowMediaDeletion":
+                value = str(setting.get("value")).strip().lower()
+                return True if value in ("1", "true") else False if value in ("0", "false") else None
+    except Exception:
+        pass
+    return None
+
+
 def build_report(config, args):
     plex = PlexClient(*config["plex"])
     root = plex.get("/")
@@ -844,6 +865,7 @@ def build_report(config, args):
         "worth_a_look": flags,
         "unavailable": unavailable,
         "since_snapshot": since_snapshot(machine_id, area, args),
+        "media_deletion_allowed": media_deletion_allowed(lambda: plex.get("/:/prefs")),
     }
     if args.snapshot_items:
         report["snapshot"] = {"server_id": machine_id, "area": area}

@@ -7,7 +7,7 @@ import time
 from unittest import mock
 
 from helpers import (FAKE_TOKEN, FakeServer, OfflineTestCase, Reply, Unreachable, fixture, load_script,
-                     plex_container, write_snapshot)
+                     plex_container, write_snapshot, check_media_deletion)
 
 sh = load_script("server-health")
 
@@ -540,5 +540,35 @@ class NowPlayingOnly(OfflineTestCase):
         code, out, err = self.run_main(FakeServer({"/status/sessions": Unreachable("connection refused")}))
         self.assertEqual(code, 1)
         self.assertEqual(out, "")
-        self.assertTrue(err.startswith("error: "))
+        self.assertTrue(err.startswith("error: "), err)
         self.assertNotIn(FAKE_TOKEN, err)
+
+
+# ---------------------------------------------------------------- media deletion setting
+
+
+class MediaDeletion(ReportTestCase):
+    def test_media_deletion_setting(self):
+        server = sample_server()
+
+        def build(answer):
+            server.routes["/:/prefs"] = answer
+            server.requests.clear()
+            return self.report(server), server.requests
+        check_media_deletion(self, build)
+
+    def test_not_a_kept_setting_or_a_flag(self):
+        server = sample_server()
+        server.routes["/:/prefs"] = prefs_answer_with_deletion()
+        report = self.report(server)
+        self.assertIs(report["media_deletion_allowed"], True)
+        self.assertNotIn("allowMediaDeletion", json.dumps(report))
+        self.assertNotIn("media_deletion", json.dumps(report["worth_a_look"]))
+        self.assertNotIn("media_deletion", json.dumps(report["background"]["maintenance_settings"]))
+
+
+def prefs_answer_with_deletion():
+    """The sample /:/prefs answer with allowMediaDeletion switched on."""
+    prefs = fixture("server-health", "server.json")["/:/prefs"]
+    prefs["MediaContainer"]["Setting"].append({"id": "allowMediaDeletion", "value": True, "type": "bool"})
+    return prefs

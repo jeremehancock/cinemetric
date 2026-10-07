@@ -10,7 +10,8 @@ presents it is in the skill's `SKILL.md`.
 ## Requirements
 ### Requirement: What the script requests
 The script `skills/users-and-shares/scripts/users_and_shares.py` SHALL request only `/`,
-`/library/sections` and `/status/sessions/history/all` from the user's Plex server, and only these
+`/library/sections`, `/status/sessions/history/all` and `/:/prefs` from the user's Plex server
+(`/:/prefs` SHALL be read only for the media deletion setting (see "Media deletion setting" in the conventions spec)), and only these
 plex.tv addresses, each with `GET`:
 - `https://plex.tv/api/users` (everyone the owner shares with or has in Plex Home),
 - `https://plex.tv/api/servers/<machine id>/shared_servers` (which libraries each person can see on

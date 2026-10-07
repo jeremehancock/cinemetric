@@ -7,13 +7,14 @@ import json
 import sys
 from unittest import mock
 
-from helpers import FAKE_API_KEY, FAKE_TOKEN, FakeServer, OfflineTestCase, fixture, load_script
+from helpers import (FAKE_API_KEY, FAKE_TOKEN, FakeServer, OfflineTestCase, fixture, load_script,
+                     check_media_deletion)
 
 gaps = load_script("episode-gaps")
 
 PLEX = ("http://192.0.2.10:32400", FAKE_TOKEN, True)
 TAUTULLI = ("http://192.0.2.10:8181", FAKE_API_KEY, True)
-ALLOWED = {"/", "/library/sections", "/library/sections/1/all"}
+ALLOWED = {"/", "/library/sections", "/library/sections/1/all", "/:/prefs"}
 
 
 def args(**overrides):
@@ -311,3 +312,19 @@ class Options(Base):
         code, _ = self.run_main("--library", "Movies")
         self.assertEqual(code, 1)
         self.assertIn("error: Only TV libraries", self.stderr.getvalue())
+
+
+# ---------------------------------------------------------------- media deletion setting
+
+
+class MediaDeletion(Base):
+    def test_media_deletion_setting(self):
+        def build(answer):
+            self.server.routes["/:/prefs"] = answer
+            self.server.requests.clear()
+            return self.report(), self.server.requests
+        check_media_deletion(self, build)
+
+    def test_connection_check_skips_settings(self):
+        gaps.check(config())
+        self.assertNotIn("/:/prefs", [seen.path for seen in self.server.requests])

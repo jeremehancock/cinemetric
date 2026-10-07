@@ -11,7 +11,7 @@ import time
 from unittest import mock
 
 from helpers import (FAKE_API_KEY, FAKE_TOKEN, FIXTURES_DIR, FakeServer, OfflineTestCase, Reply,
-                     Unreachable, fixture, load_script, write_snapshot)
+                     Unreachable, fixture, load_script, write_snapshot, check_media_deletion)
 
 us = load_script("users-and-shares")
 
@@ -142,7 +142,7 @@ class Base(OfflineTestCase):
 class Requests(Base):
     def test_only_allowed_addresses_all_get(self):
         self.report(cfg=config(tautulli=TAUTULLI))
-        allowed_paths = {"/", "/library/sections", "/status/sessions/history/all", "/api/v2"}
+        allowed_paths = {"/", "/library/sections", "/status/sessions/history/all", "/:/prefs", "/api/v2"}
         for seen in self.net.server.requests:
             with self.subTest(url=seen.url):
                 self.assertEqual(seen.method, "GET")
@@ -641,3 +641,17 @@ class SharingSnapshot(Base):
         for name in ("added", "removed", "accepted", "libraries_changed", "downloads_changed"):
             self.assertEqual(since[name], [], name)
         self.assertEqual(since["email_invites_change"], 0)
+
+
+# ---------------------------------------------------------------- media deletion setting
+
+
+class MediaDeletion(Base):
+    def test_media_deletion_setting(self):
+        net = Network(self, routes())
+
+        def build(answer):
+            net.server.routes["/:/prefs"] = answer
+            net.server.requests.clear()
+            return us.build_report(config(), args()), net.server.requests
+        check_media_deletion(self, build)

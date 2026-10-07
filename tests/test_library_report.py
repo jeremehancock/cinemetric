@@ -9,7 +9,7 @@ import time
 from unittest import mock
 
 from helpers import (FAKE_TOKEN, FakeServer, OfflineTestCase, fixture, load_script, plex_container,
-                     write_snapshot)
+                     write_snapshot, check_media_deletion)
 
 lr = load_script("library-report")
 GB = 1000 ** 3
@@ -785,3 +785,17 @@ class LibrarySnapshot(OfflineTestCase):
                                              "2": "nonsense"})
         report = self.report(fake_plex())
         self.assertEqual(report["since_snapshot"]["libraries"][0]["added_count"], 4)
+
+
+# ---------------------------------------------------------------- media deletion setting
+
+
+class MediaDeletion(WholeReport):
+    def test_media_deletion_setting(self):
+        server = fake_plex()
+
+        def build(answer):
+            server.routes["/:/prefs"] = answer
+            server.requests.clear()
+            return self.report(server), server.requests
+        check_media_deletion(self, build)

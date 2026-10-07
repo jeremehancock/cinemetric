@@ -26,7 +26,7 @@ import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.25.1"
+VERSION = "0.26.0"
 SCRIPT_TIMEOUT_SECONDS = 1800
 KEEP_DAYS = 90
 MAX_TITLE_LENGTH = 120
@@ -274,6 +274,17 @@ def collect(since):
     return reports, errors
 
 
+def media_deletion_from(reports):
+    """media_deletion_allowed from the first report that could read it, or None. Only True or False
+    is passed on."""
+    for name in SOURCES:
+        report = reports.get(name)
+        value = report.get("media_deletion_allowed") if isinstance(report, dict) else None
+        if isinstance(value, bool):
+            return value
+    return None
+
+
 def cmd_changes(args):
     reports, errors = collect(args.since)
     try:
@@ -286,6 +297,7 @@ def cmd_changes(args):
         report = reports.get(area)
         result[area] = report.get("since_snapshot") if isinstance(report, dict) else None
     result["sections_missing"] = errors
+    result["media_deletion_allowed"] = media_deletion_from(reports)
     return result
 
 

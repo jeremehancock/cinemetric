@@ -29,7 +29,9 @@ server's addresses local first, then `https` first, and save the first one that 
 the token. Each server SHALL be saved with its own access token from plex.tv. The account token SHALL
 be used only for a server the user owns that has no access token of its own. A server the user
 doesn't own and that has no access token of its own SHALL be left out of the list, so the account
-token is never sent to someone else's server.
+token is never sent to someone else's server. After saving, `select` SHALL read the media deletion
+setting from the saved server with the saved token (see "Media deletion setting" in the conventions
+spec) and include `media_deletion_allowed` in its output; this SHALL never stop or undo the save.
 
 #### Scenario: No address works
 - **WHEN** none of the server's addresses answer from this computer
@@ -43,6 +45,14 @@ token is never sent to someone else's server.
 #### Scenario: Shared server without its own token
 - **WHEN** plex.tv lists a server the user doesn't own without an `accessToken`
 - **THEN** `finish` leaves it out of the list and never saves the account token for it
+
+#### Scenario: Media deletion allowed on the chosen server
+- **WHEN** `select` saves a server whose `/:/prefs` has `allowMediaDeletion` on
+- **THEN** its output has `media_deletion_allowed` `true`
+
+#### Scenario: Settings refused after saving
+- **WHEN** `select` saves a server and `/:/prefs` answers 403
+- **THEN** the server stays saved and `media_deletion_allowed` is `null`
 
 ### Requirement: Don't overwrite without asking
 `select` SHALL refuse to overwrite an existing config unless `--replace` is given. Switching Plex

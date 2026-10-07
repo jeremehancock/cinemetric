@@ -6,7 +6,8 @@ import time
 import urllib.parse
 from unittest import mock
 
-from helpers import FAKE_API_KEY, FAKE_TOKEN, FakeServer, OfflineTestCase, Reply, Unreachable, fixture, load_script
+from helpers import (FAKE_API_KEY, FAKE_TOKEN, FakeServer, OfflineTestCase, Reply, Unreachable, fixture, load_script,
+                     check_media_deletion)
 
 pc = load_script("playback-check")
 
@@ -172,10 +173,17 @@ class Sources(Base):
         self.network(prefs="prefs_with_limit")
         self.assertNotIn("pref-secret-value", json.dumps(self.report()))
 
-    def test_prefs_not_requested_with_max_bitrate(self):
+    def test_prefs_read_once_with_max_bitrate(self):
+        # Still read for the media deletion setting, but the option's limit wins.
         net = self.network(prefs="prefs_with_limit")
-        self.report(max_bitrate=8000)
-        self.assertFalse(any(seen.path == "/:/prefs" for seen in net.requests))
+        report = self.report(max_bitrate=8000)
+        self.assertEqual(sum(seen.path == "/:/prefs" for seen in net.requests), 1)
+        self.assertEqual(report["bitrate_limit"], {"kbps": 8000, "source": "option"})
+
+    def test_prefs_read_once_without_max_bitrate(self):
+        net = self.network(prefs="prefs_with_limit")
+        self.report()
+        self.assertEqual(sum(seen.path == "/:/prefs" for seen in net.requests), 1)
 
 
 # ---------------------------------------------------------------- libraries
@@ -481,3 +489,26 @@ class Options(OfflineTestCase):
         self.assertEqual(result["plex"]["server"], "Test Server")
         self.assertEqual(result["tautulli"]["version"], "v2.0.0")
         self.assertEqual(len(server.requests), 2)
+
+
+# ---------------------------------------------------------------- media deletion setting
+
+
+class MediaDeletion(Base):
+    def test_media_deletion_setting(self):
+        net = self.network(tautulli=False)
+
+        def build(answer):
+            net.routes["/:/prefs"] = answer
+            net.requests.clear()
+            return self.report(config(tautulli=None)), net.requests
+        check_media_deletion(self, build)
+
+    def test_media_deletion_setting_with_max_bitrate(self):
+        net = self.network(tautulli=False)
+
+        def build(answer):
+            net.routes["/:/prefs"] = answer
+            net.requests.clear()
+            return self.report(config(tautulli=None), max_bitrate=8000), net.requests
+        check_media_deletion(self, build)

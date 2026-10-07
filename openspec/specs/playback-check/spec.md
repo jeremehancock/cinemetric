@@ -8,14 +8,15 @@ limit the user names). With Tautulli, it also shows which devices and people tra
 and why. It reports these few universal causes, says "likely" rather than "will", and never suggests
 converting files. Script: `skills/playback-check/scripts/playback_check.py`. How Claude presents it is
 in the skill's `SKILL.md`.
-
 ## Requirements
 ### Requirement: Sources used
 The script `skills/playback-check/scripts/playback_check.py` SHALL request only `/`,
 `/library/sections`, `/library/sections/{id}/all`, `/library/metadata/{ids}` and `/:/prefs` from the
 user's Plex server, reading library items in pages of 500. `{ids}` SHALL be 1 to 100 numeric rating
 keys separated by commas, and any other form SHALL be refused by the path allowlist. From `/:/prefs`
-the script SHALL read only `WanPerStreamMaxUploadRate`; no other setting SHALL appear in its output.
+the script SHALL read only `WanPerStreamMaxUploadRate` and `allowMediaDeletion` (see "Media deletion
+setting" in the conventions spec), requesting it at most once per run; no other setting SHALL appear
+in its output.
 
 When Tautulli is set up, the script SHALL run only the Tautulli commands `get_tautulli_info`,
 `get_history` and `get_stream_data`. It SHALL NOT contact plex.tv or any other address.
@@ -113,7 +114,9 @@ The bitrate limit SHALL be `--max-bitrate KBPS` when given, otherwise the server
 `WanPerStreamMaxUploadRate` when it is above 0. A file SHALL have the cause `over_bitrate_limit` when
 its media version's `bitrate` is above the limit. When there is no limit (the server's value is 0 or
 missing and no `--max-bitrate` is given), the check SHALL be skipped, `bitrate_limit` SHALL be `null`
-and no file SHALL have this cause. When `--max-bitrate` is given, `/:/prefs` SHALL NOT be requested.
+and no file SHALL have this cause. When `--max-bitrate` is given, the server's
+`WanPerStreamMaxUploadRate` SHALL be ignored, though `/:/prefs` is still requested once for the media
+deletion setting.
 If the server's setting can't be read (for example with an account that isn't the server owner's),
 the check SHALL be skipped the same way and `bitrate_limit_problem` SHALL give the reason; the rest of
 the report SHALL still be built.
@@ -135,6 +138,11 @@ the report SHALL still be built.
 - **WHEN** the server has no limit and the script is run with `--max-bitrate 8000`
 - **THEN** files above 8000 kbps have the cause `over_bitrate_limit` and `bitrate_limit` is
   `{"kbps": 8000, "source": "option"}`
+
+#### Scenario: A limit chosen by the user, settings read once
+- **WHEN** the script is run with `--max-bitrate 8000`
+- **THEN** `/:/prefs` is requested once, `bitrate_limit` is `{"kbps": 8000, "source": "option"}`
+  whatever the server's limit is, and `media_deletion_allowed` comes from the same answer
 
 ### Requirement: Transcodes by device and person
 When Tautulli is set up and `--days` is above 0, the script SHALL read Tautulli's history of movie and

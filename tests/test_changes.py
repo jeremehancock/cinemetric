@@ -374,3 +374,26 @@ class DefaultRun(OfflineTestCase):
                 mock.patch.object(sys, "stdout", io.StringIO()):
             ch.main()
         self.assertEqual(seen, [90])
+
+
+# ---------------------------------------------------------------- media deletion setting
+
+class MediaDeletion(DefaultRun):
+    def test_first_report_that_could_read_it(self):
+        full = reports()
+        full["library"]["media_deletion_allowed"] = None
+        full["health"]["media_deletion_allowed"] = True
+        full["sharing"]["media_deletion_allowed"] = False
+        result = self.run_with({name: (full[name], None) for name in full})
+        self.assertIs(result["media_deletion_allowed"], True)
+
+    def test_unknown_when_no_report_has_it(self):
+        full = reports()
+        result = self.run_with({name: (full[name], None) for name in full})
+        self.assertIsNone(result["media_deletion_allowed"])
+
+    def test_only_true_or_false_is_passed_on(self):
+        full = reports()
+        full["library"]["media_deletion_allowed"] = "yes"
+        result = self.run_with({name: (full[name], None) for name in full})
+        self.assertIsNone(result["media_deletion_allowed"])

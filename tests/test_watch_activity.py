@@ -9,7 +9,8 @@ import sys
 import time
 from unittest import mock
 
-from helpers import FAKE_API_KEY, FAKE_TOKEN, FakeServer, OfflineTestCase, Reply, fixture, load_script
+from helpers import (FAKE_API_KEY, FAKE_TOKEN, FakeServer, OfflineTestCase, Reply, fixture, load_script,
+                     check_media_deletion)
 
 wa = load_script("watch-activity")
 
@@ -634,3 +635,24 @@ class Settings(OfflineTestCase):
         with mock.patch.object(wa, "read_config_file", side_effect=AssertionError("file was read")):
             result = wa.load_config()
         self.assertIsNone(result["tautulli_problem"])
+
+
+# ---------------------------------------------------------------- media deletion setting
+
+
+class MediaDeletion(OfflineTestCase):
+    def test_media_deletion_setting(self):
+        net = Network(self, both_working())
+        for cfg in (config(), config(tautulli=None)):
+            def build(answer, cfg=cfg):
+                net.server.routes["/:/prefs"] = answer
+                net.server.requests.clear()
+                return wa.build_report(cfg, args()), net.server.requests
+            with self.subTest(tautulli=bool(cfg["tautulli"])):
+                check_media_deletion(self, build)
+
+    def test_tautulli_only_leaves_it_unknown(self):
+        net = Network(self, {"/api/v2": tautulli_route()})
+        report = wa.build_report(config(plex=None), args())
+        self.assertIsNone(report["media_deletion_allowed"])
+        self.assertNotIn("/:/prefs", [seen.path for seen in net.server.requests])

@@ -8,17 +8,17 @@ find. Uses only what's on the server, so episodes after the last one there can't
 multi-episode files, numbering that carries on across seasons and date-numbered seasons aren't
 reported as gaps. Script: `skills/episode-gaps/scripts/episode_gaps.py`. How Claude presents it is in
 the skill's `SKILL.md`.
-
 ## Requirements
 ### Requirement: Sources used
-The script `skills/episode-gaps/scripts/episode_gaps.py` SHALL request only `/`, `/library/sections`
-and `/library/sections/{id}/all` from the user's Plex server, reading library items in pages of 500.
+The script `skills/episode-gaps/scripts/episode_gaps.py` SHALL request only `/`, `/library/sections`,
+`/library/sections/{id}/all` and `/:/prefs` from the user's Plex server, reading library items in
+pages of 500. `/:/prefs` SHALL be read only for the media deletion setting (see "Media deletion setting" in the conventions spec).
 It SHALL NOT contact Tautulli, plex.tv, Plex's online metadata service or any other address. It
 SHALL NOT use any source of how many episodes a season or show is meant to have.
 
 #### Scenario: Building a report
 - **WHEN** the script builds a report
-- **THEN** every request goes to the configured Plex server, to one of the three allowed paths, with
+- **THEN** every request goes to the configured Plex server, to one of the four allowed paths, with
   `GET`
 
 #### Scenario: Tautulli is set up

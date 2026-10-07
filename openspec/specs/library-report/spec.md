@@ -7,8 +7,8 @@ recent additions and housekeeping problems. Script: `skills/library-report/scrip
 How Claude presents it is in the skill's `SKILL.md`.
 ## Requirements
 ### Requirement: Plex paths used
-The script SHALL request only `/`, `/library/sections` and `/library/sections/{id}/all`, reading items
-in pages of 500.
+The script SHALL request only `/`, `/library/sections`, `/library/sections/{id}/all` and `/:/prefs`,
+reading items in pages of 500. `/:/prefs` SHALL be read only for the media deletion setting (see "Media deletion setting" in the conventions spec).
 
 #### Scenario: Large library
 - **WHEN** a library has more than 500 items of a type

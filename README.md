@@ -40,6 +40,9 @@ CSS and JavaScript with no build step, ready for any static host.
 More skills are planned, and ideas are welcome; see [Roadmap](#roadmap).
 
 Every Cinemetric skill is **read-only**: it never changes anything on your server. See [SECURITY.md](SECURITY.md).
+If your server lets apps delete media files, Cinemetric mentions it once in a conversation, because
+switching off **Allow media deletion** in Plex (Settings, Library) makes sure Claude can't delete your
+movies, shows or music through Plex. Plex then refuses deletions from every app, including its own.
 
 ## Mods
 

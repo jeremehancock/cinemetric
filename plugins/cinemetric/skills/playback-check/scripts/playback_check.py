@@ -23,7 +23,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.25.1"
+VERSION = "0.26.0"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 LIBRARY_PAGE_SIZE = 500
@@ -313,15 +313,32 @@ def get_details(client, keys):
     return details
 
 
-def remote_limit(client, wanted):
+def read_once(fn):
+    """Call fn the first time only, then hand back the same result (or raise the same error)."""
+    saved = []
+
+    def wrapper():
+        if not saved:
+            try:
+                saved.append((fn(), None))
+            except ReportError as exc:
+                saved.append((None, exc))
+        result, error = saved[0]
+        if error:
+            raise error
+        return result
+    return wrapper
+
+
+def remote_limit(read_prefs, wanted):
     """Returns (bitrate_limit, problem). The option wins; otherwise the server's remote limit."""
     if wanted:
         return {"kbps": wanted, "source": "option"}, None
     try:
-        prefs = client.get("/:/prefs")
+        prefs = read_prefs()
     except ReportError as exc:
         return None, f"The server's remote streaming limit couldn't be read: {exc}"
-    # Only this one setting is read: /:/prefs also holds values that must never be printed.
+    # Only this setting is read here: /:/prefs also holds values that must never be printed.
     for setting in prefs.get("Setting", []) or []:
         if setting.get("id") == "WanPerStreamMaxUploadRate":
             kbps = as_int(setting.get("value"))
@@ -653,13 +670,35 @@ def choose_sections(sections, wanted):
     return checked, skipped
 
 
+# ---------------------------------------------------------------- media deletion
+#
+# Shared helper: the same code is in every script that reads from Plex. Keep every copy in step.
+
+def media_deletion_allowed(read_prefs):
+    """Whether Plex's "Allow media deletion" setting is on: True, False, or None when it can't be
+    told. read_prefs returns the /:/prefs answer. Only this one setting is looked at, since /:/prefs
+    also holds values that must never be printed. Never raises: a failed check mustn't stop a report."""
+    try:
+        prefs = read_prefs()
+        settings = prefs.get("Setting", []) if isinstance(prefs, dict) else []
+        for setting in settings or []:
+            if isinstance(setting, dict) and setting.get("id") == "allowMediaDeletion":
+                value = str(setting.get("value")).strip().lower()
+                return True if value in ("1", "true") else False if value in ("0", "false") else None
+    except Exception:
+        pass
+    return None
+
+
 def build_report(config, args, now=None):
     now = time.time() if now is None else now
     client = need_plex(config)
     root = client.get("/")
     sections = client.get("/library/sections").get("Directory", []) or []
     checked, skipped = choose_sections(sections, args.library)
-    bitrate_limit, limit_problem = remote_limit(client, args.max_bitrate)
+    # One /:/prefs request feeds both the bitrate limit and the media deletion setting.
+    prefs = read_once(lambda: client.get("/:/prefs"))
+    bitrate_limit, limit_problem = remote_limit(prefs, args.max_bitrate)
     limit_kbps = bitrate_limit["kbps"] if bitrate_limit else 0
 
     libraries = []
@@ -678,6 +717,7 @@ def build_report(config, args, now=None):
         "libraries": libraries,
         "skipped_libraries": skipped,
         "totals": totals,
+        "media_deletion_allowed": media_deletion_allowed(prefs),
     }
     if limit_problem:
         report["bitrate_limit_problem"] = limit_problem

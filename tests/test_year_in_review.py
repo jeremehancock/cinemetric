@@ -10,7 +10,8 @@ import sys
 import time
 from unittest import mock
 
-from helpers import FAKE_API_KEY, FAKE_TOKEN, FakeServer, OfflineTestCase, Reply, fixture, load_script
+from helpers import (FAKE_API_KEY, FAKE_TOKEN, FakeServer, OfflineTestCase, Reply, fixture, load_script,
+                     check_media_deletion)
 
 yr = load_script("year-in-review")
 
@@ -464,3 +465,15 @@ class SavedChoices(Recaps):
     def test_crafted_recap_id(self):
         self.assertIn("isn't a recap id", self.error("online-page", "--recap", "../dashboard", "--url", self.LINK))
         self.assertFalse(os.path.exists(yr.state_path()))
+
+
+# ---------------------------------------------------------------- media deletion setting
+
+
+class MediaDeletion(Recaps):
+    def test_media_deletion_setting(self):
+        def build(answer):
+            self.routes["/:/prefs"] = answer
+            self.server.requests.clear()
+            return self.recap("--year", "2025", "--json-only"), self.server.requests
+        check_media_deletion(self, build)

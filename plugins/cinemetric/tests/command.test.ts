@@ -78,6 +78,26 @@ describe('/cinemetric-mods', () => {
     expect(row.value).toBe(true)
   })
 
+  test('lists Now Playing, off by default', async ($, on) => {
+    configMenu(on, true)
+    const { text } = await run($, '')
+    expect(text).toContain('now (off)')
+    expect(text).toContain('Mods: guard, status, now.')
+  })
+
+  test('anyone can switch Now Playing on and off', { options: { now_playing_pane: true } }, async ($, on) => {
+    const sets: unknown[] = []
+    mock.env(on, { HOME: '/home/u' })
+    on('config.list', () => ({ value: [] }))
+    on('config.set', ($, e) => {
+      sets.push([e.key, e.value])
+      return { value: e.value }
+    })
+    const { text } = await run($, 'now off', { kind: 'sdk' })
+    expect(text).toContain('now is now off')
+    expect(sets).toEqual([['cinemetric.now_playing_pane', false]])
+  })
+
   test('only the user can switch the guard off', async ($, on) => {
     const row = configMenu(on, true)
     const { text } = await run($, 'guard off', { kind: 'sdk' })

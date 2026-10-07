@@ -7,6 +7,8 @@ import type { Register } from 'claude-code'
 import { setUpCommand } from './command'
 import { setUpGuard } from './guard'
 import { GUARD_SETTING } from './guard-rules'
+import { setUpNowPlaying } from './now-playing'
+import { NOW_SETTING } from './now-playing-rules'
 import { setUpStatusLine } from './status-line'
 import { STATUS_SETTING } from './status-line-rules'
 
@@ -22,5 +24,7 @@ export const register: Register = (on, options) => {
   setUpCommand(on, options)
   // Also adds the /cinemetric-mods command at session start, on or off.
   setUpStatusLine(on, options[STATUS_SETTING] === true)
+  // Adds the /cinemetric-now command at session start, on or off.
+  setUpNowPlaying(on, options[NOW_SETTING] === true)
   if (options[GUARD_SETTING] === true) setUpGuard(on)
 }

@@ -52,7 +52,7 @@ p, li, figcaption, .poster-sub { text-wrap: pretty; }
 /* Short text (a line or three) looks better with its lines evened out, so a second line
    is never just a word or two hanging under a full one. */
 .ticks li, .feature-copy > p, .ask-line, .card p, .mock figcaption, .steps-lead, .section-head p,
-.step-body p, .extra-body p, .extra-body li, .mod-switch p, .legal { text-wrap: balance; }
+.step-body p, .extra-body p, .extra-body li, .mod-switch p, .mod-note, .legal { text-wrap: balance; }
 q { quotes: "\201C" "\201D"; }
 
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
@@ -318,8 +318,10 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
 .card p { color: var(--muted); margin: 0; font-size: .96rem; }
 
 /* ---------- Mods ---------- */
-.mods-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
-.mod-list { display: grid; gap: 18px; min-width: 0; }
+/* The mod cards and the card on switching them share one two-column grid, so each row's cards
+   match in height and the switching card takes the next free cell rather than a column of its own. */
+.mods-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.mod-list { display: contents; }
 .mod-head { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
 .mod-ico {
   flex: none; width: 52px; height: 52px; padding: 12px; border-radius: 14px;
@@ -341,13 +343,19 @@ h1 { font-size: clamp(2.6rem, 7.5vw, 5.4rem); font-weight: 900; letter-spacing: 
 .mod-caveat strong { color: var(--accent-hi); }
 .mod-sample { margin-top: 12px; padding: 4px 14px; }
 .codeblock.mod-sample code { font-size: .85rem; white-space: normal; overflow-wrap: anywhere; }
+.mod-panel { padding: 10px 14px; }
+.codeblock.mod-panel code { font-size: .78rem; min-width: 0; }
+/* Like the real panel: each line stays on one line, cut short if there isn't room. */
+.mod-panel code span { display: block; padding: 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mod-panel code .mod-panel-top { color: var(--muted); }
 .mod-switch {
   background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 22px;
 }
 .mod-switch h3 { margin-top: 0; }
 .mod-switch p { color: var(--muted); }
 .mod-switch .codeblock { margin: 0 0 16px; }
-.mod-note { font-size: .92rem; border-top: 1px solid var(--line); padding-top: 14px; margin-bottom: 0; }
+.mod-note { font-size: .92rem; color: var(--muted); text-align: center; margin: 22px 0 0; }
+.mod-switch p:last-child { margin-bottom: 0; }
 
 /* ---------- Setup ---------- */
 .section-head + .steps-lead { margin-top: -24px; }

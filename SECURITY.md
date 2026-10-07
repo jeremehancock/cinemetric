@@ -41,6 +41,15 @@ off. It also can't hide a token you type or paste into the chat yourself, though
 Claude passing it on. Its rules are in
 [openspec/specs/read-only-guard/spec.md](openspec/specs/read-only-guard/spec.md).
 
+## Now Playing
+
+The Now Playing mod is off until you switch it on. When you type `/cinemetric-now`, it opens a panel
+and runs the same read-only server-health script the skills use, asking your server only for its
+current streams, about every 30 seconds while the panel is open. It stops when you close the panel.
+The mod itself never reads your token: the script does the talking to Plex, under the same rules as
+every skill. The panel shows people's names and what they're watching on your screen only; none of it
+is sent to Claude. It saves nothing.
+
 ## What the skills do not protect against
 
 - Anyone who can read your config file or environment can use your token. Keep your user account secure.

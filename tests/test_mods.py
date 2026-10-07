@@ -71,12 +71,14 @@ class PluginFiles(unittest.TestCase):
         self.assertEqual(start["matcher"], "startup")
         self.assertIn("mods_notice.py", start["hooks"][0]["command"])
 
-    def test_guard_starts_on_and_status_line_starts_off(self):
+    def test_guard_starts_on_and_the_other_mods_start_off(self):
         settings = read_json(PLUGIN, ".claude-plugin", "plugin.json")["userConfig"]
         self.assertEqual(settings["read_only_guard"]["type"], "boolean")
         self.assertIs(settings["read_only_guard"]["default"], True)
-        self.assertEqual(settings["library_status_line"]["type"], "boolean")
-        self.assertIs(settings["library_status_line"]["default"], False)
+        for name in ("library_status_line", "now_playing_pane"):
+            self.assertEqual(settings[name]["type"], "boolean")
+            self.assertIs(settings[name]["default"], False)
+        self.assertIn("only while the panel is open", settings["now_playing_pane"]["description"])
 
 
 class WebsiteMods(unittest.TestCase):
@@ -97,6 +99,12 @@ class WebsiteMods(unittest.TestCase):
         # The settings check can be worked around, so the site mustn't promise more.
         for words in ("never Claude", "only you can turn it off"):
             self.assertNotIn(words, text)
+
+    def test_now_playing_card(self):
+        text = self.site.text["mods"]
+        for words in ("Now Playing", "/cinemetric-now", "only while the panel is open", "never sent to\xa0Claude"):
+            self.assertIn(words, text)
+        self.assertEqual(text.count("Off by default"), 2)
 
     def test_guard_card_and_privacy_mention_the_token(self):
         self.assertIn("hides your Plex token and Tautulli API key", self.site.text["mods"])

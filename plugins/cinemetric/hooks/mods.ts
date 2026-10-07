@@ -4,6 +4,7 @@
 // See openspec/specs/mods/spec.md.
 
 import { GUARD_SETTING } from './guard-rules'
+import { NOW_SETTING } from './now-playing-rules'
 import { STATUS_SETTING } from './status-line-rules'
 
 export type Mod = {
@@ -27,6 +28,13 @@ export const MODS: readonly Mod[] = [
     setting: STATUS_SETTING,
     description:
       'Library status line: shows how big your Plex library is and when Cinemetric last checked it, just above the prompt.',
+    isUserOnlyOff: false,
+  },
+  {
+    name: 'now',
+    setting: NOW_SETTING,
+    description:
+      "Now Playing: /cinemetric-now opens a panel showing who's streaming from Plex right now, checked about every 30 seconds while it's open.",
     isUserOnlyOff: false,
   },
 ]

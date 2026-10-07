@@ -88,6 +88,12 @@ settings files. A call SHALL be refused only when both of these are true:
 Every other call SHALL pass this check untouched, including edits to any project's code (Cinemetric's
 own source among them) and edits to Claude Code settings that don't mention the guard.
 
+Anything a user reads (README, SECURITY.md, the website, the setting's description in `/config`)
+SHALL describe this as the guard being meant to be switched off only by the user, with Claude's usual
+ways of switching it off refused. It SHALL NOT promise that Claude can never switch the guard off,
+since the settings-file check only looks for the setting's name and can't see inside a program
+Claude writes to change the file.
+
 #### Scenario: Claude asked to turn the guard off
 - **WHEN** a later mods tool is asked to switch the guard off
 - **THEN** the guard stays on and Claude is told the user must use the config menu or type
@@ -116,6 +122,11 @@ own source among them) and edits to Claude Code settings that don't mention the 
 - **WHEN** the guard is on and Claude edits `.claude/settings.json` to add a permission that has
   nothing to do with the guard
 - **THEN** the edit goes ahead
+
+#### Scenario: Reading about switching the guard off
+- **WHEN** a user reads the README, SECURITY.md, the website or the guard's description in `/config`
+- **THEN** they learn the guard is meant to be switched off only by them and that Claude's usual ways
+  are refused, and nothing tells them Claude can never switch it off
 
 ### Requirement: Works on Claude Code versions without mods
 Cinemetric SHALL load, and every skill SHALL work, on Claude Code 2.1.75 or newer. Mods SHALL need

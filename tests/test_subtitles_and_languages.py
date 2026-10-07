@@ -438,7 +438,9 @@ class Report(Base):
         report = self.report()
         show = self.listed(report, "foreign_no_subtitles", "TV Shows")["Harbor Tales"]
         self.assertEqual(show, {"title": "Harbor Tales", "year": 2010, "episodes": 4, "episodes_flagged": 3,
-                                "audio_languages": {"es": 2, "de": 1}})
+                                "audio_languages": {"es": 2, "de": 1},
+                                "seasons": [{"season": 1, "episodes": [[2, 4]], "some_versions": []}],
+                                "ranges_more": 0, "unnumbered": [], "unnumbered_more": 0})
         quiet = self.listed(report, "unknown_language", "TV Shows")["Quiet Show"]
         self.assertEqual((quiet["episodes"], quiet["episodes_flagged"]), (2, 1))
 
@@ -498,3 +500,110 @@ class Report(Base):
         data["movies"][1]["title"] = "Bad\x1b[31mTitle"
         self.network(data=data)
         self.assertIn("Bad [31mTitle", self.listed(self.report(), "foreign_no_subtitles"))
+
+
+# ---------------------------------------------------------------- episode numbers
+
+SPANISH_NO_SUBTITLES = {"streamType": 2, "languageTag": "es", "languageCode": "spa", "language": "Spanish"}
+ENGLISH = [{"streamType": 2, "languageTag": "en", "languageCode": "eng", "language": "English"},
+           {"streamType": 3, "languageTag": "en", "languageCode": "eng", "language": "English"}]
+
+
+def one_show(episodes):
+    """The fixture with Harbor Tales as the only show. Each episode is (season, number, files), where
+    files is a string with one letter per version: "f" for Spanish audio and no subtitles (flagged
+    under foreign_no_subtitles and no_subtitles), "e" for English audio and subtitles (no finding).
+    season or number can be None, and a fourth value gives extra listing fields."""
+    data = fixture("subtitles-and-languages", "plex.json")
+    data["episodes"], data["details"] = [], {k: v for k, v in data["details"].items()
+                                             if "grandparentTitle" not in v}
+    data["shows"] = [show for show in data["shows"] if show["title"] == "Harbor Tales"]
+    for i, (season, number, files, *extra) in enumerate(episodes):
+        key = str(90000 + i)
+        item = {"ratingKey": key, "title": f"Episode {i}", "grandparentRatingKey": "500",
+                "grandparentTitle": "Harbor Tales"}
+        if season is not None:
+            item["parentIndex"] = season
+        if number is not None:
+            item["index"] = number
+        item.update(extra[0] if extra else {})
+        data["episodes"].append(item)
+        media = [{"id": int(key) * 10 + n, "videoResolution": "1080", "Part": [{
+            "id": int(key) * 10 + n, "file": "/media/secret-path/x.mkv",
+            "Stream": [{"streamType": 1}] + ([SPANISH_NO_SUBTITLES] if kind == "f" else ENGLISH)}]}
+            for n, kind in enumerate(files)]
+        data["details"][key] = dict(item, Media=media)
+    return data
+
+
+class EpisodeNumbers(Base):
+    def show(self, episodes, finding="foreign_no_subtitles"):
+        self.network(data=one_show(episodes))
+        entries = self.listed(self.report(library=["TV Shows"]), finding, "TV Shows")
+        return entries.get("Harbor Tales")
+
+    def test_ranges_in_two_seasons(self):
+        show = self.show([(1, n, "f") for n in (1, 2, 3, 4, 6)] + [(1, 5, "e"), (3, 2, "f"), (3, 1, "e")])
+        self.assertEqual(show["seasons"], [{"season": 1, "episodes": [[1, 4], [6, 6]], "some_versions": []},
+                                           {"season": 3, "episodes": [[2, 2]], "some_versions": []}])
+        self.assertEqual((show["ranges_more"], show["unnumbered"], show["unnumbered_more"]), (0, [], 0))
+
+    def test_one_version_of_an_episode_is_fine(self):
+        show = self.show([(2, 5, "ef"), (2, 6, "ff")], finding="no_subtitles")
+        self.assertEqual(show["seasons"], [{"season": 2, "episodes": [[5, 6]], "some_versions": [5]}])
+
+    def test_episode_with_no_number(self):
+        show = self.show([(1, None, "f", {"title": "Live Special", "originallyAvailableAt": "2021-12-31"}),
+                          (None, None, "f", {"title": "Odd\x1bDate", "originallyAvailableAt": "31/12/2021"})])
+        self.assertEqual(show["seasons"], [])
+        self.assertEqual(show["unnumbered"], [
+            {"title": "Live Special", "aired": "2021-12-31", "some_versions": False},
+            {"title": "Odd Date", "aired": None, "some_versions": False}])
+
+    def test_at_most_10_unnumbered_episodes(self):
+        show = self.show([(1, None, "f")] * 13)
+        self.assertEqual((len(show["unnumbered"]), show["unnumbered_more"]), (10, 3))
+
+    def test_at_most_30_ranges(self):
+        show = self.show([(1, n, "ef") for n in range(1, 100, 2)], finding="no_subtitles")
+        [season] = show["seasons"]
+        self.assertEqual(season["episodes"], [[n, n] for n in range(1, 60, 2)])
+        self.assertEqual(season["some_versions"], list(range(1, 60, 2)))
+        self.assertEqual(show["ranges_more"], 20)
+
+    def test_cap_carries_across_seasons(self):
+        show = self.show([(1, n, "f") for n in range(1, 50, 2)] + [(2, n, "f") for n in range(1, 20, 2)])
+        self.assertEqual([len(s["episodes"]) for s in show["seasons"]], [25, 5])
+        self.assertEqual(show["ranges_more"], 5)
+
+    def test_every_episode_flagged(self):
+        show = self.show([(s, n, "f") for s in range(1, 11) for n in range(1, 31)])
+        self.assertEqual(show["seasons"], [{"season": s, "episodes": [[1, 30]], "some_versions": []}
+                                           for s in range(1, 11)])
+        self.assertEqual(show["ranges_more"], 0)
+
+    def test_specials_come_first(self):
+        show = self.show([(1, 1, "f"), (0, 3, "f")])
+        self.assertEqual([s["season"] for s in show["seasons"]], [0, 1])
+
+    def test_repeated_episode_appears_once(self):
+        show = self.show([(1, 2, "f"), (1, 2, "f")])
+        self.assertEqual(show["episodes_flagged"], 2)
+        self.assertEqual(show["seasons"], [{"season": 1, "episodes": [[2, 2]], "some_versions": []}])
+
+    def test_numbers_given_as_text(self):
+        show = self.show([("1", "4", "f"), ("x", "5", "f")])
+        self.assertEqual(show["seasons"], [{"season": 1, "episodes": [[4, 4]], "some_versions": []}])
+        self.assertEqual(len(show["unnumbered"]), 1)
+
+    def test_unavailable_version_is_not_counted_as_fine(self):
+        data = one_show([(1, 1, "fe")])
+        data["details"]["90000"]["Media"][1]["deletedAt"] = 1700000000
+        self.network(data=data)
+        show = self.listed(self.report(library=["TV Shows"]), "foreign_no_subtitles", "TV Shows")["Harbor Tales"]
+        self.assertEqual(show["seasons"][0]["some_versions"], [])
+
+    def test_no_file_paths(self):
+        self.network(data=one_show([(1, 1, "f"), (None, None, "f")]))
+        self.assertNotIn("secret-path", json.dumps(self.report()))
+

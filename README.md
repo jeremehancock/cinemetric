@@ -224,7 +224,6 @@ each idea below might be built are in [openspec/ideas.md](openspec/ideas.md).
   unavailable", read from the newest snapshot without contacting your server.
 - **Guard log:** a command that lists what the guard stopped recently and why.
 - **Now Playing:** total bandwidth, and the exact reason each stream is being transcoded.
-- **Status line:** an optional count of titles added since the last check.
 
 Suggestions are welcome via GitHub issues.
 

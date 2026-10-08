@@ -178,8 +178,3 @@ subtitles" or "DTS audio") using the same rules as `playback-check`.
 
 - **Catch:** the session listing gives the transcode decision but not always the reason; check what
   `/status/sessions` includes **(to verify)** before promising it.
-
-### Status line: titles added since the last check
-
-An optional "+14 titles" segment, from the difference between the two newest snapshots. Still never
-contacts the server.

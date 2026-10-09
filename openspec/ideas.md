@@ -56,6 +56,11 @@ track.)
 
 ## New skills
 
+Each new skill fills one group of the website's skills section, so the three groups stay even (six
+skills each): `collections-and-playlists` goes in **Your library**, `watch-mix` in **Watching** and
+`export` in **Your server**. `export` could fit Your library too, but it sits beside `dashboard` and
+`changes`, the other skills that save files on the user's computer.
+
 ### `collections-and-playlists`
 
 Collections and playlists on the server: how many titles each holds, collections with only one title,
@@ -79,6 +84,24 @@ codecs, size, added date, watched status, collections), for a spreadsheet.
   a `--with-people` option could add "last watched by".
 - **Catch:** spreadsheet programs run text that starts with `=`, `+`, `-` or `@` as a formula. Titles
   from the server must be escaped against that (prefix with `'`).
+
+### `watch-mix`
+
+What gets watched compared with what's on the server: each genre's, decade's and resolution's share of
+the library next to its share of plays and watch time, for example "Horror is 18% of your movies but
+3% of what's watched; anime is 5% of your shows but 22% of watch time." For the whole server or one
+person, over the last 12 months or a period the user names.
+
+- **Sources:** library listings for what's on the shelf (as `library-report` reads them); Tautulli
+  history, or Plex's own history without it, for plays, the same way `watch-activity` does.
+- **Catch:** genres aren't in history entries, so each played title needs its genres looked up. Use
+  batches like `playback-check`'s instead of one request per title. The same lookup would give
+  `year-in-review` its favorite genres.
+- **Catch:** a title can have several genres, so the shares won't add up to 100%. Say so.
+- **Catch:** without Tautulli, Plex only records finished plays, so watch time is finished plays times
+  each title's length. Say which was used.
+- **Privacy:** for the whole server, name no one, like `year-in-review`. One person only when asked.
+- Facts only: no "you should add more anime" or "remove horror" suggestions.
 
 ---
 

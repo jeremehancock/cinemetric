@@ -203,9 +203,13 @@ each idea below might be built are in [openspec/ideas.md](openspec/ideas.md).
 
 **New skill ideas**
 
-- **`collections-and-playlists`:** your collections and playlists, how big each is, collections with
-  only one title, and playlists pointing at files Plex can no longer find.
-- **`export`:** save a library listing as a spreadsheet file (CSV) on your computer.
+One for each group of skills on the website:
+
+- **Your library: `collections-and-playlists`:** your collections and playlists, how big each is,
+  collections with only one title, and playlists pointing at files Plex can no longer find.
+- **Watching: `watch-mix`:** what gets watched compared with what's on the shelf, by genre, decade and
+  quality, for example "horror is 18% of your movies but 3% of what's watched".
+- **Your server: `export`:** save a library listing as a spreadsheet file (CSV) on your computer.
 
 **Updates to existing skills**
 

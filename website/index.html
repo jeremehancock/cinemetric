@@ -120,7 +120,7 @@
       <div class="wrap">
         <div class="section-head reveal">
           <p class="kicker">The library</p>
-          <h2 id="skills-title">Sixteen skills. One curious question at a time.</h2>
+          <h2 id="skills-title">Seventeen skills. One curious question at a time.</h2>
           <p>Just ask Claude in your own words. Each skill knows when it's needed, runs a small script against your server and turns the result into a clear report.</p>
         </div>
 
@@ -169,6 +169,11 @@
                 <span class="skill-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M4 24s7-12 20-12 20 12 20 12-7 12-20 12S4 24 4 24z" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="24" r="6" fill="currentColor"/></svg></span>
                 <span class="skill-name">watch-activity</span>
                 <span class="skill-sub">Who watched what</span>
+              </a></li>
+              <li><a class="skill-row" href="#skill-mix" style="--a:#facc15;--b:#422006">
+                <span class="skill-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="4" y="12" width="6" height="28" rx="1.5" fill="currentColor" opacity=".4"/><rect x="11" y="30" width="6" height="10" rx="1.5" fill="currentColor"/><rect x="19" y="22" width="6" height="18" rx="1.5" fill="currentColor" opacity=".4"/><rect x="26" y="18" width="6" height="22" rx="1.5" fill="currentColor"/><rect x="34" y="26" width="6" height="14" rx="1.5" fill="currentColor" opacity=".4"/><rect x="41" y="8" width="3" height="32" rx="1.5" fill="currentColor"/><path d="M4 44h40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity=".6"/></svg></span>
+                <span class="skill-name">watch-mix</span>
+                <span class="skill-sub">Watched vs. what you have</span>
               </a></li>
               <li><a class="skill-row" href="#skill-progress" style="--a:#c084fc;--b:#3b0764">
                 <span class="skill-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="4" y="9" width="40" height="7" rx="3.5" fill="currentColor"/><rect x="4" y="21" width="40" height="7" rx="3.5" fill="currentColor" opacity=".3"/><rect x="4" y="21" width="26" height="7" rx="3.5" fill="currentColor" opacity=".85"/><rect x="4" y="33" width="40" height="7" rx="3.5" fill="currentColor" opacity=".3"/><rect x="4" y="33" width="12" height="7" rx="3.5" fill="currentColor" opacity=".7"/></svg></span>
@@ -934,8 +939,61 @@
       </div>
     </section>
 
+    <!-- ============ SKILL: WATCH MIX ============ -->
+    <section class="section feature" id="skill-mix" aria-labelledby="f-mix">
+      <div class="wrap feature-grid">
+        <div class="feature-copy reveal">
+          <p class="kicker" style="--k:#fde047">watch-mix</p>
+          <h2 id="f-mix">Do you watch what you keep?</h2>
+          <p>What's on your server next to what actually gets watched: each genre, decade and resolution's share of your movies and shows, beside its share of plays and watch time.</p>
+          <ul class="ticks">
+            <li>Leads with the biggest differences, such as <q>horror is 18% of your movies but 3% of what's watched</q>.</li>
+            <li>By genre, by decade and by quality (4K, 1080p, 720p, SD), for movies and TV separately.</li>
+            <li>The last 12 months, or any number of months you name.</li>
+            <li>For the whole server it names no one; ask about one person and it covers just them.</li>
+            <li>Facts only: it never tells you to add or remove anything.</li>
+            <li>Watch time comes from Tautulli; with Plex alone it's finished plays times each title's length.</li>
+          </ul>
+          <p class="ask-line">Ask Claude: <q>Do we actually watch the horror movies?</q> or <q>How does what we watch compare with what's on Plex?</q></p>
+        </div>
+
+        <figure class="mock demo reveal" aria-label="Example: what gets watched compared with what's on the server">
+          <div class="mock-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><em>Claude Code</em></div>
+          <div class="tabpanel" id="panel-mix-1">
+            <pre class="term"><code><span class="t-you">&gt; Do we watch what's on Plex?</span>
+<span class="t-dot">⏺</span> Mostly, with a few big gaps. Horror
+  is 18% of your movies but 3% of the
+  time spent watching them; drama is
+  30% of the movies and half of the
+  watching. Over the last 12 months.
+
+  <b class="t-h">Movies, watched more</b>  shelf  watched
+  Drama                   30%      50%
+  1990s                   14%      27%
+  Comedy                  41%      49%
+
+  <b class="t-h">Movies, watched less</b>
+  Horror                  18%       3%
+  2020s                   22%      11%
+  Documentary              9%       2%
+
+  <b class="t-h">TV, watched more</b>
+  Animation                5%      22%
+  Reality                  4%      15%
+
+  <b class="t-h">Worth knowing</b>
+  Watch time is from Tautulli. Genres
+  overlap, so they add up past 100%.
+  2020s films are newer, so they've
+  had less time to be watched.</code></pre>
+          </div>
+          <figcaption>Example reply with made-up data. Claude's wording will vary.</figcaption>
+        </figure>
+      </div>
+    </section>
+
     <!-- ============ SKILL: YEAR IN REVIEW ============ -->
-    <section class="section feature" id="skill-recap" aria-labelledby="f-recap">
+    <section class="section feature flip" id="skill-recap" aria-labelledby="f-recap">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#818cf8">year-in-review</p>
@@ -959,7 +1017,7 @@
     </section>
 
     <!-- ============ SKILL: DASHBOARD ============ -->
-    <section class="section feature flip" id="skill-dashboard" aria-labelledby="f-dash">
+    <section class="section feature" id="skill-dashboard" aria-labelledby="f-dash">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#a382ff">dashboard</p>

@@ -41,6 +41,7 @@ SCRIPTS = {
     "unwatched": "unwatched.py",
     "users-and-shares": "users_and_shares.py",
     "watch-activity": "watch_activity.py",
+    "watch-mix": "watch_mix.py",
     "what-to-watch": "what_to_watch.py",
     "year-in-review": "year_in_review.py",
 }

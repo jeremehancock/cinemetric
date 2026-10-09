@@ -1,0 +1,484 @@
+{
+ "/": {
+  "MediaContainer": {
+   "friendlyName": "Test Server",
+   "version": "1.40.0.0000-test"
+  }
+ },
+ "/library/sections": {
+  "MediaContainer": {
+   "Directory": [
+    {
+     "key": "1",
+     "title": "Movies",
+     "type": "movie"
+    },
+    {
+     "key": "2",
+     "title": "TV Shows",
+     "type": "show"
+    },
+    {
+     "key": "3",
+     "title": "Music",
+     "type": "artist"
+    },
+    {
+     "key": "4",
+     "title": "Kids Movies",
+     "type": "movie"
+    }
+   ]
+  }
+ },
+ "movies": [
+  {
+   "ratingKey": "101",
+   "title": "Night of the Test",
+   "duration": 7200000,
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "gb": 2
+      }
+     ]
+    }
+   ],
+   "Genre": [
+    {
+     "tag": "Horror"
+    }
+   ],
+   "year": 1987,
+   "guid": "plex://movie/101"
+  },
+  {
+   "ratingKey": "102",
+   "title": "Haunted Sample",
+   "duration": 7200000,
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "gb": 2
+      }
+     ]
+    }
+   ],
+   "Genre": [],
+   "year": 1985,
+   "guid": "plex://movie/102"
+  },
+  {
+   "ratingKey": "103",
+   "title": "Ghost Fixture",
+   "duration": 7200000,
+   "Media": [
+    {
+     "videoResolution": "720",
+     "Part": [
+      {
+       "gb": 2
+      }
+     ]
+    }
+   ],
+   "Genre": [],
+   "year": 1999,
+   "guid": "plex://movie/103"
+  },
+  {
+   "ratingKey": "104",
+   "title": "Scream Data",
+   "duration": 7200000,
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "gb": 2
+      }
+     ]
+    },
+    {
+     "videoResolution": "4k",
+     "Part": [
+      {
+       "gb": 20
+      }
+     ]
+    }
+   ],
+   "Genre": [],
+   "year": 2021,
+   "guid": "plex://movie/104"
+  },
+  {
+   "ratingKey": "105",
+   "title": "Fear Mock",
+   "duration": 7200000,
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "gb": 2
+      }
+     ]
+    }
+   ],
+   "Genre": [],
+   "year": 2022,
+   "guid": "plex://movie/105"
+  },
+  {
+   "ratingKey": "106",
+   "title": "Comedy Test One",
+   "duration": 7200000,
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "gb": 2
+      }
+     ]
+    }
+   ],
+   "Genre": [
+    {
+     "tag": "Comedy"
+    },
+    {
+     "tag": "Drama"
+    }
+   ],
+   "year": 1990,
+   "guid": "plex://movie/106"
+  },
+  {
+   "ratingKey": "107",
+   "title": "Comedy Test Two",
+   "duration": 5400000,
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "gb": 2
+      }
+     ]
+    }
+   ],
+   "Genre": [],
+   "year": 1991,
+   "guid": "plex://movie/107"
+  },
+  {
+   "ratingKey": "108",
+   "title": "Drama Test",
+   "duration": 7200000,
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "gb": 2
+      }
+     ]
+    }
+   ],
+   "Genre": [],
+   "year": 2001,
+   "guid": "plex://movie/108"
+  },
+  {
+   "ratingKey": "109",
+   "title": "Test Story",
+   "duration": 7200000,
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "gb": 2
+      }
+     ]
+    }
+   ],
+   "Genre": [],
+   "year": 1995,
+   "guid": "plex://movie/109"
+  },
+  {
+   "ratingKey": "110",
+   "title": "Test Story",
+   "duration": 7200000,
+   "Media": [
+    {
+     "videoResolution": "sd",
+     "Part": [
+      {
+       "gb": 2
+      }
+     ]
+    }
+   ],
+   "Genre": [],
+   "originallyAvailableAt": "2019-05-01",
+   "guid": "plex://movie/110"
+  },
+  {
+   "ratingKey": "111",
+   "title": "Mystery Reel",
+   "duration": 0,
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "gb": 2
+      }
+     ],
+     "deletedAt": 1700000000
+    }
+   ],
+   "Genre": []
+  }
+ ],
+ "kids_movies": [
+  {
+   "ratingKey": "401",
+   "title": "Puppet Fright",
+   "duration": 7200000,
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "gb": 2
+      }
+     ]
+    }
+   ],
+   "Genre": [],
+   "year": 2010,
+   "guid": "plex://movie/401"
+  }
+ ],
+ "shows": [
+  {
+   "ratingKey": "500",
+   "title": "Test Show",
+   "year": 2015
+  },
+  {
+   "ratingKey": "600",
+   "title": "Other Show",
+   "originallyAvailableAt": "2020-02-02"
+  }
+ ],
+ "episodes": [
+  {
+   "ratingKey": "501",
+   "grandparentRatingKey": "500",
+   "parentIndex": 1,
+   "index": 1,
+   "duration": 1800000,
+   "Media": [
+    {
+     "videoResolution": "1080",
+     "Part": [
+      {
+       "gb": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "502",
+   "grandparentRatingKey": "500",
+   "parentIndex": 1,
+   "index": 2,
+   "duration": 1800000,
+   "Media": [
+    {
+     "videoResolution": "720",
+     "Part": [
+      {
+       "gb": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "503",
+   "grandparentRatingKey": "500",
+   "parentIndex": 2,
+   "index": 3,
+   "duration": 1800000,
+   "Media": [
+    {
+     "videoResolution": "720",
+     "Part": [
+      {
+       "gb": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "ratingKey": "601",
+   "grandparentRatingKey": "600",
+   "parentIndex": 1,
+   "index": 1,
+   "duration": 0,
+   "Media": [
+    {
+     "videoResolution": "sd",
+     "Part": [
+      {
+       "gb": 1
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "genres": {
+  "1": [
+   {
+    "key": "10",
+    "title": "Horror",
+    "members": [
+     "101",
+     "102",
+     "103",
+     "104",
+     "105"
+    ]
+   },
+   {
+    "key": "11",
+    "title": "Comedy",
+    "members": [
+     "106",
+     "107"
+    ]
+   },
+   {
+    "key": "12",
+    "title": "Drama",
+    "members": [
+     "106",
+     "108",
+     "109",
+     "110"
+    ]
+   },
+   {
+    "key": "13",
+    "title": "Romance",
+    "members": [
+     "106"
+    ]
+   }
+  ],
+  "4": [
+   {
+    "key": "40",
+    "title": "horror",
+    "members": [
+     "401"
+    ]
+   }
+  ],
+  "2": [
+   {
+    "key": "20",
+    "title": "Animation",
+    "members": [
+     "500"
+    ]
+   },
+   {
+    "key": "21",
+    "title": "Reality",
+    "members": [
+     "600"
+    ]
+   }
+  ]
+ },
+ "plex_history": [
+  {
+   "type": "movie",
+   "ratingKey": "101",
+   "title": "Night of the Test",
+   "originallyAvailableAt": "1987-10-31",
+   "accountID": 1,
+   "deviceID": 7,
+   "daysAgo": 10
+  },
+  {
+   "type": "movie",
+   "ratingKey": "999",
+   "title": "Comedy Test One",
+   "originallyAvailableAt": "1990-03-01",
+   "accountID": 2,
+   "deviceID": 8,
+   "daysAgo": 20
+  },
+  {
+   "type": "movie",
+   "ratingKey": "105",
+   "title": "Fear Mock",
+   "originallyAvailableAt": "2022-01-01",
+   "accountID": 1,
+   "daysAgo": 400
+  },
+  {
+   "type": "episode",
+   "ratingKey": "501",
+   "grandparentKey": "/library/metadata/500",
+   "grandparentTitle": "Test Show",
+   "parentIndex": 1,
+   "index": 1,
+   "accountID": 2,
+   "daysAgo": 5
+  },
+  {
+   "type": "episode",
+   "ratingKey": "601",
+   "grandparentKey": "/library/metadata/600",
+   "grandparentTitle": "Other Show",
+   "parentIndex": 1,
+   "index": 1,
+   "accountID": 1,
+   "daysAgo": 6
+  },
+  {
+   "type": "track",
+   "ratingKey": "9001",
+   "title": "Test Song",
+   "accountID": 1,
+   "daysAgo": 3
+  }
+ ],
+ "accounts": [
+  {
+   "id": 1,
+   "name": "owner-test"
+  },
+  {
+   "id": 2,
+   "name": "alex-test"
+  }
+ ]
+}

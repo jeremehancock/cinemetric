@@ -31,6 +31,7 @@ CSS and JavaScript with no build step, ready for any static host.
 | `users-and-shares` | Who your server is shared with (friends, Plex Home, managed users, pending invites), which libraries each person can see, who can download, when each person last played something, and which shared libraries nobody has played from lately. Reads the share list from your plex.tv account; only the server owner can use it |
 | `unwatched` | Movies and shows nobody has finished in a while (added more than 6 months ago, no finished play by anyone since), largest first, with how much space they use and when each was last finished. Facts only: it never suggests deleting anything. Uses Tautulli if you have it, otherwise Plex's own history |
 | `what-to-watch` | Finds something to watch tonight in your own library: by genre, length, decade, rating or content rating, unwatched only, shuffled for fresh ideas each time. Suggests a few titles with a reason for each, or picks up where you left off. Only titles already on your server |
+| `watch-mix` | What gets watched compared with what's on your server: each genre's, decade's and resolution's share of your movies and shows (titles and storage) next to its share of plays and watch time, over the last 12 months or another period, leading with the biggest differences, for example "horror is 18% of your movies but 3% of what's watched". A title can be in several genres, so genre shares add up to more than 100%. For the whole server it names no one; it can also cover one person. Facts only: it never suggests adding or removing anything. Uses Tautulli if you have it, otherwise Plex's own history (finished plays only, with watch time worked out from each title's length) |
 | `show-progress` | Where each person is in each TV show: the furthest episode they finished, how many are left and the next one, and whether they're caught up, have new episodes waiting, are partway through, or stopped (nothing played from the show in 3 months). Rewatching early episodes or starting partway in doesn't count as falling behind. Also which shows got new episodes lately and whether the people following them have watched them. For everyone, one person or one show; "caught up" means with what's on your server. Uses Tautulli if you have it, otherwise Plex's own history |
 | `episode-gaps` | Gaps in your TV shows: episode numbers missing between ones you have (E01, E02 and E04 are there, so E03 is probably missing), seasons that start late, seasons missing between others, and episodes whose files Plex can't find. Specials, two-episode files and shows numbered straight on across seasons aren't counted as gaps. Uses only what's on your server, so it can't see episodes after the last one you have |
 | `playback-check` | Files likely to be transcoded (converted on the fly) on common devices, and why: image-based subtitles (PGS, VobSub), TrueHD or DTS audio, and bitrates above your remote streaming limit or a speed you choose. With Tautulli, also which devices and people transcode most, how often, and why. Checks every movie and episode in about a minute; facts only, it never tells you to convert files |
@@ -204,10 +205,8 @@ each idea below might be built are in [openspec/ideas.md](openspec/ideas.md).
 
 **New skill ideas**
 
-One for each of the other two groups of skills on the website:
+One for the last group of skills on the website that's still waiting for its new skill:
 
-- **Watching: `watch-mix`:** what gets watched compared with what's on the shelf, by genre, decade and
-  quality, for example "horror is 18% of your movies but 3% of what's watched".
 - **Your server: `export`:** save a library listing as a spreadsheet file (CSV) on your computer.
 
 **Updates to existing skills**

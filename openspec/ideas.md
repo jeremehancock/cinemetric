@@ -57,9 +57,10 @@ track.)
 ## New skills
 
 Each new skill fills one group of the website's skills section, so the three groups stay even (six
-skills each): `watch-mix` goes in **Watching** and `export` in **Your server**
-(`collections-and-playlists`, done on 2026-10-09, filled **Your library**). `export` could fit Your library too, but it sits beside `dashboard` and
-`changes`, the other skills that save files on the user's computer.
+skills each): `export` goes in **Your server** (`collections-and-playlists`, done on 2026-10-09,
+filled **Your library**, and `watch-mix`, done the same day, filled **Watching**). `export` could fit
+Your library too, but it sits beside `dashboard` and `changes`, the other skills that save files on
+the user's computer.
 
 ### `export`
 
@@ -72,24 +73,6 @@ codecs, size, added date, watched status, collections), for a spreadsheet.
   a `--with-people` option could add "last watched by".
 - **Catch:** spreadsheet programs run text that starts with `=`, `+`, `-` or `@` as a formula. Titles
   from the server must be escaped against that (prefix with `'`).
-
-### `watch-mix`
-
-What gets watched compared with what's on the server: each genre's, decade's and resolution's share of
-the library next to its share of plays and watch time, for example "Horror is 18% of your movies but
-3% of what's watched; anime is 5% of your shows but 22% of watch time." For the whole server or one
-person, over the last 12 months or a period the user names.
-
-- **Sources:** library listings for what's on the shelf (as `library-report` reads them); Tautulli
-  history, or Plex's own history without it, for plays, the same way `watch-activity` does.
-- **Catch:** genres aren't in history entries, so each played title needs its genres looked up. Use
-  batches like `playback-check`'s instead of one request per title. The same lookup would give
-  `year-in-review` its favorite genres.
-- **Catch:** a title can have several genres, so the shares won't add up to 100%. Say so.
-- **Catch:** without Tautulli, Plex only records finished plays, so watch time is finished plays times
-  each title's length. Say which was used.
-- **Privacy:** for the whole server, name no one, like `year-in-review`. One person only when asked.
-- Facts only: no "you should add more anime" or "remove horror" suggestions.
 
 ---
 
@@ -149,11 +132,14 @@ the previous day? Should snapshots be opt-out for people who don't want anything
 
 Left out of the first version (see `openspec/changes/archive/*-year-in-review/design.md`):
 
-- **Favorite genres.** Genres aren't in Tautulli's history rows or Plex's history entries, so each
-  title needs a metadata lookup; a batched one like `playback-check`'s would keep it cheap.
+- **Favorite genres.** Genres aren't in Tautulli's history rows or Plex's history entries. `watch-mix`
+  (see `openspec/specs/watch-mix`) already solves this: Plex's genre filter, one request per genre,
+  gives every title's full genre list (listings show at most two), and plays are matched to titles in
+  steps (rating key, guid, title and year) because rating keys change when files are replaced. Reuse
+  that rather than per-title lookups.
 - **Compared with last year.** The same counting run twice; easy once someone asks.
-- **Hours from Plex alone.** Finished plays times each title's length, if that can be had without one
-  request per title.
+- **Hours from Plex alone.** Finished plays times each title's length. `watch-mix` does this with
+  lengths from the library listing, so no request per title is needed.
 
 ### `watch-activity`
 

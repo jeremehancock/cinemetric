@@ -79,7 +79,7 @@ Errors that a skill needs to recognize SHALL start with a fixed code: `NOT_CONFI
 
 ### Requirement: Connection check
 The `library-report`, `server-health`, `watch-activity`, `users-and-shares`, `unwatched`,
-`what-to-watch`, `episode-gaps`, `playback-check`, `year-in-review`, `title-lookup`, `subtitles-and-languages`, `show-progress` and `collections-and-playlists` scripts SHALL accept `--check`,
+`what-to-watch`, `episode-gaps`, `playback-check`, `year-in-review`, `title-lookup`, `subtitles-and-languages`, `show-progress`, `collections-and-playlists` and `watch-mix` scripts SHALL accept `--check`,
 which only tests the configured connections and prints a short JSON result instead of building a
 report.
 
@@ -177,7 +177,7 @@ give that file's `snapshot_date` and `days_ago`. A problem reading snapshots SHA
 ### Requirement: Media deletion setting
 Every script that reads from the user's Plex server (`setup`, `library-report`, `server-health`,
 `watch-activity`, `users-and-shares`, `unwatched`, `what-to-watch`, `episode-gaps`, `playback-check`,
-`year-in-review`, `title-lookup`, `subtitles-and-languages`, `show-progress` and `collections-and-playlists`) SHALL report whether Plex's "Allow media deletion" setting is on, in a
+`year-in-review`, `title-lookup`, `subtitles-and-languages`, `show-progress`, `collections-and-playlists` and `watch-mix`) SHALL report whether Plex's "Allow media deletion" setting is on, in a
 top-level `media_deletion_allowed` field. The script SHALL request `/:/prefs` at most once per run and
 take the value of the `allowMediaDeletion` setting as a boolean. Every other setting in that answer
 SHALL be discarded without being printed. The field SHALL be `null` when Plex isn't configured, when

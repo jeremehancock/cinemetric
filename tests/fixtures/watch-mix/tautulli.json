@@ -1,0 +1,184 @@
+{
+ "get_tautulli_info": {
+  "tautulli_version": "v2.0.0-test"
+ },
+ "get_users": [
+  {
+   "user_id": 11,
+   "friendly_name": "alex-test",
+   "username": "alex-test"
+  },
+  {
+   "user_id": 12,
+   "friendly_name": "sam-test",
+   "username": "sam-test"
+  },
+  {
+   "user_id": 13,
+   "friendly_name": "Samantha-test",
+   "username": "samantha-test"
+  }
+ ],
+ "get_history": [
+  {
+   "media_type": "movie",
+   "rating_key": "101",
+   "guid": "plex://movie/101",
+   "title": "Night of the Test",
+   "year": 1987,
+   "play_duration": 3600,
+   "duration": 3600,
+   "watched_status": 1,
+   "user_id": 11,
+   "user": "alex-test",
+   "friendly_name": "alex-test",
+   "player": "Alex's iPhone",
+   "daysAgo": 10
+  },
+  {
+   "media_type": "movie",
+   "rating_key": "999",
+   "guid": "plex://movie/106",
+   "title": "Old Name",
+   "year": 1990,
+   "play_duration": 7200,
+   "duration": 7200,
+   "watched_status": 1,
+   "user_id": 12,
+   "user": "sam-test",
+   "friendly_name": "sam-test",
+   "player": "Living Room",
+   "daysAgo": 20
+  },
+  {
+   "media_type": "movie",
+   "rating_key": "998",
+   "guid": "plex://movie/gone",
+   "title": "Night Of The Test!",
+   "year": 1987,
+   "play_duration": 1800,
+   "duration": 1800,
+   "watched_status": 0.5,
+   "user_id": 11,
+   "daysAgo": 30
+  },
+  {
+   "media_type": "movie",
+   "rating_key": "997",
+   "guid": "plex://movie/other",
+   "title": "Test Story",
+   "year": "",
+   "play_duration": 3600,
+   "duration": 3600,
+   "watched_status": 1,
+   "user_id": 11,
+   "daysAgo": 40
+  },
+  {
+   "media_type": "movie",
+   "rating_key": "107",
+   "guid": "plex://movie/107",
+   "title": "Comedy Test Two",
+   "year": 1991,
+   "play_duration": 3600,
+   "duration": 5400,
+   "watched_status": 1,
+   "user_id": 12,
+   "daysAgo": 50
+  },
+  {
+   "media_type": "movie",
+   "rating_key": "103",
+   "guid": "plex://movie/103",
+   "title": "Ghost Fixture",
+   "year": 1999,
+   "play_duration": 600,
+   "duration": 600,
+   "watched_status": 0,
+   "user_id": 12,
+   "daysAgo": 60
+  },
+  {
+   "media_type": "movie",
+   "rating_key": "108",
+   "guid": "plex://movie/108",
+   "title": "Drama Test",
+   "year": 2001,
+   "play_duration": 3600,
+   "duration": 3600,
+   "watched_status": 1,
+   "user_id": 11,
+   "daysAgo": 400
+  },
+  {
+   "media_type": "episode",
+   "rating_key": "7000",
+   "grandparent_rating_key": "",
+   "grandparent_title": "Live Channel",
+   "live": 1,
+   "play_duration": 3600,
+   "user_id": 11,
+   "daysAgo": 2
+  },
+  {
+   "media_type": "track",
+   "rating_key": "9001",
+   "grandparent_rating_key": "9000",
+   "play_duration": 200,
+   "user_id": 11,
+   "daysAgo": 2
+  },
+  {
+   "media_type": "episode",
+   "rating_key": "501",
+   "grandparent_rating_key": "500",
+   "grandparent_title": "Test Show",
+   "parent_media_index": 1,
+   "media_index": 1,
+   "play_duration": 1800,
+   "duration": 1800,
+   "watched_status": 1,
+   "user_id": 11,
+   "daysAgo": 5
+  },
+  {
+   "media_type": "episode",
+   "rating_key": "777",
+   "grandparent_rating_key": "500",
+   "grandparent_title": "Test Show",
+   "parent_media_index": 2,
+   "media_index": 3,
+   "play_duration": 1800,
+   "duration": 1800,
+   "watched_status": 1,
+   "user_id": 12,
+   "daysAgo": 6
+  },
+  {
+   "media_type": "episode",
+   "rating_key": "778",
+   "grandparent_rating_key": "500",
+   "grandparent_title": "Test Show",
+   "parent_media_index": 9,
+   "media_index": 9,
+   "play_duration": 1800,
+   "duration": 1800,
+   "watched_status": 1,
+   "user_id": 12,
+   "daysAgo": 7
+  },
+  {
+   "media_type": "episode",
+   "rating_key": "779",
+   "grandparent_rating_key": "12345",
+   "grandparent_title": "Gone Show",
+   "parent_media_index": 1,
+   "media_index": 1,
+   "play_duration": 1800,
+   "duration": 1800,
+   "watched_status": 1,
+   "user_id": 11,
+   "daysAgo": 8
+  }
+ ]
+}

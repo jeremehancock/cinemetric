@@ -87,6 +87,7 @@ SHARED = {
     "day": {"users-and-shares": "its times are already whole seconds, and it has no as_int"},
     "when": {},
     "months_before": {},
+    "resolution_bucket": {},
     # Libraries, titles and history
     "get_all": {},
     "normalize": {},

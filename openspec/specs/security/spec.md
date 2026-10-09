@@ -84,6 +84,11 @@ creates SHALL NOT make any network requests when opened.
 - **WHEN** `collections_and_playlists.py` runs
 - **THEN** the only network requests go to the configured Plex server, even when Tautulli is set up
 
+#### Scenario: Comparing watching with the shelf
+- **WHEN** `watch_mix.py` runs
+- **THEN** the only network requests go to the configured Plex server and, if set up, the configured
+  Tautulli address
+
 #### Scenario: Building a year in review
 - **WHEN** `year_in_review.py` runs
 - **THEN** the only network requests go to the configured Plex server and, if set up, the configured

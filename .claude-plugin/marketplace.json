@@ -9,7 +9,7 @@
     {
       "name": "cinemetric",
       "description": "Read-only reports on your Plex Media Server: library stats and housekeeping, server health and live streams, watch activity (with optional Tautulli), who your server is shared with, a dashboard page that pulls the main stats together, and mods for Claude Code (a read-only guard that stops Claude from changing your server, a library status line, and a Now Playing panel showing who's streaming), for Linux, macOS and Windows.",
-      "version": "0.30.0",
+      "version": "0.31.0",
       "author": {
         "name": "Jereme Hancock"
       },

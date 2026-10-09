@@ -80,6 +80,10 @@ creates SHALL NOT make any network requests when opened.
 - **THEN** the only network requests go to the configured Plex server and, if set up, the configured
   Tautulli address
 
+#### Scenario: Reporting on collections and playlists
+- **WHEN** `collections_and_playlists.py` runs
+- **THEN** the only network requests go to the configured Plex server, even when Tautulli is set up
+
 #### Scenario: Building a year in review
 - **WHEN** `year_in_review.py` runs
 - **THEN** the only network requests go to the configured Plex server and, if set up, the configured

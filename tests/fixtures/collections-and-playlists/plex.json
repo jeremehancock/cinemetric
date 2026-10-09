@@ -1,0 +1,623 @@
+{
+ "/": {
+  "MediaContainer": {
+   "friendlyName": "Test Server",
+   "version": "1.43.0"
+  }
+ },
+ "/library/sections": {
+  "MediaContainer": {
+   "Directory": [
+    {
+     "key": "1",
+     "type": "movie",
+     "title": "Movies"
+    },
+    {
+     "key": "2",
+     "type": "show",
+     "title": "TV Shows"
+    },
+    {
+     "key": "3",
+     "type": "artist",
+     "title": "Music"
+    }
+   ]
+  }
+ },
+ "listings": {
+  "1": {
+   "1": [
+    {
+     "ratingKey": "101",
+     "type": "movie",
+     "title": "Nosferatu",
+     "year": 1922,
+     "Media": [
+      {
+       "id": 1,
+       "Part": [
+        {
+         "id": 1,
+         "size": 4000000000,
+         "file": "/media/file-4000000000-0.mkv"
+        }
+       ]
+      },
+      {
+       "id": 2,
+       "Part": [
+        {
+         "id": 2,
+         "size": 20000000000,
+         "file": "/media/file-20000000000-1.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "102",
+     "type": "movie",
+     "title": "Metropolis",
+     "year": 1927,
+     "Media": [
+      {
+       "id": 1,
+       "Part": [
+        {
+         "id": 1,
+         "size": 10000000000,
+         "file": "/media/file-10000000000-0.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "103",
+     "type": "movie",
+     "title": "The General",
+     "year": 1926,
+     "Media": [
+      {
+       "id": 1,
+       "Part": [
+        {
+         "id": 1,
+         "size": 3000000000,
+         "file": "/media/file-3000000000-0.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "104",
+     "type": "movie",
+     "title": "Sherlock Jr.",
+     "year": 1924,
+     "Media": [
+      {
+       "id": 1,
+       "Part": [
+        {
+         "id": 1,
+         "size": 2000000000,
+         "file": "/media/file-2000000000-0.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "105",
+     "type": "movie",
+     "title": "His Girl Friday",
+     "year": 1940,
+     "Media": [
+      {
+       "id": 1,
+       "Part": [
+        {
+         "id": 1,
+         "size": 5000000000,
+         "file": "/media/file-5000000000-0.mkv"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "2": {
+   "2": [
+    {
+     "ratingKey": "201",
+     "type": "show",
+     "title": "Harbor Lights",
+     "year": 2001
+    },
+    {
+     "ratingKey": "202",
+     "type": "show",
+     "title": "Quiet Valley",
+     "year": 2005
+    },
+    {
+     "ratingKey": "203",
+     "type": "show",
+     "title": "Lantern Street",
+     "year": 2010
+    }
+   ],
+   "4": [
+    {
+     "ratingKey": "2011",
+     "type": "episode",
+     "title": "Low Tide",
+     "grandparentRatingKey": "201",
+     "grandparentTitle": "Harbor Lights",
+     "parentRatingKey": "2101",
+     "parentIndex": 1,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1,
+       "Part": [
+        {
+         "id": 1,
+         "size": 1000000000,
+         "file": "/media/file-1000000000-0.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "2012",
+     "type": "episode",
+     "title": "High Tide",
+     "grandparentRatingKey": "201",
+     "grandparentTitle": "Harbor Lights",
+     "parentRatingKey": "2101",
+     "parentIndex": 1,
+     "index": 2,
+     "Media": [
+      {
+       "id": 1,
+       "Part": [
+        {
+         "id": 1,
+         "size": 1000000000,
+         "file": "/media/file-1000000000-0.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "2013",
+     "type": "episode",
+     "title": "Fog Bank",
+     "grandparentRatingKey": "201",
+     "grandparentTitle": "Harbor Lights",
+     "parentRatingKey": "2102",
+     "parentIndex": 2,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1,
+       "Part": [
+        {
+         "id": 1,
+         "size": 2000000000,
+         "file": "/media/file-2000000000-0.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "2021",
+     "type": "episode",
+     "title": "First Frost",
+     "grandparentRatingKey": "202",
+     "grandparentTitle": "Quiet Valley",
+     "parentRatingKey": "2201",
+     "parentIndex": 1,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1,
+       "Part": [
+        {
+         "id": 1,
+         "size": 3000000000,
+         "file": "/media/file-3000000000-0.mkv"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "2031",
+     "type": "episode",
+     "title": "Lamps Lit",
+     "grandparentRatingKey": "203",
+     "grandparentTitle": "Lantern Street",
+     "parentRatingKey": "2301",
+     "parentIndex": 1,
+     "index": 1,
+     "Media": [
+      {
+       "id": 1,
+       "Part": [
+        {
+         "id": 1,
+         "size": 1000000000,
+         "file": "/media/file-1000000000-0.mkv"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "collections": {
+  "1": [
+   {
+    "ratingKey": "501",
+    "type": "collection",
+    "title": "Silent Classics",
+    "smart": "1",
+    "childCount": 3
+   },
+   {
+    "ratingKey": "502",
+    "type": "collection",
+    "title": "Keaton",
+    "childCount": 1
+   },
+   {
+    "ratingKey": "503",
+    "type": "collection",
+    "title": "Screwball",
+    "smart": "1",
+    "childCount": 0
+   }
+  ],
+  "2": [
+   {
+    "ratingKey": "601",
+    "type": "collection",
+    "title": "Coastal",
+    "childCount": 1
+   },
+   {
+    "ratingKey": "602",
+    "type": "collection",
+    "title": "Mixed Bag",
+    "childCount": 2
+   }
+  ]
+ },
+ "children": {
+  "501": [
+   {
+    "ratingKey": "101",
+    "type": "movie",
+    "title": "Nosferatu",
+    "year": 1922,
+    "Media": [
+     {
+      "id": 1,
+      "Part": [
+       {
+        "id": 1,
+        "size": 4000000000,
+        "file": "/media/file-4000000000-0.mkv"
+       }
+      ]
+     },
+     {
+      "id": 2,
+      "Part": [
+       {
+        "id": 2,
+        "size": 20000000000,
+        "file": "/media/file-20000000000-1.mkv"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "ratingKey": "102",
+    "type": "movie",
+    "title": "Metropolis",
+    "year": 1927,
+    "Media": [
+     {
+      "id": 1,
+      "Part": [
+       {
+        "id": 1,
+        "size": 10000000000,
+        "file": "/media/file-10000000000-0.mkv"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "ratingKey": "103",
+    "type": "movie",
+    "title": "The General",
+    "year": 1926,
+    "Media": [
+     {
+      "id": 1,
+      "Part": [
+       {
+        "id": 1,
+        "size": 3000000000,
+        "file": "/media/file-3000000000-0.mkv"
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "502": [
+   {
+    "ratingKey": "103",
+    "type": "movie",
+    "title": "The General",
+    "year": 1926,
+    "Media": [
+     {
+      "id": 1,
+      "Part": [
+       {
+        "id": 1,
+        "size": 3000000000,
+        "file": "/media/file-3000000000-0.mkv"
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "503": [],
+  "601": [
+   {
+    "ratingKey": "201",
+    "type": "show",
+    "title": "Harbor Lights",
+    "year": 2001
+   }
+  ],
+  "602": [
+   {
+    "ratingKey": "2201",
+    "type": "season",
+    "title": "Season 1",
+    "parentTitle": "Quiet Valley"
+   },
+   {
+    "ratingKey": "2031",
+    "type": "episode",
+    "title": "Lamps Lit",
+    "grandparentRatingKey": "203",
+    "grandparentTitle": "Lantern Street",
+    "parentRatingKey": "2301",
+    "parentIndex": 1,
+    "index": 1,
+    "Media": [
+     {
+      "id": 1,
+      "Part": [
+       {
+        "id": 1,
+        "size": 1000000000,
+        "file": "/media/file-1000000000-0.mkv"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "/playlists": {
+  "MediaContainer": {
+   "Metadata": [
+    {
+     "ratingKey": "701",
+     "title": "Road Trip",
+     "playlistType": "audio",
+     "smart": true,
+     "leafCount": 2,
+     "duration": 100
+    },
+    {
+     "ratingKey": "702",
+     "title": "Movie Night",
+     "playlistType": "video",
+     "smart": false,
+     "leafCount": 4,
+     "duration": 999
+    },
+    {
+     "ratingKey": "703",
+     "title": "Snapshots",
+     "playlistType": "photo",
+     "smart": false,
+     "leafCount": 0
+    }
+   ]
+  }
+ },
+ "items": {
+  "701": [
+   {
+    "ratingKey": "801",
+    "type": "track",
+    "title": "Porch Light",
+    "grandparentTitle": "The Lamplighters",
+    "parentTitle": "Evening Songs",
+    "duration": 200000,
+    "Media": [
+     {
+      "id": 1,
+      "Part": [
+       {
+        "id": 1,
+        "size": 5000000,
+        "file": "/media/file-5000000-0.mkv"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "ratingKey": "802",
+    "type": "track",
+    "title": "Night Train",
+    "grandparentTitle": "The Lamplighters",
+    "parentTitle": "Evening Songs",
+    "duration": 180000,
+    "Media": [
+     {
+      "id": 1,
+      "Part": [
+       {
+        "id": 1,
+        "size": 6000000,
+        "file": "/media/file-6000000-0.mkv"
+       }
+      ],
+      "deletedAt": 1760000000
+     }
+    ]
+   },
+   {
+    "ratingKey": "803",
+    "type": "track",
+    "title": "Last Call",
+    "grandparentTitle": "The Lamplighters",
+    "parentTitle": "Evening Songs",
+    "duration": 120000,
+    "Media": [
+     {
+      "id": 1,
+      "Part": [
+       {
+        "id": 1,
+        "size": 4000000,
+        "file": "/media/file-4000000-0.mkv"
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "702": [
+   {
+    "ratingKey": "101",
+    "type": "movie",
+    "title": "Nosferatu",
+    "year": 1922,
+    "Media": [
+     {
+      "id": 1,
+      "Part": [
+       {
+        "id": 1,
+        "size": 4000000000,
+        "file": "/media/file-4000000000-0.mkv"
+       }
+      ],
+      "deletedAt": 1760000000
+     },
+     {
+      "id": 2,
+      "Part": [
+       {
+        "id": 2,
+        "size": 20000000000,
+        "file": "/media/file-20000000000-1.mkv"
+       }
+      ]
+     }
+    ],
+    "duration": 5000000
+   },
+   {
+    "ratingKey": "102",
+    "type": "movie",
+    "title": "Metropolis",
+    "year": 1927,
+    "Media": [
+     {
+      "id": 1,
+      "Part": [
+       {
+        "id": 1,
+        "size": 10000000000,
+        "file": "/media/file-10000000000-0.mkv"
+       }
+      ]
+     }
+    ],
+    "duration": 7000000
+   },
+   {
+    "ratingKey": "102",
+    "type": "movie",
+    "title": "Metropolis",
+    "year": 1927,
+    "Media": [
+     {
+      "id": 1,
+      "Part": [
+       {
+        "id": 1,
+        "size": 10000000000,
+        "file": "/media/file-10000000000-0.mkv"
+       }
+      ]
+     }
+    ],
+    "duration": 7000000
+   },
+   {
+    "ratingKey": "2013",
+    "type": "episode",
+    "title": "Fog Bank",
+    "grandparentRatingKey": "201",
+    "grandparentTitle": "Harbor Lights",
+    "parentRatingKey": "2102",
+    "parentIndex": 2,
+    "index": 1,
+    "Media": [
+     {
+      "id": 1,
+      "Part": [
+       {
+        "id": 1,
+        "size": 2000000000,
+        "file": "/media/file-2000000000-0.mkv"
+       }
+      ],
+      "deletedAt": 1760000000
+     }
+    ],
+    "duration": 1000000
+   }
+  ],
+  "703": []
+ }
+}

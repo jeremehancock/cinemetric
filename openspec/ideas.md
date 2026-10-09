@@ -57,21 +57,9 @@ track.)
 ## New skills
 
 Each new skill fills one group of the website's skills section, so the three groups stay even (six
-skills each): `collections-and-playlists` goes in **Your library**, `watch-mix` in **Watching** and
-`export` in **Your server**. `export` could fit Your library too, but it sits beside `dashboard` and
+skills each): `watch-mix` goes in **Watching** and `export` in **Your server**
+(`collections-and-playlists`, done on 2026-10-09, filled **Your library**). `export` could fit Your library too, but it sits beside `dashboard` and
 `changes`, the other skills that save files on the user's computer.
-
-### `collections-and-playlists`
-
-Collections and playlists on the server: how many titles each holds, collections with only one title,
-smart vs regular collections, playlists with items Plex can no longer find, and titles that aren't in
-any collection.
-
-- **Sources:** `/library/sections/{id}/collections` and `/playlists` **(to verify)**, plus each
-  one's items.
-- **Catch:** playlists belong to the account that made them. With the owner's token only the owner's
-  playlists are visible; say so instead of implying they're all there.
-- Facts only: no "you should make a collection for ..." suggestions.
 
 ### `export`
 

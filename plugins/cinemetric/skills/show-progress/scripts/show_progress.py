@@ -23,7 +23,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.29.2"
+VERSION = "0.30.0"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 LIBRARY_PAGE_SIZE = 500

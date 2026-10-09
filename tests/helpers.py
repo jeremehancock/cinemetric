@@ -28,6 +28,7 @@ FIXTURES_DIR = os.path.join(ROOT, "tests", "fixtures")
 # Skill folder -> script file name.
 SCRIPTS = {
     "changes": "changes.py",
+    "collections-and-playlists": "collections_and_playlists.py",
     "dashboard": "dashboard.py",
     "episode-gaps": "episode_gaps.py",
     "library-report": "library_report.py",

@@ -119,6 +119,13 @@ the specs leave open. At least the following SHALL be covered:
   and the next episode, each status and the order they're chosen in, recently added episodes,
   `--user` and `--show` (including no match and several matches), dropping private Tautulli fields,
   sorting and the limit, and the report totals.
+- `collections-and-playlists`: which libraries are read and skipped, smart and regular
+  collections, a collection whose children can't be read, collection sizes (several media versions,
+  shows, seasons and episodes, a title counted once), single-title and empty collections, titles in
+  no collection (a show counted through a season or episode, a title in two collections), playlist
+  kinds, items and storage (a title in a playlist twice), unavailable items (all versions gone, one
+  copy left, the 15-example cap), playlists refused without failing the report, `--only` and
+  `--library` (playlists not filtered), sorting and the limit, and the report totals.
 
 #### Scenario: A shared helper is fixed in one script only
 - **WHEN** a fix to `validate_url`, `clean` or the snapshot reading helper is applied to one script
@@ -172,6 +179,11 @@ the specs leave open. At least the following SHALL be covered:
 #### Scenario: A rewatch makes someone look behind
 - **WHEN** a change to `show_progress.py` makes a person who finished up to S02E05 and then rewatched
   S01E01 show S01E02 as their next episode
+- **THEN** a test fails
+
+#### Scenario: A missing playlist item goes unreported
+- **WHEN** a change to `collections_and_playlists.py` stops counting a playlist episode whose only
+  media version has `deletedAt` set as unavailable
 - **THEN** a test fails
 
 #### Scenario: Playback rules drift apart

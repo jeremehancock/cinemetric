@@ -12,6 +12,11 @@ shipped to users or published online.
   (`website/screens/year-in-review.jpg`) from made-up sample plays and updates its height in
   `website/index.html`. Run `python3 tools/year_in_review_screenshot.py` after changing how the recap
   page looks. Same needs as the dashboard tool.
+- **`export_screenshot.py`**: retakes the website's export screenshot (`website/screens/export.jpg`):
+  a workbook built from made-up titles with the export script's own code, opened on its Movies tab in
+  LibreOffice on a virtual screen. Updates the image's size in `website/index.html`. Run
+  `python3 tools/export_screenshot.py` after changing how the workbook looks. Needs LibreOffice, Xvfb,
+  ImageMagick and Pillow.
 - **`shared_helpers.py`**: checks that every script's copy of a shared helper (config loading,
   address checks, the Plex client, text cleaning, snapshot reading and so on) matches. Run
   `python3 tools/shared_helpers.py` to see which copies differ, and

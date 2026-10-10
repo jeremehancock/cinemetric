@@ -40,7 +40,8 @@ These came out of an explore session on 2026-10-05 and apply to every idea below
     3. Go one level deeper     (subtitles and audio per file are done in playback-check)
 ```
 
-Suggested order: open. (`show-progress`, `title-lookup` and `subtitles-and-languages` were done on
+Suggested order: open. (`export` was done on 2026-10-09: an Excel workbook with tabs, built from its own
+library read and five other skills' reports, so every website skills group now has six skills. `show-progress`, `title-lookup` and `subtitles-and-languages` were done on
 2026-10-07; `show-progress` also covers the old "shows people stopped watching partway" idea. A server
 check for the latter found that Plex keeps each person's preferred languages on plex.tv, not on the
 server, so it checks against each library's own language unless one is named. Snapshots and "what changed" were done on 2026-10-06, and so were `year-in-review`, dashboard
@@ -51,28 +52,6 @@ returns subtitle and audio details for 100 titles per request, so no sampling wa
 2026-10-05; `library-report` music details (lossless vs lossy, missing artwork) on 2026-10-06. Hi-res
 music (bit depth, sample rate) was left out: it isn't in the track listing and needs a request per
 track.)
-
----
-
-## New skills
-
-Each new skill fills one group of the website's skills section, so the three groups stay even (six
-skills each): `export` goes in **Your server** (`collections-and-playlists`, done on 2026-10-09,
-filled **Your library**, and `watch-mix`, done the same day, filled **Watching**). `export` could fit
-Your library too, but it sits beside `dashboard` and `changes`, the other skills that save files on
-the user's computer.
-
-### `export`
-
-Saves a listing of a library as a CSV file on the user's computer (title, year, library, resolution,
-codecs, size, added date, watched status, collections), for a spreadsheet.
-
-- **Where it goes:** the same data folder the dashboard uses, with the same private file permissions,
-  unless the user names a folder.
-- **Catch:** the CSV is a file on disk that may later be shared. Leave people's names out by default;
-  a `--with-people` option could add "last watched by".
-- **Catch:** spreadsheet programs run text that starts with `=`, `+`, `-` or `@` as a formula. Titles
-  from the server must be escaped against that (prefix with `'`).
 
 ---
 
@@ -140,6 +119,18 @@ Left out of the first version (see `openspec/changes/archive/*-year-in-review/de
 - **Compared with last year.** The same counting run twice; easy once someone asks.
 - **Hours from Plex alone.** Finished plays times each title's length. `watch-mix` does this with
   lengths from the library listing, so no request per title is needed.
+
+### `export`
+
+The workbook could gain more tabs on the same plumbing (each runs another skill's script), and
+people's viewing could be added on request.
+
+- **More tabs:** unwatched titles (`unwatched`), collections and playlists
+  (`collections-and-playlists`), or library growth by month (`library-report`).
+- **`--with-people`:** a "last watched by" column. **Catch:** the workbook is a file that may later be
+  shared, so names stay out unless asked for, and SKILL.md should say the file then holds names.
+- **Music:** one row per album, with lossless or lossy, from the listings `library-report` already
+  reads.
 
 ### `watch-activity`
 

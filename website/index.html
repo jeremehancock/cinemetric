@@ -120,7 +120,7 @@
       <div class="wrap">
         <div class="section-head reveal">
           <p class="kicker">The library</p>
-          <h2 id="skills-title">Seventeen skills. One curious question at a time.</h2>
+          <h2 id="skills-title">Eighteen skills. One curious question at a time.</h2>
           <p>Just ask Claude in your own words. Each skill knows when it's needed, runs a small script against your server and turns the result into a clear report.</p>
         </div>
 
@@ -220,6 +220,11 @@
                 <span class="skill-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M38 17A15 15 0 1 0 39 29" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><path d="M40 8v10h-10" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 24h12M24 18v12" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" opacity=".7"/></svg></span>
                 <span class="skill-name">changes</span>
                 <span class="skill-sub">What's new since</span>
+              </a></li>
+              <li><a class="skill-row" href="#skill-export" style="--a:#60a5fa;--b:#172554">
+                <span class="skill-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="6" y="6" width="36" height="30" rx="3" fill="none" stroke="currentColor" stroke-width="3"/><path d="M6 15h36M6 24h36M18 6v30M30 6v30" stroke="currentColor" stroke-width="2" opacity=".6"/><rect x="6" y="38" width="10" height="5" rx="1.5" fill="currentColor"/><rect x="18" y="38" width="10" height="5" rx="1.5" fill="currentColor" opacity=".5"/><rect x="30" y="38" width="10" height="5" rx="1.5" fill="currentColor" opacity=".5"/></svg></span>
+                <span class="skill-name">export</span>
+                <span class="skill-sub">Your library as a spreadsheet</span>
               </a></li>
               <li><a class="skill-row" href="#skill-dashboard" style="--a:#8b5cf6;--b:#2a1a4d">
                 <span class="skill-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="6" y="8" width="16" height="14" rx="2.5" fill="currentColor"/><rect x="26" y="8" width="16" height="22" rx="2.5" fill="currentColor" opacity=".7"/><rect x="6" y="26" width="16" height="14" rx="2.5" fill="currentColor" opacity=".7"/><rect x="26" y="34" width="16" height="6" rx="2.5" fill="currentColor"/></svg></span>
@@ -992,8 +997,33 @@
       </div>
     </section>
 
+    <!-- ============ SKILL: EXPORT ============ -->
+    <section class="section feature flip" id="skill-export" aria-labelledby="f-export">
+      <div class="wrap feature-grid">
+        <div class="feature-copy reveal">
+          <p class="kicker" style="--k:#93c5fd">export</p>
+          <h2 id="f-export">Your whole library in a spreadsheet.</h2>
+          <p>One Excel file with a tab for each part: your server's details, your movies, your TV shows, and the things worth tidying up. It opens in Excel, Numbers, LibreOffice and Google Sheets.</p>
+          <ul class="ticks">
+            <li>Movies and TV shows on their own tabs, with year, date added, length, quality, codecs, size, missing files, watched status and collections.</li>
+            <li>Tabs for issues, episode gaps, files likely to transcode and subtitle problems, straight from those skills.</li>
+            <li>One row per show, or per episode if you ask.</li>
+            <li>Saved privately on your computer, or in a folder you choose. It never replaces a file of yours without asking.</li>
+            <li>No one's names or viewing history are in the file, and nothing in it can run when it's opened.</li>
+          </ul>
+          <p class="ask-line">Ask Claude: <q>Export my Plex library to a spreadsheet</q> or <q>Save a list of every movie I have to my Documents folder</q></p>
+        </div>
+
+        <figure class="mock demo reveal" aria-label="Example: the Movies tab of an exported workbook">
+          <div class="mock-bar"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span><em>Your spreadsheet</em></div>
+          <div class="shot"><img src="screens/export.jpg" width="841" height="623" loading="lazy" alt="A real Cinemetric export open in a spreadsheet program on its Movies tab: zoomed in on its first columns, one row per movie with library, title, year and date added, with filter buttons on the column names, and tabs along the bottom for Server, Movies, TV Shows, Issues, Episode gaps, Playback and Subtitles."></div>
+          <figcaption>A real exported workbook, filled with made-up sample titles, open in LibreOffice.</figcaption>
+        </figure>
+      </div>
+    </section>
+
     <!-- ============ SKILL: YEAR IN REVIEW ============ -->
-    <section class="section feature flip" id="skill-recap" aria-labelledby="f-recap">
+    <section class="section feature" id="skill-recap" aria-labelledby="f-recap">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#818cf8">year-in-review</p>
@@ -1017,7 +1047,7 @@
     </section>
 
     <!-- ============ SKILL: DASHBOARD ============ -->
-    <section class="section feature" id="skill-dashboard" aria-labelledby="f-dash">
+    <section class="section feature flip" id="skill-dashboard" aria-labelledby="f-dash">
       <div class="wrap feature-grid">
         <div class="feature-copy reveal">
           <p class="kicker" style="--k:#a382ff">dashboard</p>

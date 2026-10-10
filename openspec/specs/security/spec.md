@@ -46,7 +46,9 @@ address. Two scripts SHALL additionally contact plex.tv, and only at the address
   plex.tv.
 
 The dashboard and changes scripts SHALL contact nothing themselves; they only run other Cinemetric
-scripts. There SHALL be no analytics, update checks or other third-party services. Pages Cinemetric
+scripts. The export script SHALL contact only the configured Plex server itself, and SHALL run the
+other scripts it uses with options that keep them to the Plex server (`playback_check.py` with
+`--days 0`). There SHALL be no analytics, update checks or other third-party services. Pages Cinemetric
 creates SHALL NOT make any network requests when opened.
 
 #### Scenario: Building a report
@@ -88,6 +90,10 @@ creates SHALL NOT make any network requests when opened.
 - **WHEN** `watch_mix.py` runs
 - **THEN** the only network requests go to the configured Plex server and, if set up, the configured
   Tautulli address
+
+#### Scenario: Exporting a workbook
+- **WHEN** `export.py` runs, including the scripts it runs for the other tabs
+- **THEN** the only network requests go to the configured Plex server, even when Tautulli is set up
 
 #### Scenario: Building a year in review
 - **WHEN** `year_in_review.py` runs
@@ -144,11 +150,12 @@ real terminal, so Claude can't run it.
 ### Requirement: Private files
 Cinemetric's config folder, data folder and snapshots folders SHALL be created readable only by the
 user (`700`), and every file holding settings or report data (config, in-progress sign-in, Tautulli
-form status, dashboard page, dashboard state, year-in-review pages, year-in-review state and
-snapshots) SHALL be created readable only by the user (`600`) from the start, with no moment where looser permissions apply. On
+form status, dashboard page, dashboard state, year-in-review pages, year-in-review state,
+exported workbooks and snapshots) SHALL be created readable only by the user (`600`) from the start, with no moment where looser permissions apply. On
 Linux and macOS, a config file owned by another user or accessible to other users SHALL be refused,
 with the `chmod 600` command that fixes it. The in-progress sign-in file SHALL be deleted once a
-server is selected or setup is cancelled.
+server is selected or setup is cancelled. A folder the user names for an exported workbook SHALL
+NOT be created or have its permissions changed; only the file is made private.
 
 #### Scenario: Config readable by others
 - **WHEN** a script finds `config.json` with group or other permissions
@@ -161,6 +168,10 @@ server is selected or setup is cancelled.
 #### Scenario: A new recap page
 - **WHEN** `year_in_review.py` writes a recap page
 - **THEN** the file is `600` and the data folder is `700`
+
+#### Scenario: An export to a folder the user named
+- **WHEN** `export.py` saves to `~/Documents`, which has permissions `755`
+- **THEN** the file is `600` and the folder is still `755`
 
 ### Requirement: Encrypted connections by default
 HTTPS certificates SHALL be checked unless the user explicitly turned checking off: `"verify_tls":
@@ -193,7 +204,9 @@ cancelled, or after 10 minutes.
 ### Requirement: Server text is treated as data
 In every script, titles, names, version strings and other text from Plex, plex.tv or Tautulli SHALL
 have control characters removed and be cut to 120 characters before they are printed. The dashboard
-SHALL HTML-escape every value it puts on the page.
+SHALL HTML-escape every value it puts on the page. The export script SHALL store server text in its
+workbook only as plain text, never as a formula, and the workbook SHALL hold no formulas, macros or
+links (see "Server text never runs" in the export spec).
 
 #### Scenario: A title with a newline in it
 - **WHEN** a media title contains control characters
@@ -204,6 +217,10 @@ SHALL HTML-escape every value it puts on the page.
   120 characters
 - **THEN** the listed name has the control characters replaced with spaces and is cut to 120
   characters
+
+#### Scenario: A title made to be a spreadsheet formula
+- **WHEN** a movie's title on the server is `=1+1` and the library is exported
+- **THEN** the workbook cell holds the text `=1+1` and the workbook contains no formula
 
 ### Requirement: Dashboard goes online only by choice
 The dashboard SHALL be published to claude.ai only when the user has chosen `online` or `both`, and

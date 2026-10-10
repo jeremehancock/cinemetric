@@ -1,0 +1,684 @@
+{
+ "/": {
+  "MediaContainer": {
+   "friendlyName": "Test Server",
+   "version": "1.40.0.0000-test",
+   "platform": "Linux"
+  }
+ },
+ "/library/sections": {
+  "MediaContainer": {
+   "Directory": [
+    {
+     "key": "1",
+     "title": "Movies",
+     "type": "movie"
+    },
+    {
+     "key": "2",
+     "title": "TV Shows",
+     "type": "show"
+    },
+    {
+     "key": "3",
+     "title": "Music",
+     "type": "artist"
+    }
+   ]
+  }
+ },
+ "listings": {
+  "1": {
+   "1": [
+    {
+     "ratingKey": "101",
+     "title": "Night of the Test",
+     "titleSort": "Night of the Test",
+     "year": 1987,
+     "guid": "plex://movie/101",
+     "thumb": "/t/101",
+     "addedAt": 1760000000,
+     "duration": 6000000,
+     "contentRating": "R",
+     "viewCount": 1,
+     "lastViewedAt": 1760086400,
+     "Media": [
+      {
+       "videoResolution": "1080",
+       "bitrate": 8000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 8000000000
+        }
+       ]
+      },
+      {
+       "videoResolution": "4k",
+       "bitrate": 40000,
+       "videoCodec": "hevc",
+       "audioCodec": "truehd",
+       "audioChannels": 8,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 50000000000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "102",
+     "title": "=HYPERLINK(\"http://example.invalid\",\"Click\")",
+     "year": 2001,
+     "guid": "local://102",
+     "addedAt": 1760000000,
+     "duration": 5400000,
+     "viewOffset": 1200000,
+     "Media": [
+      {
+       "videoResolution": "1080",
+       "bitrate": 6000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 4000000000
+        }
+       ],
+       "deletedAt": 1760005000
+      }
+     ]
+    },
+    {
+     "ratingKey": "103",
+     "title": "Amélie & <Friends>, \"quoted\"",
+     "originallyAvailableAt": "1999-05-01",
+     "guid": "plex://movie/103",
+     "thumb": "/t/103",
+     "addedAt": 1760000000,
+     "duration": 7230000,
+     "contentRating": "PG",
+     "Media": [
+      {
+       "videoResolution": "720",
+       "bitrate": 3000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 2000000000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "104",
+     "title": "-30-",
+     "titleSort": "Thirty",
+     "year": 1950,
+     "guid": "plex://movie/104",
+     "thumb": "/t/104",
+     "addedAt": 1760000000,
+     "duration": 4800000,
+     "Media": [
+      {
+       "videoResolution": "sd",
+       "bitrate": 1500,
+       "videoCodec": "mpeg4",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 1000000000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "105",
+     "title": "</t></is></c><c><f>1+1</f>",
+     "year": 2010,
+     "guid": "plex://movie/105",
+     "thumb": "/t/105",
+     "addedAt": 1760000000,
+     "duration": 6000000,
+     "Media": [
+      {
+       "videoResolution": "1080",
+       "bitrate": 7000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 6000000000
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "2": {
+   "2": [
+    {
+     "ratingKey": "201",
+     "title": "Test Show",
+     "year": 2015,
+     "guid": "plex://show/201",
+     "thumb": "/t/201",
+     "addedAt": 1760000000,
+     "contentRating": "TV-14",
+     "leafCount": 12,
+     "viewedLeafCount": 5,
+     "lastViewedAt": 1760172800
+    },
+    {
+     "ratingKey": "202",
+     "title": "Another Show",
+     "titleSort": "Another Show",
+     "year": 2020,
+     "guid": "plex://show/202",
+     "thumb": "/t/202",
+     "addedAt": 1760000000,
+     "leafCount": 3,
+     "viewedLeafCount": 3
+    }
+   ],
+   "4": [
+    {
+     "ratingKey": "3001",
+     "title": "Pilot Part 1",
+     "grandparentTitle": "Test Show",
+     "grandparentRatingKey": "201",
+     "parentRatingKey": "2011",
+     "parentIndex": 1,
+     "index": 1,
+     "year": 2015,
+     "addedAt": 1760000000,
+     "duration": 1800000,
+     "contentRating": "TV-14",
+     "viewCount": 1,
+     "Media": [
+      {
+       "videoResolution": "1080",
+       "bitrate": 4000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 1000000000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "3002",
+     "title": "Pilot Part 2",
+     "grandparentTitle": "Test Show",
+     "grandparentRatingKey": "201",
+     "parentRatingKey": "2011",
+     "parentIndex": 1,
+     "index": 2,
+     "year": 2015,
+     "addedAt": 1760000000,
+     "duration": 1800000,
+     "contentRating": "TV-14",
+     "viewCount": 1,
+     "Media": [
+      {
+       "videoResolution": "1080",
+       "bitrate": 4000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 1000000000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "3003",
+     "title": "Pilot Part 3",
+     "grandparentTitle": "Test Show",
+     "grandparentRatingKey": "201",
+     "parentRatingKey": "2011",
+     "parentIndex": 1,
+     "index": 3,
+     "year": 2015,
+     "addedAt": 1760000000,
+     "duration": 1800000,
+     "contentRating": "TV-14",
+     "viewCount": 1,
+     "Media": [
+      {
+       "videoResolution": "1080",
+       "bitrate": 4000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 1000000000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "3004",
+     "title": "Pilot Part 4",
+     "grandparentTitle": "Test Show",
+     "grandparentRatingKey": "201",
+     "parentRatingKey": "2011",
+     "parentIndex": 1,
+     "index": 4,
+     "year": 2015,
+     "addedAt": 1760000000,
+     "duration": 1800000,
+     "contentRating": "TV-14",
+     "viewCount": 1,
+     "Media": [
+      {
+       "videoResolution": "1080",
+       "bitrate": 4000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 1000000000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "3005",
+     "title": "Pilot Part 5",
+     "grandparentTitle": "Test Show",
+     "grandparentRatingKey": "201",
+     "parentRatingKey": "2011",
+     "parentIndex": 1,
+     "index": 5,
+     "year": 2015,
+     "addedAt": 1760000000,
+     "duration": 1800000,
+     "contentRating": "TV-14",
+     "viewCount": 1,
+     "Media": [
+      {
+       "videoResolution": "1080",
+       "bitrate": 4000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 1000000000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "3006",
+     "title": "Pilot Part 6",
+     "grandparentTitle": "Test Show",
+     "grandparentRatingKey": "201",
+     "parentRatingKey": "2011",
+     "parentIndex": 1,
+     "index": 6,
+     "year": 2015,
+     "addedAt": 1760000000,
+     "duration": 1800000,
+     "contentRating": "TV-14",
+     "viewCount": 0,
+     "Media": [
+      {
+       "videoResolution": "1080",
+       "bitrate": 4000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 1000000000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "3007",
+     "title": "Pilot Part 7",
+     "grandparentTitle": "Test Show",
+     "grandparentRatingKey": "201",
+     "parentRatingKey": "2011",
+     "parentIndex": 1,
+     "index": 7,
+     "year": 2015,
+     "addedAt": 1760000000,
+     "duration": 1800000,
+     "contentRating": "TV-14",
+     "viewCount": 0,
+     "Media": [
+      {
+       "videoResolution": "1080",
+       "bitrate": 4000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 1000000000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "3008",
+     "title": "Pilot Part 8",
+     "grandparentTitle": "Test Show",
+     "grandparentRatingKey": "201",
+     "parentRatingKey": "2011",
+     "parentIndex": 1,
+     "index": 8,
+     "year": 2015,
+     "addedAt": 1760000000,
+     "duration": 1800000,
+     "contentRating": "TV-14",
+     "viewCount": 0,
+     "Media": [
+      {
+       "videoResolution": "1080",
+       "bitrate": 4000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 1000000000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "3009",
+     "title": "Pilot Part 9",
+     "grandparentTitle": "Test Show",
+     "grandparentRatingKey": "201",
+     "parentRatingKey": "2011",
+     "parentIndex": 1,
+     "index": 9,
+     "year": 2015,
+     "addedAt": 1760000000,
+     "duration": 1800000,
+     "contentRating": "TV-14",
+     "viewCount": 0,
+     "Media": [
+      {
+       "videoResolution": "1080",
+       "bitrate": 4000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 1000000000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "3010",
+     "title": "Pilot Part 10",
+     "grandparentTitle": "Test Show",
+     "grandparentRatingKey": "201",
+     "parentRatingKey": "2011",
+     "parentIndex": 1,
+     "index": 10,
+     "year": 2015,
+     "addedAt": 1760000000,
+     "duration": 1800000,
+     "contentRating": "TV-14",
+     "viewCount": 0,
+     "Media": [
+      {
+       "videoResolution": "1080",
+       "bitrate": 4000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 1000000000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "3011",
+     "title": "Holiday 1",
+     "grandparentTitle": "Test Show",
+     "grandparentRatingKey": "201",
+     "parentRatingKey": "2012",
+     "parentIndex": 2,
+     "index": 1,
+     "year": 2016,
+     "addedAt": 1760000000,
+     "duration": 1800000,
+     "Media": [
+      {
+       "videoResolution": "720",
+       "bitrate": 2000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 500000000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "3012",
+     "title": "Holiday 2",
+     "grandparentTitle": "Test Show",
+     "grandparentRatingKey": "201",
+     "parentRatingKey": "2012",
+     "parentIndex": 2,
+     "index": 2,
+     "year": 2016,
+     "addedAt": 1760000000,
+     "duration": 1800000,
+     "Media": [
+      {
+       "videoResolution": "720",
+       "bitrate": 2000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 500000000
+        }
+       ],
+       "deletedAt": 1760005000
+      }
+     ]
+    },
+    {
+     "ratingKey": "3021",
+     "title": "Second",
+     "grandparentTitle": "Another Show",
+     "grandparentRatingKey": "202",
+     "parentRatingKey": "2021",
+     "parentIndex": 1,
+     "index": 2,
+     "addedAt": 1760000000,
+     "duration": 2400000,
+     "viewCount": 1,
+     "Media": [
+      {
+       "videoResolution": "1080",
+       "bitrate": 4000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 1000000000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "3022",
+     "title": "First",
+     "grandparentTitle": "Another Show",
+     "grandparentRatingKey": "202",
+     "parentRatingKey": "2021",
+     "parentIndex": 1,
+     "index": 1,
+     "addedAt": 1760000000,
+     "duration": 2400000,
+     "viewCount": 1,
+     "Media": [
+      {
+       "videoResolution": "1080",
+       "bitrate": 4000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 1000000000
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "ratingKey": "3023",
+     "title": "Unnumbered Special",
+     "grandparentTitle": "Another Show",
+     "grandparentRatingKey": "202",
+     "parentRatingKey": "2021",
+     "parentIndex": 1,
+     "addedAt": 1760000000,
+     "duration": 2400000,
+     "viewCount": 1,
+     "Media": [
+      {
+       "videoResolution": "1080",
+       "bitrate": 4000,
+       "videoCodec": "h264",
+       "audioCodec": "aac",
+       "audioChannels": 2,
+       "container": "mkv",
+       "Part": [
+        {
+         "size": 1000000000
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "collections": {
+  "1": [
+   {
+    "ratingKey": "901",
+    "title": "Test Trilogy"
+   },
+   {
+    "ratingKey": "902",
+    "title": "Award Winners"
+   },
+   {
+    "ratingKey": "903",
+    "title": " +Extras"
+   }
+  ],
+  "2": [
+   {
+    "ratingKey": "911",
+    "title": "Holiday Specials"
+   }
+  ]
+ },
+ "children": {
+  "901": [
+   {
+    "ratingKey": "101",
+    "type": "movie",
+    "title": "Night of the Test"
+   }
+  ],
+  "902": [
+   {
+    "ratingKey": "101",
+    "type": "movie"
+   },
+   {
+    "ratingKey": "104",
+    "type": "movie"
+   }
+  ],
+  "903": [
+   {
+    "ratingKey": "104",
+    "type": "movie"
+   }
+  ],
+  "911": [
+   {
+    "ratingKey": "2012",
+    "type": "season",
+    "title": "Season 2"
+   }
+  ]
+ }
+}

@@ -31,6 +31,7 @@ SCRIPTS = {
     "collections-and-playlists": "collections_and_playlists.py",
     "dashboard": "dashboard.py",
     "episode-gaps": "episode_gaps.py",
+    "export": "export.py",
     "library-report": "library_report.py",
     "playback-check": "playback_check.py",
     "server-health": "server_health.py",

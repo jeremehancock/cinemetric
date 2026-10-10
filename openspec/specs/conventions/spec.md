@@ -9,8 +9,8 @@ errors, where settings live, and what its `SKILL.md` must tell Claude. Security 
 ### Requirement: Skill shape
 Each skill SHALL live in `plugins/cinemetric/skills/<name>/` as a `SKILL.md` plus one script in
 `scripts/`. The script collects the facts and prints them; Claude turns them into the written report
-by following `SKILL.md`. The `dashboard` and `year-in-review` skills are the exceptions: their pages
-are written by rules in the script, not by Claude.
+by following `SKILL.md`. The `dashboard`, `year-in-review` and `export` skills are the exceptions: their pages (or, for
+`export`, its workbook) are written by rules in the script, not by Claude.
 
 #### Scenario: Adding a new skill
 - **WHEN** a new skill is added
@@ -21,6 +21,11 @@ are written by rules in the script, not by Claude.
 - **WHEN** the year-in-review script runs
 - **THEN** it writes the recap page itself by fixed rules and also prints JSON that `SKILL.md` tells
   Claude how to summarize
+
+#### Scenario: An export
+- **WHEN** the export script runs
+- **THEN** it writes the workbook itself by fixed rules and prints a JSON summary that `SKILL.md`
+  tells Claude how to present
 
 ### Requirement: Standard library only
 Scripts SHALL run on Python 3.8 or newer using only the Python standard library. Nothing is installed
@@ -79,7 +84,7 @@ Errors that a skill needs to recognize SHALL start with a fixed code: `NOT_CONFI
 
 ### Requirement: Connection check
 The `library-report`, `server-health`, `watch-activity`, `users-and-shares`, `unwatched`,
-`what-to-watch`, `episode-gaps`, `playback-check`, `year-in-review`, `title-lookup`, `subtitles-and-languages`, `show-progress`, `collections-and-playlists` and `watch-mix` scripts SHALL accept `--check`,
+`what-to-watch`, `episode-gaps`, `playback-check`, `year-in-review`, `title-lookup`, `subtitles-and-languages`, `show-progress`, `collections-and-playlists`, `watch-mix` and `export` scripts SHALL accept `--check`,
 which only tests the configured connections and prints a short JSON result instead of building a
 report.
 
@@ -95,7 +100,7 @@ Connection settings SHALL be read from `$XDG_CONFIG_HOME/cinemetric/config.json`
 `PLEX_TOKEN`, `TAUTULLI_URL` and `TAUTULLI_API_KEY` SHALL take priority over the file. A script SHALL
 read the file only when the environment doesn't already provide the settings it needs, and a problem
 with the file SHALL stop a script only when the script needs the file for Plex. Files the dashboard
-creates, and snapshots (in a `snapshots` folder), SHALL live in `$XDG_DATA_HOME/cinemetric` (default
+creates, workbooks `export` saves (unless the user names another place), and snapshots (in a `snapshots` folder), SHALL live in `$XDG_DATA_HOME/cinemetric` (default
 `~/.local/share/cinemetric`; `%LOCALAPPDATA%\cinemetric` on Windows; `CINEMETRIC_DATA_DIR` overrides
 it).
 
@@ -110,6 +115,10 @@ it).
 #### Scenario: Where snapshots go
 - **WHEN** `XDG_DATA_HOME` is `/tmp/x` and a snapshot is saved
 - **THEN** it is under `/tmp/x/cinemetric/snapshots/`
+
+#### Scenario: Where an export goes
+- **WHEN** `XDG_DATA_HOME` is `/tmp/x` and an export runs without `--output`
+- **THEN** the workbook is in `/tmp/x/cinemetric/`
 
 ### Requirement: One version number
 Every script's `VERSION` constant, `plugins/cinemetric/.claude-plugin/plugin.json` and
@@ -177,7 +186,7 @@ give that file's `snapshot_date` and `days_ago`. A problem reading snapshots SHA
 ### Requirement: Media deletion setting
 Every script that reads from the user's Plex server (`setup`, `library-report`, `server-health`,
 `watch-activity`, `users-and-shares`, `unwatched`, `what-to-watch`, `episode-gaps`, `playback-check`,
-`year-in-review`, `title-lookup`, `subtitles-and-languages`, `show-progress`, `collections-and-playlists` and `watch-mix`) SHALL report whether Plex's "Allow media deletion" setting is on, in a
+`year-in-review`, `title-lookup`, `subtitles-and-languages`, `show-progress`, `collections-and-playlists`, `watch-mix` and `export`) SHALL report whether Plex's "Allow media deletion" setting is on, in a
 top-level `media_deletion_allowed` field. The script SHALL request `/:/prefs` at most once per run and
 take the value of the `allowMediaDeletion` setting as a boolean. Every other setting in that answer
 SHALL be discarded without being printed. The field SHALL be `null` when Plex isn't configured, when

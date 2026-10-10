@@ -40,6 +40,7 @@ CSS and JavaScript with no build step, ready for any static host.
 | `collections-and-playlists` | Your collections and playlists: how many titles each collection holds and how much space they use, smart or regular, collections with only one title or none, and how much of each library isn't in any collection. Also your playlists with their length and size, and the ones holding items whose files Plex can no longer find. Plex keeps playlists per account, so it sees only the playlists of the account Cinemetric signed in with. Facts only: it never suggests making or deleting anything |
 | `changes` | What changed since yesterday, last week or last month: titles added and removed, new episodes, files Plex can no longer find, Plex updates, and people given or losing access. Each time you run it (or build the dashboard) it saves a small private snapshot on your computer, at most one per day, kept 90 days, to compare with next time. Nothing runs in the background; the library, server and sharing reports and the dashboard show the same "since last time" changes. It can also say how the library and sharing moved across all the saved snapshots |
 | `year-in-review` | A recap page of one calendar year: hours watched, busiest months and busiest day, movies vs TV vs music, and the most watched movies, shows and artists. For the whole server it names no one and leaves off titles only one person watched, so it doesn't reveal anyone's viewing; it can also cover just your own year, or one person's as a recap to give them. Saved on your computer, as a private claude.ai page, or both; running it again updates the same file and link |
+| `export` | Saves your libraries as a spreadsheet (an Excel `.xlsx` file that also opens in Numbers, LibreOffice and Google Sheets) with a tab each for your server's details (nothing that changes moment to moment, such as what's streaming or CPU use), your movies, and your TV shows (or every episode), with year, date added, length, quality, codecs, size, missing files, watched status and collections, and the issues other skills find: files Plex can't find, unmatched titles, missing posters, duplicates, low-resolution titles, episode gaps, files likely to transcode and subtitle problems. Saved privately on your computer, or in a folder you choose; it never replaces a file of yours without asking. No one's names or viewing history are in the file |
 | `dashboard` | One page with library stats, server status (version, updates, remote access and anything that needs a look), the last 30 days of watching, unwatched titles, episode gaps, playback and sharing, with charts, plus trends over the saved snapshots (storage, titles per library and people with access). Saved on your computer, as a private claude.ai page you can open anywhere, or both; each refresh updates the same file and link |
 
 More skills are planned, and ideas are welcome; see [Roadmap](#roadmap).
@@ -203,12 +204,6 @@ the rules every skill follows, are written down as specs in [openspec/specs/](op
 work starts as an OpenSpec change proposal (`/opsx:propose`) before any code is written. Notes on how
 each idea below might be built are in [openspec/ideas.md](openspec/ideas.md).
 
-**New skill ideas**
-
-One for the last group of skills on the website that's still waiting for its new skill:
-
-- **Your server: `export`:** save a library listing as a spreadsheet file (CSV) on your computer.
-
 **Updates to existing skills**
 
 - **`server-health`:** when your server is busiest, by hour and day of the week, compared with when
@@ -219,6 +214,7 @@ One for the last group of skills on the website that's still waiting for its new
 - **`unwatched`:** what one person hasn't watched.
 - **`changes`:** how fast the library is growing, for example "about 1.2 TB a month".
 - **`year-in-review`:** favorite genres, and a comparison with the year before.
+- **`export`:** more tabs, such as unwatched titles or collections and playlists.
 
 **Mod ideas**
 

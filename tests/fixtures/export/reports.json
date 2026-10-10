@@ -1,0 +1,425 @@
+{
+ "health": {
+  "server": {
+   "name": "Test Server",
+   "version": "1.40.0.0000-test",
+   "platform": "Linux",
+   "update": {
+    "update_available": true,
+    "available_version": "1.41.0.0000-test"
+   },
+   "remote_access": {
+    "state": "mapped"
+   },
+   "resource_use": {
+    "average": {
+     "host_cpu_pct": 12.5,
+     "host_memory_pct": 40.0
+    }
+   },
+   "streaming_settings": {
+    "hardware_acceleration": false,
+    "video_transcoding_disabled": false,
+    "remote_stream_limit_kbps": 4000
+   }
+  },
+  "live_activity": {
+   "totals": {
+    "streams": 1,
+    "direct_play": 0,
+    "direct_stream": 0,
+    "transcode": 1,
+    "bandwidth_kbps": 8000
+   },
+   "streams": [
+    {
+     "user": "alex-test",
+     "title": "Secret Stream Title",
+     "player": "Alex's iPhone",
+     "platform": "iOS",
+     "method": "transcode"
+    }
+   ]
+  },
+  "background": {
+   "library_scans": [
+    {
+     "name": "Movies",
+     "last_scanned": "2026-10-01 03:00"
+    }
+   ],
+   "maintenance_settings": {
+    "scan_on_folder_change": true,
+    "maintenance_start_hour": 2
+   }
+  },
+  "worth_a_look": [
+   {
+    "kind": "update_available",
+    "version": "1.41.0.0000-test"
+   },
+   {
+    "kind": "transcode_too_slow",
+    "user": "alex-test",
+    "title": "Secret Stream Title",
+    "speed": 0.8
+   },
+   {
+    "kind": "remote_stream_limit_low",
+    "limit_kbps": 4000
+   },
+   {
+    "kind": "hardware_transcoding_off"
+   },
+   {
+    "kind": "high_cpu",
+    "average_pct": 91.2
+   },
+   {
+    "kind": "high_memory",
+    "average_pct": 95.5
+   },
+   {
+    "kind": "task_not_progressing",
+    "seconds_between_checks": 15,
+    "tasks": [
+     {
+      "title": "Scanning Movies",
+      "progress_pct": 40
+     }
+    ]
+   }
+  ],
+  "unavailable": [
+   {
+    "part": "stuck task check",
+    "reason": "OWNER_ONLY: only available to the server owner's account"
+   }
+  ]
+ },
+ "library": {
+  "libraries": [
+   {
+    "name": "Movies",
+    "type": "movie",
+    "counts": {
+     "movies": 5
+    },
+    "media": {
+     "files": 6,
+     "size_gb": 67.0
+    },
+    "duplicates": {
+     "titles": 3,
+     "extra_copies": 3,
+     "extra_gb": 9.0,
+     "examples": [
+      {
+       "title": "Night of the Test (1987)",
+       "extra_gb": 8.0,
+       "copies": [
+        {
+         "resolution": "4K",
+         "video_codec": "hevc",
+         "gb": 50.0
+        },
+        {
+         "resolution": "1080p",
+         "video_codec": "h264",
+         "gb": 8.0
+        }
+       ]
+      }
+     ]
+    },
+    "upgrades": {
+     "titles": 2,
+     "examples": [
+      {
+       "title": "-30- (1950)",
+       "resolution": "SD",
+       "video_codec": "mpeg4",
+       "gb": 1.0
+      }
+     ]
+    }
+   },
+   {
+    "name": "TV Shows",
+    "type": "show",
+    "counts": {
+     "shows": 2,
+     "seasons": 3,
+     "episodes": 15
+    },
+    "media": {
+     "files": 15,
+     "size_gb": 13.5
+    },
+    "duplicates": {
+     "titles": 0,
+     "examples": []
+    },
+    "upgrades": {
+     "titles": 2,
+     "examples": [
+      {
+       "title": "Test Show",
+       "episodes": 2,
+       "by_resolution": {
+        "SD": 0,
+        "720p": 2
+       }
+      }
+     ]
+    }
+   },
+   {
+    "name": "Music",
+    "type": "artist",
+    "counts": {
+     "artists": 3,
+     "albums": 4,
+     "tracks": 40
+    },
+    "media": {
+     "files": 40,
+     "size_gb": 1.2
+    }
+   }
+  ],
+  "cross_library_duplicates": {
+   "titles": 1,
+   "extra_gb": 2.0,
+   "examples": [
+    {
+     "title": "Night of the Test (1987)",
+     "extra_gb": 8.0,
+     "libraries": [
+      {
+       "library": "Movies",
+       "resolution": "4K",
+       "gb": 50.0
+      },
+      {
+       "library": "Kids Movies",
+       "resolution": "1080p",
+       "gb": 8.0
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "gaps": {
+  "limits": "Only gaps between the episodes on the server can be found.",
+  "libraries": [
+   {
+    "name": "TV Shows",
+    "more_shows": 2,
+    "listed": [
+     {
+      "title": "Test Show",
+      "year": 2015,
+      "first_season": 2,
+      "missing_seasons": [
+       4
+      ],
+      "seasons": [
+       {
+        "season": 3,
+        "missing": [
+         [
+          3,
+          3
+         ],
+         [
+          5,
+          7
+         ]
+        ],
+        "unavailable": [
+         9
+        ],
+        "continues_numbering": false
+       },
+       {
+        "season": 2,
+        "missing": [],
+        "unavailable": [],
+        "continues_numbering": true
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "playback": {
+  "bitrate_limit": {
+   "kbps": 4000,
+   "source": "server"
+  },
+  "limits": "These are likely causes on common devices, not a promise.",
+  "libraries": [
+   {
+    "name": "Movies",
+    "type": "movie",
+    "more": 3,
+    "listed": [
+     {
+      "title": "Night of the Test",
+      "year": 1987,
+      "files": [
+       {
+        "resolution": "4k",
+        "size_gb": 50.0,
+        "bitrate_kbps": 40000,
+        "causes": [
+         "image_subtitles",
+         "truehd_audio",
+         "over_bitrate_limit"
+        ],
+        "image_subtitle_languages": [
+         "en",
+         "fr"
+        ],
+        "audio": {
+         "codec": "truehd",
+         "profile": null,
+         "common_alternative": false
+        }
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "TV Shows",
+    "type": "show",
+    "more": 0,
+    "listed": [
+     {
+      "title": "Test Show",
+      "year": 2015,
+      "episodes": 30,
+      "episodes_flagged": 12,
+      "image_subtitles": 0,
+      "truehd_audio": 0,
+      "dts_audio": 12,
+      "over_bitrate_limit": 0
+     }
+    ]
+   }
+  ],
+  "playback_history": null,
+  "playback_history_note": "Transcode history wasn't checked (--days 0)."
+ },
+ "subtitles": {
+  "limits": "This goes by the language labels on each track.",
+  "language_names": {
+   "en": "English",
+   "es": "Spanish",
+   "ja": "Japanese"
+  },
+  "libraries": [
+   {
+    "name": "Movies",
+    "type": "movie",
+    "language": {
+     "codes": [
+      "en"
+     ],
+     "source": "library"
+    },
+    "listed": {
+     "foreign_no_subtitles": [
+      {
+       "title": "Night of the Test",
+       "year": 1987,
+       "files": [
+        {
+         "resolution": "1080",
+         "main_audio_language": "ja",
+         "audio_languages": [
+          "ja",
+          "unknown"
+         ],
+         "subtitle_languages": [
+          "es"
+         ],
+         "forced_subtitle_languages": [
+          "en"
+         ]
+        }
+       ]
+      }
+     ],
+     "no_subtitles": [],
+     "unknown_language": []
+    },
+    "more": {
+     "foreign_no_subtitles": 0,
+     "no_subtitles": 4,
+     "unknown_language": 0
+    }
+   },
+   {
+    "name": "TV Shows",
+    "type": "show",
+    "language": {
+     "codes": [
+      "en"
+     ],
+     "source": "library"
+    },
+    "listed": {
+     "foreign_no_subtitles": [
+      {
+       "title": "Test Show",
+       "year": 2015,
+       "episodes": 20,
+       "episodes_flagged": 3,
+       "audio_languages": {
+        "es": 3
+       },
+       "seasons": [
+        {
+         "season": 1,
+         "episodes": [
+          [
+           2,
+           3
+          ],
+          [
+           7,
+           7
+          ]
+         ],
+         "some_versions": []
+        }
+       ],
+       "ranges_more": 0,
+       "unnumbered": [
+        {
+         "title": "Bonus",
+         "aired": "2016-01-02",
+         "some_versions": false
+        }
+       ],
+       "unnumbered_more": 0
+      }
+     ],
+     "no_subtitles": [],
+     "unknown_language": []
+    },
+    "more": {
+     "foreign_no_subtitles": 0,
+     "no_subtitles": 0,
+     "unknown_language": 0
+    },
+    "language_problem": null
+   }
+  ]
+ }
+}

@@ -102,7 +102,9 @@ the specs leave open. At least the following SHALL be covered:
 - `title-lookup`: exact and "contains" matches, narrowing by year, library and type, the same title
   in two libraries, several matches and no match, `--key`, finding an episode and an episode not on
   the server, collections and the cut summary, separate media versions and unavailable files, the
-  same playback causes as `playback-check` for the same made-up files, the show's seasons and
+  same playback causes as `playback-check` for the same made-up files, each file's audio and
+  subtitle tracks (default, selected, forced, hearing impaired, separate files, the 50-track cap and
+  cleaned track names, none for unavailable files or whole shows), the show's seasons and
   playback summary with detail batches, each history source with finished and unfinished plays and
   episodes finished, history refused without failing the report, and dropping private Tautulli
   fields.

@@ -22,12 +22,13 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-VERSION = "0.32.0"
+VERSION = "0.33.0"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 MAX_SUMMARY_LENGTH = 300
 LIBRARY_PAGE_SIZE = 500
 DETAIL_BATCH = 100
+MAX_TRACKS = 50
 TAUTULLI_PAGE_SIZE = 1000
 HISTORY_CAP = 20000
 PLEX_PAGE_SIZE = 500
@@ -537,6 +538,37 @@ def bit_depth(media):
     return 10 if "10" in str(media.get("videoProfile") or "") else None
 
 
+def list_tracks(media):
+    """Every audio and subtitle track Plex knows for one media version, in Plex's order."""
+    streams = [s for part in media.get("Part", []) or [] for s in part.get("Stream", []) or []]
+    audio, subtitles = [], []
+    for stream in streams:
+        kind = as_int(stream.get("streamType"))
+        if kind not in (AUDIO, SUBTITLE):
+            continue
+        track = {
+            "language": clean(language(stream)) or None,
+            "name": clean(stream.get("title")) or None,
+            "codec": clean(codec(stream)) or None,
+        }
+        if kind == AUDIO:
+            track["channels"] = as_int(stream.get("channels")) or None
+        else:
+            track["forced"] = as_bool(stream.get("forced"))
+            track["hearing_impaired"] = as_bool(stream.get("hearingImpaired"))
+            # Plex gives a separate subtitle file its own address; tracks inside the video don't have one.
+            track["external"] = bool(stream.get("key"))
+        track["default"] = as_bool(stream.get("default"))
+        track["selected"] = as_bool(stream.get("selected"))
+        (audio if kind == AUDIO else subtitles).append(track)
+    return {
+        "audio_tracks": audio[:MAX_TRACKS],
+        "audio_track_count": len(audio),
+        "subtitle_tracks": subtitles[:MAX_TRACKS],
+        "subtitle_track_count": len(subtitles),
+    }
+
+
 def describe_file(media, library, limit_kbps, have_streams):
     parts = media.get("Part", []) or []
     available = not media.get("deletedAt")
@@ -559,6 +591,8 @@ def describe_file(media, library, limit_kbps, have_streams):
         entry["playback_causes"] = result["causes"]
         entry["image_subtitle_languages"] = result["image_subtitle_languages"]
         entry["audio"] = result["audio"]
+        if have_streams:
+            entry.update(list_tracks(media))
     return entry
 
 

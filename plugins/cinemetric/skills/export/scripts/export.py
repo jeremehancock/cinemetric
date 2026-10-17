@@ -31,7 +31,7 @@ from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from xml.sax.saxutils import escape
 
-VERSION = "0.32.0"
+VERSION = "0.33.0"
 TIMEOUT_SECONDS = 60
 MAX_TITLE_LENGTH = 120
 LIBRARY_PAGE_SIZE = 500

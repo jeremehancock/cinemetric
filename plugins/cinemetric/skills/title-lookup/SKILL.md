@@ -1,6 +1,6 @@
 ---
 name: title-lookup
-description: "Tell the user everything Cinemetric knows about one movie, TV show or episode on their Plex server: when it was added, length, ratings, genres and collections; each file's quality (resolution, HDR, codecs, size); whether it's likely to transcode on common devices and why; for a show, its seasons, episode counts, sizes and episodes Plex can't find; and who watched it, how many times, when, and how far they got. Uses Tautulli when it's set up, otherwise Plex's own history. Read-only. Use when the user asks about a particular title on Plex: tell me about Dune, do I have Blade Runner and in what quality, is it 4K or HDR, how big is it, will it play on my TV without transcoding, who watched it or when it was last watched, whether someone finished it, how many seasons or episodes of a show they have, or what's on an episode such as The Office S03E07."
+description: "Tell the user everything Cinemetric knows about one movie, TV show or episode on their Plex server: when it was added, length, ratings, genres and collections; each file's quality (resolution, HDR, codecs, size) and its audio and subtitle tracks; whether it's likely to transcode on common devices and why; for a show, its seasons, episode counts, sizes and episodes Plex can't find; and who watched it, how many times, when, and how far they got. Uses Tautulli when it's set up, otherwise Plex's own history. Read-only. Use when the user asks about a particular title on Plex: tell me about Dune, do I have Blade Runner and in what quality, is it 4K or HDR, how big is it, which audio or subtitle tracks it has and which is the default, will it play on my TV without transcoding, who watched it or when it was last watched, whether someone finished it, how many seasons or episodes of a show they have, or what's on an episode such as The Office S03E07."
 argument-hint: "\"<title>\" [--year N] [--type movie|show] [--season N --episode N] [--key RATING_KEY]"
 allowed-tools: Read, Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/title_lookup.py *), Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/title_lookup.py), Bash(python ${CLAUDE_SKILL_DIR}/scripts/title_lookup.py *), Bash(python ${CLAUDE_SKILL_DIR}/scripts/title_lookup.py)
 ---
@@ -85,7 +85,10 @@ sometimes, `episode_not_found`.
 `total_size_bytes`; episodes have `show_title`, `season` and `episode`. Each file has `library`,
 `resolution` (`4k`, `1080`, `720`, `sd`...), `video_codec`, `hdr`, `bit_depth`, `audio_codec`,
 `audio_channels`, `container`, `bitrate_kbps`, `size_bytes`, `path`, `available` and, when available,
-`playback_causes`, `image_subtitle_languages` and `audio` (`codec`, `profile`, `common_alternative`).
+`playback_causes`, `image_subtitle_languages` and `audio` (`codec`, `profile`, `common_alternative`),
+`audio_tracks` (each with `language`, `name`, `codec`, `channels`, `default`, `selected`),
+`subtitle_tracks` (each with `language`, `name`, `codec`, `forced`, `hearing_impaired`, `external`,
+`default`, `selected`), `audio_track_count` and `subtitle_track_count`.
 Shows have `seasons` (each with `season`, `episodes`, `unavailable`, `size_bytes`, `specials`),
 `episode_count`, `total_size_bytes`, `first_added_at`, `last_added_at` and `playback_summary`
 (`files`, `files_flagged`, `details_missing` and a count per cause).
@@ -105,7 +108,9 @@ Answer what the user asked first. If they asked "who watched Dune?", lead with t
    7.1 audio, 58.2 GB" or "1080p, H.264, DTS 5.1 audio, 19.1 GB". Write sizes in GB or TB, not bytes.
    Say "Dolby Vision or HDR10" only as "HDR"; the script doesn't tell them apart. If a file has
    `available` false, say Plex can no longer find that file. Give the file path only if the user asks
-   where the file is.
+   where the file is. Add the tracks in a few words, such as "Japanese and French audio, English and
+   French subtitles"; give the full track lists only when the user asks (see "Audio and subtitle
+   tracks" below).
 3. **For a show**: how many seasons and episodes, the total size, and when episodes were first and
    last added. Name seasons with `unavailable` above 0 ("2 episodes in season 4 point to files Plex
    can't find"). Call season 0 "specials". Don't list every season unless asked or there are only a
@@ -127,6 +132,25 @@ Answer what the user asked first. If they asked "who watched Dune?", lead with t
    briefly: finished or how far they got (`furthest_percent`, Tautulli only), and for a show how many
    episodes they've finished out of `episode_count`. With no plays, say nobody has played it yet.
 6. **Worth knowing**: if playback causes were mentioned, one line from `limits`.
+
+**Audio and subtitle tracks:** when the user asks about audio, languages, dubs or subtitles for this
+title, or whether a track is the default or was picked up, list each file's `audio_tracks` and
+`subtitle_tracks` in order, one short line each, for example "Japanese, DTS 2.0, default" or
+"English, SRT, forced, separate file".
+- Write language codes as names ("ja" is Japanese). A `null` language means the track has no
+  language set, so Plex can't pick it by language. Write codecs plainly: `dca` is DTS, `pgs` and
+  `vobsub` are picture subtitles, `srt` and `ass` are text.
+- `default` is the marker in the file. `selected` is the track Plex will use for the account
+  Cinemetric signed in with, which can differ when that account once chose another track by hand.
+  When they point at different tracks, say so in one line; it explains why Plex plays something
+  other than the file's default.
+- `external` means a separate subtitle file next to the video (from Bazarr, for example), not one
+  inside the video file. Plex doesn't give that file's name.
+- `hearing_impaired` false isn't proof: older Plex versions don't report it, and the track's `name`
+  may still say SDH.
+- If `audio_track_count` or `subtitle_track_count` is bigger than its list, say only the first 50
+  are shown.
+- For language questions across a whole library, suggest `cinemetric:subtitles-and-languages`.
 
 **When something's missing:**
 - `episode_not_found`: say that episode isn't on the server, then describe the show. Suggest the

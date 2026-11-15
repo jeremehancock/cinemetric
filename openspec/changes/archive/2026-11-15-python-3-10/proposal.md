@@ -1,10 +1,14 @@
 ## Why
 
-Python 3.8 stopped getting updates, security fixes included, in October 2024, and Python 3.9 in
-October 2025. GitHub's newest Ubuntu no longer offers Python 3.8, so the tests' 3.8 run only works by
-staying on Ubuntu 24.04, which GitHub will retire too. Python 3.10 is the oldest version that still
-gets security fixes and that GitHub's newest Ubuntu offers, and almost everyone already has it or
-newer.
+Python 3.8 stopped getting updates, security fixes included, in October 2024. GitHub's newest Ubuntu
+no longer offers Python 3.8, so the tests' 3.8 run only worked by staying on Ubuntu 24.04, which
+GitHub will retire too. Python 3.10 is the oldest version GitHub's newest Ubuntu offers, and it's the
+built-in Python on Ubuntu 22.04, which many servers still run, so it keeps Cinemetric open to the
+most people.
+
+Python 3.10 itself stopped getting security fixes on 2026-10-01 (3.11 has them until October 2027).
+That was missed when this change was first written, which wrongly called 3.10 the oldest supported
+version; the owner chose to keep 3.10 anyway for the reasons above.
 
 ## What Changes
 

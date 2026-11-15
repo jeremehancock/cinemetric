@@ -13,7 +13,8 @@ permissions:
 jobs:
   test:
     name: test (${{ matrix.python }})
-    runs-on: ubuntu-latest
+    # GitHub's newest Ubuntu has no Python 3.8, so the 3.8 run stays on 24.04, which still does.
+    runs-on: ${{ matrix.python == '3.8' && 'ubuntu-24.04' || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
       matrix:

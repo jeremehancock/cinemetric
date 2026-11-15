@@ -5,7 +5,9 @@ How Cinemetric's automated tests are organized and run: where they live, the rul
 (offline, standard library only, never touching the user's real settings or real data), what they
 must cover, and how GitHub runs them and blocks merging into `main` when they fail. What the scripts
 themselves must do is in each skill's spec and the `security` and `conventions` specs.
+
 ## Requirements
+
 ### Requirement: Where the tests live
 Automated tests SHALL live in a `tests/` folder at the repository root, outside `plugins/`, so they are
 not part of what users install. Sample server responses used by the tests SHALL live in
@@ -17,7 +19,7 @@ not part of what users install. Sample server responses used by the tests SHALL 
 
 ### Requirement: One command runs everything
 All tests SHALL run with `python3 -m unittest discover -s tests` from the repository root, on Python
-3.8 or newer, using only the standard library. Nothing is installed with `pip`.
+3.10 or newer, using only the standard library. Nothing is installed with `pip`.
 
 #### Scenario: Running the tests on a fresh checkout
 - **WHEN** someone clones the repository and runs `python3 -m unittest discover -s tests`
@@ -232,7 +234,7 @@ the specs leave open. At least the following SHALL be covered:
 ### Requirement: Tests run on GitHub
 A GitHub Actions workflow at `.github/workflows/tests.yml` SHALL run the full offline test suite with
 `python3 -m unittest discover -s tests` for every pull request into `main` and every push to `main`,
-and SHALL also be startable by hand. It SHALL run the suite once on Python 3.8 (the oldest version
+and SHALL also be startable by hand. It SHALL run the suite once on Python 3.10 (the oldest version
 Cinemetric supports) and once on the newest stable Python. The same workflow SHALL run the mods'
 tests with `claude plugin test plugins/cinemetric`, using a pinned Claude Code version installed for
 the run, with no login. The workflow SHALL use no repository secrets, SHALL have read-only access to
@@ -240,12 +242,12 @@ the repository, and SHALL install nothing beyond Python, and Node and Claude Cod
 
 #### Scenario: Opening a pull request
 - **WHEN** a pull request into `main` is opened or updated
-- **THEN** the tests run on Python 3.8 and on the newest stable Python, the mods' tests run, and the
+- **THEN** the tests run on Python 3.10 and on the newest stable Python, the mods' tests run, and the
   results show on the pull request
 
 #### Scenario: Code that only works on newer Python
-- **WHEN** a change uses a Python feature that doesn't exist in Python 3.8
-- **THEN** the Python 3.8 run fails, even if the run on the newest Python passes
+- **WHEN** a change uses a Python feature that doesn't exist in Python 3.10
+- **THEN** the Python 3.10 run fails, even if the run on the newest Python passes
 
 #### Scenario: A change breaks the read-only guard
 - **WHEN** a change to `hooks/guard-rules.ts` lets a command that deletes media through
@@ -258,7 +260,7 @@ cancelled. This is the check that branch rules refer to, so the list of Python v
 jobs can change without changing the rules.
 
 #### Scenario: One Python version fails
-- **WHEN** the tests pass on the newest Python but fail on Python 3.8
+- **WHEN** the tests pass on the newest Python but fail on Python 3.10
 - **THEN** **All tests passed** fails
 
 #### Scenario: Adding a Python version to the workflow
@@ -334,4 +336,3 @@ from running the scripts' own helpers, not from copies written into the test.
 #### Scenario: The snapshot file name changes in one place
 - **WHEN** the scripts' snapshot file name pattern changes but `hooks/status-line-rules.ts` doesn't
 - **THEN** a test fails
-

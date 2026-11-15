@@ -13,13 +13,12 @@ permissions:
 jobs:
   test:
     name: test (${{ matrix.python }})
-    # GitHub's newest Ubuntu has no Python 3.8, so the 3.8 run stays on 24.04, which still does.
-    runs-on: ${{ matrix.python == '3.8' && 'ubuntu-24.04' || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        # 3.8 is the oldest Python Cinemetric supports; 3.x is the newest stable release.
-        python: ["3.8", "3.x"]
+        # 3.10 is the oldest Python Cinemetric supports; 3.x is the newest stable release.
+        python: ["3.10", "3.x"]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7

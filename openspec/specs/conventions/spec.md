@@ -5,7 +5,9 @@
 How every Cinemetric skill is built: its shape, its dependencies, how its script reports results and
 errors, where settings live, and what its `SKILL.md` must tell Claude. Security rules are in the
 `security` spec; what each skill reports is in that skill's own spec.
+
 ## Requirements
+
 ### Requirement: Skill shape
 Each skill SHALL live in `plugins/cinemetric/skills/<name>/` as a `SKILL.md` plus one script in
 `scripts/`. The script collects the facts and prints them; Claude turns them into the written report
@@ -28,7 +30,7 @@ by following `SKILL.md`. The `dashboard`, `year-in-review` and `export` skills a
   tells Claude how to present
 
 ### Requirement: Standard library only
-Scripts SHALL run on Python 3.8 or newer using only the Python standard library. Nothing is installed
+Scripts SHALL run on Python 3.10 or newer using only the Python standard library. Nothing is installed
 with `pip`.
 
 #### Scenario: A third-party package would be convenient
@@ -239,4 +241,3 @@ look" instead of at the end.
 #### Scenario: Setting unknown
 - **WHEN** `media_deletion_allowed` is `null`
 - **THEN** Claude doesn't mention media deletion
-

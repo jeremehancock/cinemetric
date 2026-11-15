@@ -3,7 +3,7 @@
 Working notes behind the [Roadmap](../README.md#roadmap) in the README. The README says *what* each idea
 is; this file records what was worked out about *how* to build it, the catches found while thinking it
 through, and the questions still open. Nothing here is a commitment. Each idea still starts as an
-OpenSpec change proposal (`/opsx:propose`) before any code is written; use the notes below as the
+OpenSpec change proposal (`/openspec-propose`) before any code is written; use the notes below as the
 starting point for that proposal.
 
 Endpoint and command names marked **(to verify)** come from memory of the Plex and Tautulli APIs, not

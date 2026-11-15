@@ -201,7 +201,7 @@ manual setup and think a token leaked, use "sign out of all devices" in your Ple
 Plans can change; feedback and ideas are welcome via
 [GitHub issues](https://github.com/jeremehancock/cinemetric/issues). What the existing skills do, and
 the rules every skill follows, are written down as specs in [openspec/specs/](openspec/specs/). New
-work starts as an OpenSpec change proposal (`/opsx:propose`) before any code is written. Notes on how
+work starts as an OpenSpec change proposal (`/openspec-propose`) before any code is written. Notes on how
 each idea below might be built are in [openspec/ideas.md](openspec/ideas.md).
 
 **Updates to existing skills**

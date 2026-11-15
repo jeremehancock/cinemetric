@@ -121,7 +121,7 @@ In Claude Code:
 /plugin install cinemetric@cinemetric
 ```
 
-Requirements: Claude Code 2.1.75 or newer (2.1.260 or newer for [mods](#mods)) and Python 3.8+
+Requirements: Claude Code 2.1.75 or newer (2.1.260 or newer for [mods](#mods)) and Python 3.10+
 (standard library only, nothing to `pip install`).
 Your computer must be able to reach your Plex server over the network. No SSH is needed.
 

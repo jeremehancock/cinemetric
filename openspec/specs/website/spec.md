@@ -5,7 +5,9 @@
 The public landing page for Cinemetric: a static site in `website/` that shows what each skill does,
 in its real output format with made-up sample data, and how to install and set it up. It is not part
 of the plugin and never ships with it.
+
 ## Requirements
+
 ### Requirement: Static site in its own folder
 The website SHALL live entirely in the top-level `website/` folder, with `index.html` at its root, so a
 static host (such as Coolify) can serve that folder as-is. All links between the site's own files SHALL
@@ -76,7 +78,7 @@ data.
   names on it, and there is no tab bar or terminal conversation
 
 ### Requirement: Shows how to set up
-The site SHALL include a setup guide covering: requirements (Claude Code, Python 3.8+, network access to
+The site SHALL include a setup guide covering: requirements (Claude Code, Python 3.10+, network access to
 the Plex server), the two install commands, connecting with Sign in with Plex, optionally adding
 Tautulli, the manual-setup fallback, and how to revoke access. It SHALL say that Cinemetric works
 best in Claude Code in a terminal. Each command SHALL have a button that copies it. The guide SHALL link to the README for full details.
@@ -343,4 +345,3 @@ card's length close to the other mod cards.
 #### Scenario: Reading the guard's card
 - **WHEN** a visitor reads the read-only guard's card
 - **THEN** they learn it protects both the server and the token, worded as a safety net
-

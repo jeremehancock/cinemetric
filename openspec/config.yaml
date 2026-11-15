@@ -3,7 +3,7 @@ schema: spec-driven
 context: |
   Cinemetric is a Claude Code plugin: read-only Claude skills that report on a Plex Media Server
   (and optionally Tautulli). Each skill is plugins/cinemetric/skills/<name>/SKILL.md plus one
-  Python 3.8+ script using only the standard library. The script prints JSON; Claude writes the
+  Python 3.10+ script using only the standard library. The script prints JSON; Claude writes the
   report by following SKILL.md.
 
   Where each kind of fact lives (write each fact in one place only):

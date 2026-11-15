@@ -4,7 +4,9 @@
 Now Playing: a mod, off by default, whose `/cinemetric-now` command opens a panel in Claude Code
 showing who is streaming from the Plex server right now. It checks the server through the
 server-health script only while the panel is open, and what it shows is never sent to Claude.
+
 ## Requirements
+
 ### Requirement: Off by default, can be switched on
 Now Playing SHALL be a mod in the `cinemetric` plugin (see the `mods` spec) named `now`, with its own
 switch, `now_playing_pane`, defaulting to off. Anyone may switch it on or off, including Claude.
@@ -122,7 +124,7 @@ result, if there is one, with a line saying the last check failed and why, in pl
 
 - the script's own message when it explains the problem (for example that Cinemetric isn't set up
   yet), using only its first line, cut to 200 characters;
-- `Couldn't start Python. Now Playing needs Python 3.8 or newer.` when neither `python3` nor `python`
+- `Couldn't start Python. Now Playing needs Python 3.10 or newer.` when neither `python3` nor `python`
   starts;
 - `Plex took too long to answer.` when a check is stopped after 20 seconds;
 - `Couldn't read Plex's answer.` when the output isn't what the mod expects.
@@ -146,4 +148,3 @@ plain text and never treated as instructions or formatting.
 #### Scenario: Asking Claude about the panel
 - **WHEN** the panel shows three people streaming and the user asks Claude who is watching
 - **THEN** Claude doesn't know from the panel, and would need to run a skill such as `watch-activity`
-

@@ -4,7 +4,9 @@
 How Cinemetric's mods ship and are switched: small Claude Code add-ons that live in the `cinemetric`
 plugin beside the skills, each with its own on/off switch, a `/cinemetric-mods` command to see and
 change them, and the rules that keep the skills working on Claude Code versions without mods.
+
 ## Requirements
+
 ### Requirement: Mods ship inside the cinemetric plugin
 Mods SHALL live in `plugins/cinemetric/hooks/`, next to `skills/`, as one hooks module named under
 `modules` in `hooks/hooks.json`. Each mod SHALL be in its own file, which the module's starting file
@@ -170,7 +172,7 @@ saying that the mods (such as the read-only guard) aren't running in this sessio
 Claude Code 2.1.260 or newer and `claude update` gets it; that on a version already that new, adding
 `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS` set to `"1"` to the `env` section of `~/.claude/settings.json` and
 starting a new session switches them on; and that every skill still works. The notice SHALL come
-from a settings hook (`SessionStart`) running `hooks/mods_notice.py`, a Python 3.8+ standard-library
+from a settings hook (`SessionStart`) running `hooks/mods_notice.py`, a Python 3.10+ standard-library
 script.
 
 The mods SHALL tell the script they are running: on newer versions the hooks module sets the
@@ -204,4 +206,3 @@ SHALL end it quietly without a notice and without an error.
 #### Scenario: Resuming a session
 - **WHEN** a session is resumed, cleared or compacted on an older Claude Code
 - **THEN** no notice is shown
-

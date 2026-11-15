@@ -30,7 +30,7 @@ export const NO_PANEL_REPLY =
 export const CHECKING = 'Checking Plex...'
 export const NOTHING_PLAYING = 'Nothing is playing right now.'
 
-export const NO_PYTHON = "Couldn't start Python. Now Playing needs Python 3.8 or newer."
+export const NO_PYTHON = "Couldn't start Python. Now Playing needs Python 3.10 or newer."
 export const TOO_SLOW = 'Plex took too long to answer.'
 export const UNREADABLE = "Couldn't read Plex's answer."
 
